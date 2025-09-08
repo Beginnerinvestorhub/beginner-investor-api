@@ -1,0 +1,9 @@
+packages:
+  - 'tools/frontend'
+  - 'tools/backend'
+  - 'tools/*'
+
+onlyBuiltDependencies:
+  - '@firebase/util'
+  - '@pnpm/exe'
+  - protobufjs

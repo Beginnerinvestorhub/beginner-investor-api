@@ -1,0 +1,85 @@
+{
+    "version": "0.2.0",
+    "configurations": [
+        
+        {
+            "name": "Debug Frontend (Next.js)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/frontend/node_modules/.bin/next",
+            "args": ["dev"],
+            "cwd": "${workspaceFolder}/tools/frontend",
+            "env": {
+                "NODE_OPTIONS": "--inspect"
+            },
+            "console": "integratedTerminal",
+            "serverReadyAction": {
+                "pattern": "ready - started server on .+, url: (https?://.+)",
+                "uriFormat": "%s",
+                "action": "debugWithChrome"
+            }
+        },
+        {
+            "name": "Debug Backend (Node.js)",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/backend/src/index.ts",
+            "cwd": "${workspaceFolder}/tools/backend",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "NODE_ENV": "development"
+            },
+            "console": "integratedTerminal",
+            "restart": true,
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/tools/backend/dist/**/*.js"]
+        },
+        {
+            "name": "Debug Python AI Service",
+            "type": "python",
+            "request": "launch",
+            "program": "${workspaceFolder}/tools/ai_microservice/start.py",
+            "cwd": "${workspaceFolder}/tools/ai_microservice",
+            "python": "${workspaceFolder}/tools/ai_microservice/.venv/Scripts/python.exe",
+            "env": {
+                "PYTHONPATH": "${workspaceFolder}/tools/ai_microservice"
+            },
+            "console": "integratedTerminal",
+            "justMyCode": false
+        },
+        {
+            "name": "Attach to Frontend",
+            "type": "node",
+            "request": "attach",
+            "port": 9229,
+            "restart": true,
+            "localRoot": "${workspaceFolder}/tools/frontend",
+            "remoteRoot": "${workspaceFolder}/tools/frontend"
+        },
+        {
+            "name": "Attach to Backend",
+            "type": "node",
+            "request": "attach",
+            "port": 9230,
+            "restart": true,
+            "localRoot": "${workspaceFolder}/tools/backend",
+            "remoteRoot": "${workspaceFolder}/tools/backend"
+        }
+    ],
+    "compounds": [
+        {
+            "name": "Debug Full Stack",
+            "configurations": [
+                "Debug Frontend (Next.js)",
+                "Debug Backend (Node.js)",
+                "Debug Python AI Service"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Full Stack",
+                "order": 1
+            }
+        }
+    ]
+}

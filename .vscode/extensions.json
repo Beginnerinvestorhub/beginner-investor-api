@@ -1,0 +1,24 @@
+{
+    "recommendations": [
+        "google.geminicodeassist",
+        "dsznajder.es7-react-js-snippets",
+        "pmneo.tsimporter",
+        "formulahendry.auto-rename-tag",
+        "coenraads.bracket-pair-colorizer-2",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode",
+        "editorconfig.editorconfig",
+        "ms-python.python",
+        "ms-python.vscode-pylance",
+        "njpwerner.autodocstring",
+        "prisma.prisma",
+        "rangav.vscode-thunder-client",
+        "toba.vsfire",
+        "eamodio.gitlens",
+        "mhutchie.git-graph",
+        "christian-kohler.path-intellisense",
+        "christian-kohler.npm-intellisense",
+        "gruntfuggly.todo-tree",
+        "usernamehw.errorlens"
+    ]
+}

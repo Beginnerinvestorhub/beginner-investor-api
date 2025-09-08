@@ -1,0 +1,86 @@
+{
+    "geminicodeassist.agentYoloMode": true,
+    "geminicodeassist.agentDebugMode": true,
+    "geminicodeassist.chat.changeView": "Default diff view",
+    "geminicodeassist.codeGenerationPaneViewEnabled": true,
+    "geminicodeassist.inlineSuggestions.suggestionSpeed": "Fast",
+    "geminicodeassist.updateChannel": "Insiders",
+    "geminicodeassist.verboseLogging": true,
+    "workbench.auxiliaryActivityBar.location": "bottom",
+    "workbench.editor.autoLockGroups": {
+        "workbench.editor.chatSession": false
+    },
+    
+    // Multi-root workspace optimization
+    "explorer.compactFolders": false,
+    "explorer.fileNesting.enabled": true,
+    "explorer.fileNesting.patterns": {
+        "*.ts": "${capture}.js",
+        "*.tsx": "${capture}.js",
+        "package.json": "package-lock.json,pnpm-lock.yaml,yarn.lock",
+        "docker-compose.yml": "docker-compose.*.yml,Dockerfile*",
+        ".env.example": ".env,.env.*"
+    },
+    
+    // TypeScript/JavaScript productivity
+    "typescript.preferences.importModuleSpecifier": "relative",
+    "typescript.suggest.autoImports": true,
+    "typescript.updateImportsOnFileMove.enabled": "always",
+    "javascript.suggest.autoImports": true,
+    "editor.codeActionsOnSave": {
+        "source.fixAll.eslint": "explicit",
+        "source.organizeImports": "explicit"
+    },
+    
+    // Python development
+    "python.defaultInterpreterPath": "./tools/ai_microservice/.venv/Scripts/python.exe",
+    "python.terminal.activateEnvironment": true,
+    "python.analysis.autoImportCompletions": true,
+    
+    // Git and version control
+    "git.enableSmartCommit": true,
+    "git.autofetch": true,
+    "gitlens.currentLine.enabled": false,
+    "gitlens.hovers.currentLine.over": "line",
+    
+    // Terminal and task management
+    "terminal.integrated.defaultProfile.windows": "PowerShell",
+    "terminal.integrated.splitCwd": "workspaceRoot",
+    
+    // Performance optimizations
+    "files.exclude": {
+        "**/node_modules": true,
+        "**/.git": true,
+        "**/.DS_Store": true,
+        "**/dist": true,
+        "**/.next": true,
+        "**/.turbo": true,
+        "**/__pycache__": true,
+        "**/*.pyc": true,
+        "**/venv": true,
+        "**/.venv": true
+    },
+    "search.exclude": {
+        "**/node_modules": true,
+        "**/dist": true,
+        "**/.next": true,
+        "**/pnpm-lock.yaml": true,
+        "**/package-lock.json": true
+    },
+    
+    // Editor enhancements
+    "editor.minimap.enabled": true,
+    "editor.minimap.maxColumn": 120,
+    "editor.rulers": [80, 120],
+    "editor.bracketPairColorization.enabled": true,
+    "editor.guides.bracketPairs": true,
+    "workbench.tree.indent": 20,
+    
+    // Auto-save and formatting
+    "files.autoSave": "onFocusChange",
+    "editor.formatOnSave": true,
+    "editor.formatOnPaste": true,
+    "prettier.requireConfig": true,
+    "terminal.integrated.suggest.enabled": true,
+    "npm-intellisense.recursivePackageJsonLookup": false
+}

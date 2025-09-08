@@ -1,0 +1,200 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Start All Services",
+            "type": "shell",
+            "command": "powershell",
+            "args": ["-File", "${workspaceFolder}/start-dev.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Frontend Dev",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["dev"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/frontend"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "label": "Backend Dev",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["dev"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/backend"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "label": "Python AI Service",
+            "type": "shell",
+            "command": "powershell",
+            "args": [
+                "-Command",
+                "& { .venv/Scripts/Activate.ps1; python start.py }"
+            ],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/ai_microservice"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "dedicated",
+                "showReuseMessage": false
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Build All",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "Build Frontend",
+                "Build Backend"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Build Frontend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["build"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/frontend"
+            },
+            "group": "build",
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "label": "Build Backend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["build"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/backend"
+            },
+            "group": "build",
+            "problemMatcher": ["$tsc"]
+        },
+        {
+            "label": "Test All",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "Test Frontend",
+                "Test Backend"
+            ],
+            "group": "test"
+        },
+        {
+            "label": "Test Frontend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["test"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/frontend"
+            },
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "Test Backend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["test"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/backend"
+            },
+            "group": "test",
+            "problemMatcher": []
+        },
+        {
+            "label": "Lint & Format All",
+            "dependsOrder": "parallel",
+            "dependsOn": [
+                "Lint Frontend",
+                "Lint Backend"
+            ],
+            "group": "build"
+        },
+        {
+            "label": "Lint Frontend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["lint:fix"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/frontend"
+            },
+            "group": "build",
+            "problemMatcher": ["$eslint-stylish"]
+        },
+        {
+            "label": "Lint Backend",
+            "type": "shell",
+            "command": "pnpm",
+            "args": ["lint:fix"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools/backend"
+            },
+            "group": "build",
+            "problemMatcher": ["$eslint-stylish"]
+        },
+        {
+            "label": "Setup Environment",
+            "type": "shell",
+            "command": "powershell",
+            "args": ["-File", "${workspaceFolder}/dev-setup.ps1"],
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": true,
+                "panel": "new"
+            },
+            "problemMatcher": []
+        },
+        {
+            "label": "Docker Compose Up",
+            "type": "shell",
+            "command": "docker-compose",
+            "args": ["up", "--build"],
+            "options": {
+                "cwd": "${workspaceFolder}/tools"
+            },
+            "group": "build",
+            "presentation": {
+                "echo": true,
+                "reveal": "always",
+                "focus": false,
+                "panel": "new"
+            },
+            "problemMatcher": []
+        }
+    ]
+}
