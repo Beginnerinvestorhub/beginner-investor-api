@@ -160,6 +160,4 @@ databases:
     databaseName: beginner_investor_hub
     user: postgres
 
-  # Redis for caching, rate limiting, and gamification data
-  - name: beginner-investor-redis
-    type: redis
+
