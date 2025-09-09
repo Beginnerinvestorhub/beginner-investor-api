@@ -1,7 +1,8 @@
 # render.yaml - Render Blueprint for Beginner Investor Hub
-# Firebase: Authentication | Learning Hub: AI-Powered Gamification
+# This Blueprint defines all services and databases for the Beginner Investor Hub.
 services:
-  # Core Backend API - Entry point with Firebase auth
+  # Core Backend API - The main entry point for the application.
+  # Handles user authentication with Firebase and routes requests to other services.
   - type: web
     name: backend-api-service
     env: node
@@ -14,7 +15,7 @@ services:
         value: production
       - key: PORT
         value: 10000
-      # Firebase Authentication
+      # Firebase Authentication credentials for secure access.
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: FIREBASE_PRIVATE_KEY
@@ -23,23 +24,25 @@ services:
         sync: false
       - key: FIREBASE_WEB_API_KEY
         sync: false
-      # Database
+      # Links to the PostgreSQL database for user and application data.
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
           property: connectionString
-      # Internal service URLs
+      # Internal URLs for communication between microservices.
       - key: AI_MICROSERVICE_URL
         value: https://ai-microservice-engine.onrender.com
       - key: PORTFOLIO_SIMULATION_URL
         value: https://portfolio-simulation-service.onrender.com
       - key: MARKET_DATA_URL
         value: https://market-data-ingestion-service.onrender.com
+      # CORS (Cross-Origin Resource Sharing) settings.
       - key: CORS_ORIGIN
         sync: false
     healthCheckPath: /health
     
-  # AI Microservice Engine - Powers AI behavioral nudge + Learning Hub
+  # AI Microservice Engine - Dedicated service for AI functionalities.
+  # This powers features like behavioral nudges and the Learning Hub.
   - type: web
     name: ai-microservice-engine
     env: node
@@ -52,31 +55,32 @@ services:
         value: production
       - key: PORT
         value: 10001
-      # OpenAI Configuration
+      # OpenAI credentials for API access.
       - key: OPENAI_API_KEY
         sync: false
       - key: MODEL_API_ENDPOINT
         value: https://api.openai.com/v1
       - key: OPENAI_MODEL
         value: gpt-4
-      # Firebase for token verification
+      # Firebase Project ID for token verification.
       - key: FIREBASE_PROJECT_ID
         sync: false
-      # Learning Hub & Gamification
+      # Feature flags for enabling/disabling parts of the application.
       - key: BEHAVIORAL_NUDGE_ENABLED
         value: true
       - key: LEARNING_HUB_ENABLED
         value: true
       - key: GAMIFICATION_ENABLED
         value: true
-      # Database for user progress tracking
+      # Database for storing user progress.
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
           property: connectionString
     healthCheckPath: /health
 
-  # Python Risk Engine
+  # Python Risk Engine - A specialized service for risk calculations.
+  # This uses a separate Python environment for specific libraries.
   - type: web
     name: python-risk-engine
     env: python
@@ -89,14 +93,15 @@ services:
         value: production
       - key: PORT
         value: 10002
-      # Firebase for token verification
+      # Firebase for user token verification.
       - key: FIREBASE_PROJECT_ID
         sync: false
       - key: RISK_CALCULATION_ENABLED
         value: true
     healthCheckPath: /health
 
-  # Market Data Ingestion
+  # Market Data Ingestion - Service for fetching and storing market data.
+  # This service populates the database with real-time stock and market info.
   - type: web
     name: market-data-ingestion-service
     env: node
@@ -109,24 +114,25 @@ services:
         value: production
       - key: PORT
         value: 10003
-      # Database for persistent storage
+      # Database for persistent storage of market data.
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
           property: connectionString
-      # Market Data APIs
+      # API keys for third-party market data providers.
       - key: ALPHA_VANTAGE_API_KEY
         sync: false
       - key: FINNHUB_API_KEY
         sync: false
       - key: MARKET_DATA_API_KEY
         sync: false
-      # Firebase for admin operations
+      # Firebase for admin operations.
       - key: FIREBASE_PROJECT_ID
         sync: false
     healthCheckPath: /health
 
-  # Portfolio Simulation
+  # Portfolio Simulation - Service for managing and simulating user portfolios.
+  # This service relies on the Python Risk Engine and Market Data services.
   - type: web
     name: portfolio-simulation-service
     env: node
@@ -139,29 +145,23 @@ services:
         value: production
       - key: PORT
         value: 10004
-      # Database for user portfolios
+      # Database for user portfolio data.
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
           property: connectionString
-      # Dependent services
+      # Dependent services for risk analysis and market data.
       - key: PYTHON_RISK_ENGINE_URL
         value: https://python-risk-engine.onrender.com
       - key: MARKET_DATA_URL
         value: https://market-data-ingestion-service.onrender.com
-      # Firebase for user authentication
+      # Firebase for user authentication.
       - key: FIREBASE_PROJECT_ID
         sync: false
     healthCheckPath: /health
+
 databases:
-  # PostgreSQL Database for persistent data
+  # PostgreSQL Database - The primary relational database for the application.
   - name: beginner-investor-db
     databaseName: beginner_investor_hub
-    user: postgres
-<<<<<<< HEAD:.render.yaml
-
-  # Redis for caching, rate limiting, and gamification data
-  - name: beginner-investor-redis
-    type: redis
-=======
->>>>>>> bbe7e34e49d298a5ceead5129434676aa6692342:render.yaml
+  
