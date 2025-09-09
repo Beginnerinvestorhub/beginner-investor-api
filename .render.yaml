@@ -215,13 +215,3 @@ databases:
   # Redis for caching, rate limiting, and gamification data
   - name: beginner-investor-redis
     type: redis
-
-databases:
-  # PostgreSQL Database
-  - name: beginner-investor-db
-    databaseName: beginner_investor_hub
-    user: postgres
-
-  # Redis Cache
-  - name: beginner-investor-redis
-    type: redis
