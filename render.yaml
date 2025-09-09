@@ -153,15 +153,13 @@ services:
       - key: FIREBASE_PROJECT_ID
         sync: false
     healthCheckPath: /health
+
 databases:
   # PostgreSQL Database for persistent data
   - name: beginner-investor-db
     databaseName: beginner_investor_hub
     user: postgres
-<<<<<<< HEAD:.render.yaml
 
   # Redis for caching, rate limiting, and gamification data
   - name: beginner-investor-redis
     type: redis
-=======
->>>>>>> bbe7e34e49d298a5ceead5129434676aa6692342:render.yaml
