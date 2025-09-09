@@ -164,8 +164,4 @@ databases:
   # PostgreSQL Database - The primary relational database for the application.
   - name: beginner-investor-db
     databaseName: beginner_investor_hub
-    user: postgres
-
-  # Redis Database - Used for caching, real-time data, and rate limiting.
-  # This is crucial for performance and features like gamification.
-  - name: beginner-investor-redis
+  
