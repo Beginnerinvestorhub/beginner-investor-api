@@ -1,0 +1,99 @@
+# Exported from Render on 2025-09-09T11:30:01Z
+databases:
+- name: '`beginner-investor-db'
+  databaseName: investment_hub_9nuh
+  user: investment_hub_user
+  plan: free
+  region: virginia
+  ipAllowList:
+  - source: 0.0.0.0/0
+    description: everywhere
+  postgresMajorVersion: "17"
+services:
+- type: web
+  name: 'market-data-ingestion-service '
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: MARKET_DATA_API_KEY
+    sync: false
+  - key: FINNHUB_API_KEY
+    sync: false
+  - key: ALPHA_VANTAGE_API_KEY
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  - key: REDIS_URL
+    sync: false
+  - key: PORT
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
+- type: web
+  name: python-risk-engine
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: RISK_CALCULATION_ENABLED
+    sync: false
+  - key: REDIS_URL
+    sync: false
+  - key: PORT
+    sync: false
+  - key: FLASK_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
+- type: web
+  name: Ai-microservice-engine
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: BEHAVIORAL_NUDGE_ENABLED
+    sync: false
+  - key: MODEL_API_ENDPOINT
+    sync: false
+  - key: OPENAI_API_KEY
+    sync: false
+  - key: REDIS_URL
+    sync: false
+  - key: PORT
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./Dockerfile
+  autoDeployTrigger: commit
+- type: web
+  name: Backend API
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: CORS_ORIGIN
+    sync: false
+  - key: DATABASE_URL
+    sync: false
+  - key: COOKIE_SECRET
+    sync: false
+  - key: JWT_SECRET
+    sync: false
+  - key: PORT
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./tools/services/backend-api/Dockerfile
+  autoDeployTrigger: commit
+version: "1"
