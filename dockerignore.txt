@@ -1,0 +1,76 @@
+# .dockerignore for Beginner Investor Hub
+
+# Node.js
+node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# IDE files
+.vscode
+.idea
+*.swp
+*.swo
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Git
+.git
+.gitignore
+
+# Documentation
+*.md
+docs/
+
+# Development tools
+.eslintrc*
+.prettierrc*
+jest.config.js
+
+# Frontend build (since it's deployed to Vercel)
+frontend/
+.next/
+out/
+
+# Monitoring (deployed separately)
+monitoring/
+grafana/
+prometheus/
+alertmanager/
+
+# Scripts (not needed in production)
+scripts/
+*.sh
+*.ps1
+
+# Logs
+logs/
+*.log
+
+# Coverage
+coverage/
+
+# Temporary files
+tmp/
+temp/
+
+# Development database
+*.sqlite
+*.db
+
+# Cache
+.cache/
+
+# Build artifacts
+dist/
+build/

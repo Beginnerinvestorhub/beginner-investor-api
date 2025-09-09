@@ -1,0 +1,50 @@
+# Multi-stage Dockerfile for Beginner Investor Hub Backend Services
+FROM node:18-alpine AS base
+
+# Install dependencies only when needed
+FROM base AS deps
+WORKDIR /app
+
+# Copy package files for dependency installation
+COPY package*.json ./
+COPY tools-restructured/services/backend-api/package*.json ./tools-restructured/services/backend-api/
+COPY tools-restructured/services/ai_microservice/package*.json ./tools-restructured/services/ai_microservice/
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Install Python for AI microservice if needed
+RUN apk add --no-cache python3 py3-pip
+
+# Production image
+FROM base AS runner
+WORKDIR /app
+
+# Create non-root user for security
+RUN addgroup --system --gid 1001 nodejs
+RUN adduser --system --uid 1001 nodeuser
+
+# Copy dependencies
+COPY --from=deps /app/node_modules ./node_modules
+COPY --from=deps /app/tools-restructured/services/backend-api/node_modules ./tools-restructured/services/backend-api/node_modules
+COPY --from=deps /app/tools-restructured/services/ai_microservice/node_modules ./tools-restructured/services/ai_microservice/node_modules
+
+# Copy application code
+COPY --chown=nodeuser:nodejs . .
+
+# Set environment variables
+ENV NODE_ENV=production
+ENV PORT=10000
+
+# Expose the port that Render expects
+EXPOSE 10000
+
+# Switch to non-root user
+USER nodeuser
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:10000/health || exit 1
+
+# Start the main backend API service
+CMD ["node", "tools-restructured/services/backend-api/server.js"]
