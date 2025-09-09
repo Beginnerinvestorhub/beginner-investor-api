@@ -5,11 +5,11 @@ services:
   # Handles user authentication with Firebase and routes requests to other services.
   - type: web
     name: backend-api-service
-    env: node
-    buildCommand: |
-      npm install
-      cd tools-restructured/services/backend-api && npm install
-    startCommand: node tools-restructured/services/backend-api/server.js
+    dockerfile: tools-restructured/services/backend-api/Dockerfile
+    dockerContext: .
+    dockerBuildArgs:
+      - NODE_ENV=production
+    dockerBuildTarget: production
     envVars:
       - key: NODE_ENV
         value: production
@@ -45,11 +45,11 @@ services:
   # This powers features like behavioral nudges and the Learning Hub.
   - type: web
     name: ai-microservice-engine
-    env: node
-    buildCommand: |
-      npm install
-      cd tools-restructured/services/ai_microservice && npm install
-    startCommand: node tools-restructured/services/ai_microservice/server.js
+    dockerfile: tools-restructured/services/ai_microservice/Dockerfile
+    dockerContext: .
+    dockerBuildArgs:
+      - NODE_ENV=production
+    dockerBuildTarget: production
     envVars:
       - key: NODE_ENV
         value: production
@@ -83,11 +83,11 @@ services:
   # This uses a separate Python environment for specific libraries.
   - type: web
     name: python-risk-engine
-    env: python
-    buildCommand: |
-      cd tools-restructured/services/python-engine
-      pip install -r requirements.txt
-    startCommand: python tools-restructured/services/python-engine/app.py
+    dockerfile: tools-restructured/services/python-engine/Dockerfile
+    dockerContext: .
+    dockerBuildArgs:
+      - NODE_ENV=production
+    dockerBuildTarget: production
     envVars:
       - key: FLASK_ENV
         value: production
@@ -104,11 +104,11 @@ services:
   # This service populates the database with real-time stock and market info.
   - type: web
     name: market-data-ingestion-service
-    env: node
-    buildCommand: |
-      npm install
-      cd tools-restructured/services/market-data-ingestion && npm install
-    startCommand: node tools-restructured/services/market-data-ingestion/server.js
+    dockerfile: tools-restructured/services/market-data-ingestion/Dockerfile
+    dockerContext: .
+    dockerBuildArgs:
+      - NODE_ENV=production
+    dockerBuildTarget: production
     envVars:
       - key: NODE_ENV
         value: production
@@ -135,11 +135,11 @@ services:
   # This service relies on the Python Risk Engine and Market Data services.
   - type: web
     name: portfolio-simulation-service
-    env: node
-    buildCommand: |
-      npm install
-      cd tools-restructured/services/portfolio-simulation && npm install
-    startCommand: node tools-restructured/services/portfolio-simulation/server.js
+    dockerfile: tools-restructured/services/portfolio-simulation/Dockerfile
+    dockerContext: .
+    dockerBuildArgs:
+      - NODE_ENV=production
+    dockerBuildTarget: production
     envVars:
       - key: NODE_ENV
         value: production
