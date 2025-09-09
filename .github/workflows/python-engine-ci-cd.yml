@@ -1,0 +1,210 @@
+name: Python Engine CI/CD
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths:
+      - 'tools-restructured/services/python-engine/**'
+  pull_request:
+    branches: [ main, develop ]
+    paths:
+      - 'tools-restructured/services/python-engine/**'
+
+# Environment variables
+env:
+  DOCKER_IMAGE: python-engine
+  DOCKER_REGISTRY: ghcr.io/beginnerinvestorhub
+  DOCKER_CONTEXT: ./tools-restructured/services/python-engine
+  DOCKERFILE: ${{ github.workspace }}/tools-restructured/services/python-engine/Dockerfile
+
+jobs:
+  test:
+    name: Test
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:15-alpine
+        env:
+          POSTGRES_USER: test
+          POSTGRES_PASSWORD: test
+          POSTGRES_DB: test
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+        cache: 'pip'
+
+    - name: Install dependencies
+      working-directory: ./tools-restructured/services/python-engine
+      run: |
+        python -m pip install --upgrade pip
+        pip install poetry
+        poetry install --no-interaction --no-root
+
+    - name: Run linting
+      working-directory: ./tools-restructured/services/python-engine
+      run: |
+        poetry run black --check .
+        poetry run isort --check-only .
+        poetry run flake8 .
+        poetry run mypy .
+
+    - name: Run tests
+      working-directory: ./tools-restructured/services/python-engine
+      env:
+        DATABASE_URL: postgresql://test:test@localhost:5432/test
+        REDIS_URL: redis://localhost:6379/0
+      run: |
+        poetry run pytest --cov=app --cov-report=xml
+
+    - name: Upload coverage to Codecov
+      uses: codecov/codecov-action@v3
+      with:
+        file: ./tools-restructured/services/python-engine/coverage.xml
+        fail_ci_if_error: false
+
+  build-and-push:
+    name: Build and Push
+    needs: test
+    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+
+    - name: Set up Docker Buildx
+      uses: docker/setup-buildx-action@v2
+
+    - name: Log in to GitHub Container Registry
+      uses: docker/login-action@v2
+      with:
+        registry: ghcr.io
+        username: ${{ github.repository_owner }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata (tags, labels) for Docker
+      id: meta
+      uses: docker/metadata-action@v4
+      with:
+        images: ${{ env.DOCKER_REGISTRY }}/${{ env.DOCKER_IMAGE }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=semver,pattern={{version}}
+          type=sha,format=long
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v4
+      with:
+        context: ${{ env.DOCKER_CONTEXT }}
+        push: ${{ github.event_name != 'pull_request' }}
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+  deploy-staging:
+    name: Deploy to Staging
+    needs: build-and-push
+    if: github.ref == 'refs/heads/develop'
+    runs-on: ubuntu-latest
+    environment: staging
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.STAGING_SSH_PRIVATE_KEY }}
+        known_hosts: 'just-a-placeholder-so-we-don-t-get-errors'
+
+    - name: Deploy to staging server
+      env:
+        SSH_HOST: ${{ secrets.STAGING_SSH_HOST }}
+        SSH_USER: ${{ secrets.STAGING_SSH_USER }}
+        DOCKER_REGISTRY: ${{ env.DOCKER_REGISTRY }}
+        DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
+        DOCKER_TAG: ${{ github.sha }}
+      run: |
+        # Add server to known hosts
+        mkdir -p ~/.ssh
+        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+        
+        # SSH into the server and run the deployment script
+        ssh $SSH_USER@$SSH_HOST "
+          # Pull the latest image
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          docker pull $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
+          
+          # Update the service
+          cd /path/to/your/staging/directory
+          DOCKER_IMAGE=$DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG docker-compose up -d
+          
+          # Clean up old images
+          docker image prune -f
+        "
+
+  deploy-production:
+    name: Deploy to Production
+    needs: [test, build-and-push]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    runs-on: ubuntu-latest
+    environment: production
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Install SSH key
+      uses: shimataro/ssh-key-action@v2
+      with:
+        key: ${{ secrets.PRODUCTION_SSH_PRIVATE_KEY }}
+        known_hosts: 'just-a-placeholder-so-we-don-t-get-errors'
+
+    - name: Deploy to production server
+      env:
+        SSH_HOST: ${{ secrets.PRODUCTION_SSH_HOST }}
+        SSH_USER: ${{ secrets.PRODUCTION_SSH_USER }}
+        DOCKER_REGISTRY: ${{ env.DOCKER_REGISTRY }}
+        DOCKER_IMAGE: ${{ env.DOCKER_IMAGE }}
+        DOCKER_TAG: ${{ github.sha }}
+      run: |
+        # Add server to known hosts
+        mkdir -p ~/.ssh
+        ssh-keyscan -H $SSH_HOST >> ~/.ssh/known_hosts
+        
+        # SSH into the server and run the deployment script
+        ssh $SSH_USER@$SSH_HOST "
+          # Pull the latest image
+          echo ${{ secrets.GITHUB_TOKEN }} | docker login ghcr.io -u ${{ github.repository_owner }} --password-stdin
+          docker pull $DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG
+          
+          # Update the service
+          cd /path/to/your/production/directory
+          DOCKER_IMAGE=$DOCKER_REGISTRY/$DOCKER_IMAGE:$DOCKER_TAG docker-compose up -d
+          
+          # Clean up old images
+          docker image prune -f
+        "

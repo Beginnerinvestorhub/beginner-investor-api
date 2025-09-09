@@ -77,7 +77,7 @@
     "workbench.tree.indent": 20,
     
     // Auto-save and formatting
-    "files.autoSave": "onFocusChange",
+    "files.autoSave": "afterDelay",
     "editor.formatOnSave": true,
     "editor.formatOnPaste": true,
     "prettier.requireConfig": true,

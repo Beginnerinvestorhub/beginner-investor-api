@@ -1,0 +1,93 @@
+name: Dependabot auto-approve and merge
+
+on:
+  pull_request_target:
+    types: [opened, reopened, synchronize, labeled]
+    branches: [main, develop]
+
+permissions:
+  pull-requests: write
+  contents: write
+  checks: write
+
+jobs:
+  dependabot:
+    name: Dependabot auto-approve and merge
+    runs-on: ubuntu-latest
+    if: >
+      github.actor == 'dependabot[bot]' && 
+      (github.event.action == 'opened' || 
+       github.event.action == 'reopened' ||
+       github.event.action == 'synchronize' ||
+       (github.event.action == 'labeled' && 
+        contains(github.event.pull_request.labels.*.name, 'dependencies')))
+
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@v1
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for Dependabot PRs
+        if: >
+          steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+          (contains(github.event.pull_request.labels.*.name, 'dependencies') ||
+           contains(github.event.pull_request.labels.*.name, 'security'))
+        run: |
+          echo "PR is a dependency update, enabling auto-merge"
+          gh pr merge --auto --merge "${{ github.event.pull_request.html_url }}"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Approve PR
+        if: >
+          steps.metadata.outputs.update-type != 'version-update:semver-major' &&
+          (contains(github.event.pull_request.labels.*.name, 'dependencies') ||
+           contains(github.event.pull_request.labels.*.name, 'security'))
+        run: |
+          echo "Approving PR #${{ github.event.pull_request.number }}"
+          gh pr review ${{ github.event.pull_request.number }} --approve --body "Automatically approved by Dependabot auto-merge workflow"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  security-checks:
+    name: Security Checks
+    runs-on: ubuntu-latest
+    if: github.actor == 'dependabot[bot]'
+    steps:
+      - uses: actions/checkout@v3
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '18.x'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Run security audit
+        run: npm audit --audit-level=moderate
+        continue-on-error: true
+      
+      - name: Check for vulnerabilities
+        uses: actions/github-script@v6
+        with:
+          script: |
+            const fs = require('fs');
+            const { data: checkRuns } = await github.rest.checks.listForRef({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              ref: context.sha,
+            });
+            
+            const auditCheck = checkRuns.check_runs.find(
+              check => check.name === 'npm audit'
+            );
+            
+            if (auditCheck && auditCheck.conclusion === 'failure') {
+              core.setFailed('Vulnerabilities found in dependencies');
+            }
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
