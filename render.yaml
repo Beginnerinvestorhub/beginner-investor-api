@@ -164,4 +164,3 @@ databases:
   # PostgreSQL Database - The primary relational database for the application.
   - name: beginner-investor-db
     databaseName: beginner_investor_hub
-  
