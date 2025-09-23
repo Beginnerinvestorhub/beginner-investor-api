@@ -1,166 +1,284 @@
-# render.yaml - Render Blueprint for Beginner Investor Hub
-# This Blueprint defines all services and databases for the Beginner Investor Hub.
+# .render.yaml - BeginnerInvestorHub Deployment Configuration
+# This file defines the complete microservices architecture for Render.com
+
+# Database Services
+databases:
+  - name: fintech-postgres
+    databaseName: fintech_db
+    user: postgres
+    plan: starter  # $7/month - upgrade to standard ($20) for production
+    region: oregon
+    
+  - name: fintech-redis
+    plan: starter  # $7/month - Redis cache
+    maxmemoryPolicy: allkeys-lru
+    region: oregon
+
+# Core Services
 services:
-  # Core Backend API - The main entry point for the application.
-  # Handles user authentication with Firebase and routes requests to other services.
+  # API Gateway - Main entry point
   - type: web
     name: backend-api-service
-    dockerfile: tools-restructured/services/backend-api/Dockerfile
-    dockerContext: .
-    dockerBuildArgs:
-      - NODE_ENV=production
-    dockerBuildTarget: production
+    runtime: node
+    plan: starter  # $7/month - upgrade to standard ($25) for production
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    rootDir: services/backend-api-service
     envVars:
       - key: NODE_ENV
         value: production
       - key: PORT
-        value: 10000
-      # Firebase Authentication credentials for secure access.
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: FIREBASE_PRIVATE_KEY
-        sync: false
-      - key: FIREBASE_CLIENT_EMAIL
-        sync: false
-      - key: FIREBASE_WEB_API_KEY
-        sync: false
-      # Links to the PostgreSQL database for user and application data.
+        value: 3000
       - key: DATABASE_URL
         fromDatabase:
-          name: beginner-investor-db
+          name: fintech-postgres
           property: connectionString
-      # Internal URLs for communication between microservices.
-      - key: AI_MICROSERVICE_URL
-        value: https://ai-microservice-engine.onrender.com
-      - key: PORTFOLIO_SIMULATION_URL
-        value: https://portfolio-simulation-service.onrender.com
-      - key: MARKET_DATA_URL
-        value: https://market-data-ingestion-service.onrender.com
-      # CORS (Cross-Origin Resource Sharing) settings.
-      - key: CORS_ORIGIN
-        sync: false
-    healthCheckPath: /health
-    
-  # AI Microservice Engine - Dedicated service for AI functionalities.
-  # This powers features like behavioral nudges and the Learning Hub.
-  - type: web
-    name: ai-microservice-engine
-    dockerfile: tools-restructured/services/ai_microservice/Dockerfile
-    dockerContext: .
-    dockerBuildArgs:
-      - NODE_ENV=production
-    dockerBuildTarget: production
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10001
-      # OpenAI credentials for API access.
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: MODEL_API_ENDPOINT
-        value: https://api.openai.com/v1
-      - key: OPENAI_MODEL
-        value: gpt-4
-      # Firebase Project ID for token verification.
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      # Feature flags for enabling/disabling parts of the application.
-      - key: BEHAVIORAL_NUDGE_ENABLED
-        value: true
-      - key: LEARNING_HUB_ENABLED
-        value: true
-      - key: GAMIFICATION_ENABLED
-        value: true
-      # Database for storing user progress.
-      - key: DATABASE_URL
+      - key: REDIS_URL
         fromDatabase:
-          name: beginner-investor-db
+          name: fintech-redis
           property: connectionString
-    healthCheckPath: /health
-
-  # Python Risk Engine - A specialized service for risk calculations.
-  # This uses a separate Python environment for specific libraries.
-  - type: web
-    name: python-risk-engine
-    dockerfile: tools-restructured/services/python-engine/Dockerfile
-    dockerContext: .
-    dockerBuildArgs:
-      - NODE_ENV=production
-    dockerBuildTarget: production
-    envVars:
-      - key: FLASK_ENV
-        value: production
-      - key: PORT
-        value: 10002
-      # Firebase for user token verification.
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-      - key: RISK_CALCULATION_ENABLED
-        value: true
-    healthCheckPath: /health
-
-  # Market Data Ingestion - Service for fetching and storing market data.
-  # This service populates the database with real-time stock and market info.
-  - type: web
-    name: market-data-ingestion-service
-    dockerfile: tools-restructured/services/market-data-ingestion/Dockerfile
-    dockerContext: .
-    dockerBuildArgs:
-      - NODE_ENV=production
-    dockerBuildTarget: production
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: PORT
-        value: 10003
-      # Database for persistent storage of market data.
-      - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
-      # API keys for third-party market data providers.
+      - key: FIREBASE_SERVICE_ACCOUNT
+        fromGroup: secrets
       - key: ALPHA_VANTAGE_API_KEY
-        sync: false
+        fromGroup: secrets
       - key: FINNHUB_API_KEY
-        sync: false
-      - key: MARKET_DATA_API_KEY
-        sync: false
-      # Firebase for admin operations.
-      - key: FIREBASE_PROJECT_ID
-        sync: false
+        fromGroup: secrets
+      - key: OPENAI_API_KEY
+        fromGroup: secrets
     healthCheckPath: /health
-
-  # Portfolio Simulation - Service for managing and simulating user portfolios.
-  # This service relies on the Python Risk Engine and Market Data services.
+    autoDeploy: true
+    
+  # Market Data Ingestion Service
   - type: web
-    name: portfolio-simulation-service
-    dockerfile: tools-restructured/services/portfolio-simulation/Dockerfile
-    dockerContext: .
-    dockerBuildArgs:
-      - NODE_ENV=production
-    dockerBuildTarget: production
+    name: market-data-service
+    runtime: python
+    plan: starter
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    rootDir: services/market-data-ingestion-service
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fintech-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: ALPHA_VANTAGE_API_KEY
+        fromGroup: secrets
+      - key: FINNHUB_API_KEY
+        fromGroup: secrets
+      - key: DATA_INGESTION_INTERVAL
+        value: 300
+    healthCheckPath: /health
+    autoDeploy: true
+    
+  # AI Microservice Engine
+  - type: web
+    name: ai-engine
+    runtime: python
+    plan: standard  # $25/month - AI processing needs more resources
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    rootDir: services/ai-microservice-engine
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fintech-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: OPENAI_API_KEY
+        fromGroup: secrets
+      - key: AI_MODEL
+        value: gpt-4o-mini  # More cost-effective for development
+    healthCheckPath: /health
+    autoDeploy: true
+    
+  # Risk Engine
+  - type: web
+    name: risk-engine
+    runtime: python
+    plan: standard  # $25/month - Heavy mathematical calculations
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    rootDir: services/python-risk-engine
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fintech-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: RISK_CALCULATION_WORKERS
+        value: 2  # Limited by Render plan
+    healthCheckPath: /health
+    autoDeploy: true
+    
+  # Portfolio Simulation Service
+  - type: web
+    name: portfolio-simulation
+    runtime: python
+    plan: standard  # $25/month - Monte Carlo simulations
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python app.py
+    rootDir: services/portfolio-simulation-service
+    envVars:
+      - key: PYTHONPATH
+        value: /opt/render/project/src
+      - key: PYTHONUNBUFFERED
+        value: 1
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fintech-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: RISK_ENGINE_URL
+        value: https://risk-engine.onrender.com
+      - key: MARKET_DATA_URL
+        value: https://market-data-service.onrender.com
+      - key: SIMULATION_WORKERS
+        value: 1  # Limited by Render plan
+    healthCheckPath: /health
+    autoDeploy: true
+    
+  # Frontend (Next.js)
+  - type: web
+    name: frontend
+    runtime: node
+    plan: starter
+    region: oregon
+    buildCommand: npm ci && npm run build
+    startCommand: npm start
+    rootDir: frontend
     envVars:
       - key: NODE_ENV
         value: production
-      - key: PORT
-        value: 10004
-      # Database for user portfolio data.
+      - key: NEXT_PUBLIC_API_URL
+        value: https://backend-api-service.onrender.com
+      - key: NEXTAUTH_URL
+        value: https://beginnerinvestorhub.onrender.com
+      - key: NEXTAUTH_SECRET
+        fromGroup: secrets
+    healthCheckPath: /
+    autoDeploy: true
+
+  # Background Jobs - Cron Jobs for data ingestion, nudges, etc.
+  - type: cron
+    name: data-ingestion-cron
+    runtime: python
+    plan: starter
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/scheduled_ingestion.py
+    rootDir: services/market-data-ingestion-service
+    schedule: "*/5 * * * *"  # Every 5 minutes
+    envVars:
       - key: DATABASE_URL
         fromDatabase:
-          name: beginner-investor-db
+          name: fintech-postgres
           property: connectionString
-      # Dependent services for risk analysis and market data.
-      - key: PYTHON_RISK_ENGINE_URL
-        value: https://python-risk-engine.onrender.com
-      - key: MARKET_DATA_URL
-        value: https://market-data-ingestion-service.onrender.com
-      # Firebase for user authentication.
-      - key: FIREBASE_PROJECT_ID
-        sync: false
-    healthCheckPath: /health
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: ALPHA_VANTAGE_API_KEY
+        fromGroup: secrets
+      - key: FINNHUB_API_KEY
+        fromGroup: secrets
+        
+  - type: cron
+    name: behavioral-nudges-cron
+    runtime: python
+    plan: starter
+    region: oregon
+    buildCommand: pip install -r requirements.txt
+    startCommand: python scripts/generate_nudges.py
+    rootDir: services/behavioral-nudge-engine
+    schedule: "0 9,15 * * *"  # 9 AM and 3 PM daily
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: fintech-postgres
+          property: connectionString
+      - key: REDIS_URL
+        fromDatabase:
+          name: fintech-redis
+          property: connectionString
+      - key: BACKEND_API_URL
+        value: https://backend-api-service.onrender.com
 
-databases:
-  # PostgreSQL Database - The primary relational database for the application.
-  - name: beginner-investor-db
-    databaseName: beginner_investor_hub
+# Environment Variable Groups
+envVarGroups:
+  - name: secrets
+    envVars:
+      - key: FIREBASE_SERVICE_ACCOUNT
+        generateValue: false  # You'll set this manually
+      - key: ALPHA_VANTAGE_API_KEY
+        generateValue: false
+      - key: FINNHUB_API_KEY
+        generateValue: false
+      - key: OPENAI_API_KEY
+        generateValue: false
+      - key: NEXTAUTH_SECRET
+        generateValue: true   # Render will generate this
+      - key: JWT_SECRET
+        generateValue: true
+      - key: STRIPE_SECRET_KEY
+        generateValue: false  # For future paywall implementation
+      - key: STRIPE_WEBHOOK_SECRET
+        generateValue: false
+
+# Static Site for Documentation (optional)
+staticSites:
+  - name: documentation
+    buildCommand: npm run build-docs
+    publishPath: docs/build
+    rootDir: docs
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
+    envVars:
+      - key: NODE_ENV
+        value: production
+
+# Notification Rules
+alerting:
+  - service: backend-api-service
+    rule: response_time_p95 > 2000
+    channels:
+      - email: your-email@domain.com
+  - service: ai-engine
+    rule: response_time_p95 > 5000
+    channels:
+      - email: your-email@domain.com
+  - database: fintech-postgres
+    rule: cpu_usage > 80
+    channels:
+      - email: your-email@domain.com

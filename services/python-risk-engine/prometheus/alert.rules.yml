@@ -1,0 +1,57 @@
+groups:
+- name: python-engine
+  rules:
+    # Alert for high error rate
+    - alert: HighErrorRate
+      expr: rate(http_requests_total{status=~"5.."}[5m]) / rate(http_requests_total[5m]) > 0.05
+      for: 10m
+      labels:
+        severity: critical
+        service: python-engine
+      annotations:
+        summary: "High error rate on {{ $labels.instance }}"
+        description: "Error rate is {{ $value | humanizePercentage }} for {{ $labels.method }} {{ $labels.path }}"
+
+    # Alert for high latency
+    - alert: HighLatency
+      expr: histogram_quantile(0.95, sum(rate(http_request_duration_seconds_bucket[5m])) by (le)) > 1
+      for: 10m
+      labels:
+        severity: warning
+        service: python-engine
+      annotations:
+        summary: "High latency on {{ $labels.instance }}"
+        description: "95th percentile latency is {{ $value | humanizeDuration }} for {{ $labels.method }} {{ $labels.path }}"
+
+    # Alert for service down
+    - alert: ServiceDown
+      expr: up{job="python-engine"} == 0
+      for: 5m
+      labels:
+        severity: critical
+        service: python-engine
+      annotations:
+        summary: "Service down: {{ $labels.instance }}"
+        description: "The Python Engine service is not responding"
+
+    # Alert for high memory usage
+    - alert: HighMemoryUsage
+      expr: (node_memory_MemTotal_bytes - node_memory_MemAvailable_bytes) / node_memory_MemTotal_bytes * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+        service: python-engine
+      annotations:
+        summary: "High memory usage on {{ $labels.instance }}"
+        description: "Memory usage is {{ $value | humanizePercentage }}"
+
+    # Alert for high CPU usage
+    - alert: HighCPUUsage
+      expr: 100 - (avg by(instance) (rate(node_cpu_seconds_total{mode="idle"}[5m])) * 100 > 80
+      for: 10m
+      labels:
+        severity: warning
+        service: python-engine
+      annotations:
+        summary: "High CPU usage on {{ $labels.instance }}"
+        description: "CPU usage is {{ $value | humanizePercentage }}"

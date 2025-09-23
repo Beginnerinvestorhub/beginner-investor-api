@@ -1,0 +1,68 @@
+apiVersion: 1
+
+datasources:
+  - name: Prometheus
+    type: prometheus
+    access: proxy
+    url: http://prometheus:9090
+    isDefault: true
+    editable: false
+    jsonData:
+      timeInterval: "15s"
+      httpMethod: "POST"
+      prometheusType: "Prometheus"
+      prometheusVersion: "2.0.0"
+      cacheLevel: "High"
+      disableMetricsLookup: false
+      exemplarTraceIdDestinations:
+        - name: "traceID"
+          datasourceUid: "tempo"
+
+  - name: PostgreSQL
+    type: postgres
+    access: proxy
+    url: postgres:5432
+    database: ${POSTGRES_DB:-python_engine}
+    user: ${POSTGRES_USER:-postgres}
+    secureJsonData:
+      password: ${POSTGRES_PASSWORD:-postgres}
+    jsonData:
+      sslmode: "disable"
+      postgresVersion: 1500
+      timescaledb: false
+      maxOpenConns: 100
+      maxIdleConns: 100
+      connMaxLifetime: 14400
+      maxIdleConnsAuto: true
+      connMaxLifetimeAuto: 3600
+      timeInterval: "1m"
+
+  - name: Loki
+    type: loki
+    access: proxy
+    url: http://loki:3100
+    jsonData:
+      maxLines: 1000
+      derivedFields:
+        - datasourceUid: "tempo"
+          matcherRegex: "traceID=(\\w+)"
+          name: "TraceID"
+          url: "$${__value.raw}"
+
+  - name: Tempo
+    type: tempo
+    access: proxy
+    url: http://tempo:3200
+    jsonData:
+      httpMethod: "GET"
+      tracesToLogs:
+        datasourceUid: "loki"
+        tags: ["job"]
+        mapTagNamesEnabled: true
+        mappedTags:
+          - key: "service"
+            value: "service"
+          - key: "http_method"
+            value: "http.method"
+          - key: "http_path"
+            value: "http.path"

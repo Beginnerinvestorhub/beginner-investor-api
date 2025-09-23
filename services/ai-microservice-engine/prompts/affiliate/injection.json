@@ -1,0 +1,16 @@
+{
+  "affiliate_injection_prompt": {
+    "description": "Integrates an affiliate link naturally into content while maintaining value and readability.",
+    "template": "Given the following content and context, naturally integrate the provided affiliate link in a way that adds value to the reader. The link should feel like a helpful suggestion rather than an advertisement.\n\nContent: {content}\n\nAffiliate Link: {affiliate_link}\n\nContext: {context}\n\nRewritten content with affiliate link:",
+    "variables": {
+      "content": "The original content where the affiliate link will be inserted",
+      "affiliate_link": "The affiliate link to be integrated",
+      "context": "Additional context about the content or target audience"
+    },
+    "example": {
+      "content": "Investing in index funds is a great way to build long-term wealth.",
+      "affiliate_link": "https://example.com/best-index-funds?ref=123",
+      "context": "Beginner investors looking for passive investment options"
+    }
+  }
+}

@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  test:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: test
+    environment:
+      - TESTING=true
+      - DATABASE_URI=postgresql://test:test@test-db:5432/test_db
+    depends_on:
+      test-db:
+        condition: service_healthy
+    volumes:
+      - .:/app
+    command: >
+      sh -c "pytest --cov=app --cov-report=term-missing"
+
+  test-db:
+    image: postgres:15-alpine
+    environment:
+      - POSTGRES_USER=test
+      - POSTGRES_PASSWORD=test
+      - POSTGRES_DB=test_db
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U test -d test_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  test-redis:
+    image: redis:7-alpine
+    command: redis-server --requirepass test-password
+
+networks:
+  default:
+    name: python-engine-test
+    driver: bridge

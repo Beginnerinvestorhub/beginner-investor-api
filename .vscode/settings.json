@@ -1,203 +1,34 @@
 {
-    "geminicodeassist.agentYoloMode": true,
-    "geminicodeassist.agentDebugMode": true,
-    "geminicodeassist.chat.changeView": "Default diff view",
-    "geminicodeassist.codeGenerationPaneViewEnabled": true,
-    "geminicodeassist.inlineSuggestions.suggestionSpeed": "Fast",
-    "geminicodeassist.updateChannel": "Insiders",
-    "geminicodeassist.verboseLogging": true,
-    "workbench.auxiliaryActivityBar.location": "bottom",
-    "workbench.editor.autoLockGroups": {
-        "workbench.editor.chatSession": false
-    },
-    
-    // Multi-root workspace optimization
-    "explorer.compactFolders": false,
     "explorer.fileNesting.enabled": true,
     "explorer.fileNesting.patterns": {
-        "*.ts": "${capture}.js",
-        "*.tsx": "${capture}.js",
-        "package.json": "package-lock.json,pnpm-lock.yaml,yarn.lock",
-        "docker-compose.yml": "docker-compose.*.yml,Dockerfile*",
-        ".env.example": ".env,.env.*"
+        "*.ts": "${capture}.js, ${capture}.d.ts, ${capture}.test.ts, ${capture}.spec.ts",
+        "*.js": "${capture}.js.map, ${capture}.test.js, ${capture}.spec.js",
+        "*.tsx": "${capture}.module.css, ${capture}.test.tsx, ${capture}.spec.tsx",
+        "*.jsx": "${capture}.module.css, ${capture}.test.jsx, ${capture}.spec.jsx",
+        "*.scss": "${capture}.css, ${capture}.module.scss",
+        "*.css": "${capture}.module.css",
+        "docker-compose*.yml": "docker-compose*.override.yml, .env, .env.*",
+        "package.json": "package-lock.json, .babelrc, .eslintrc, .prettierrc, tsconfig*.json",
+        "tsconfig.json": "tsconfig.*.json",
+        "next.config.js": "next-env.d.ts, next.config.*",
+        "README.md": "CONTRIBUTING.md, LICENSE, CHANGELOG.md, .gitignore",
+        ".env": ".env.*, .env.example"
     },
-    
-    // TypeScript/JavaScript productivity
-    "typescript.preferences.importModuleSpecifier": "relative",
-    "typescript.suggest.autoImports": true,
-    "typescript.updateImportsOnFileMove.enabled": "always",
-    "javascript.suggest.autoImports": true,
-    "editor.codeActionsOnSave": {
-        "source.fixAll.eslint": "explicit",
-        "source.organizeImports": "explicit"
-    },
-    
-    // Python development
-    "python.defaultInterpreterPath": "./tools/ai_microservice/.venv/Scripts/python.exe",
-    "python.terminal.activateEnvironment": true,
-    "python.analysis.autoImportCompletions": true,
-    
-    // Git and version control
-    "git.enableSmartCommit": true,
-    "git.autofetch": true,
-    "gitlens.currentLine.enabled": false,
-    "gitlens.hovers.currentLine.over": "line",
-    
-    // Terminal and task management
-    "terminal.integrated.defaultProfile.windows": "PowerShell",
-    "terminal.integrated.splitCwd": "workspaceRoot",
-    
-    // Performance optimizations
+    "explorer.compactFolders": false,
+    "explorer.sortOrder": "type",
     "files.exclude": {
-        "**/node_modules": true,
         "**/.git": true,
+        "**/.svn": true,
+        "**/.hg": true,
+        "**/CVS": true,
         "**/.DS_Store": true,
-        "**/dist": true,
-        "**/.next": true,
-        "**/.turbo": true,
+        "**/node_modules": false,
         "**/__pycache__": true,
-        "**/*.pyc": true,
-        "**/venv": true,
-        "**/.venv": true
+        "**/.pytest_cache": true,
+        "**/.mypy_cache": true
     },
-    "search.exclude": {
-        "**/node_modules": true,
-        "**/dist": true,
-        "**/.next": true,
-        "**/pnpm-lock.yaml": true,
-        "**/package-lock.json": true
-    },
-    
-    // Editor enhancements
-    "editor.minimap.enabled": false,
-    "editor.minimap.maxColumn": 120,
-    "editor.rulers": [80, 120],
-    "editor.bracketPairColorization.enabled": true,
-    "editor.guides.bracketPairs": true,
-    "workbench.tree.indent": 25,
-    
-    // Auto-save and formatting
     "files.autoSave": "afterDelay",
-    "editor.formatOnSave": true,
-    "editor.formatOnPaste": true,
-    "prettier.requireConfig": true,
-    "terminal.integrated.suggest.enabled": true,
-    "npm-intellisense.recursivePackageJsonLookup": false,
-    "editor.fontSize": 16,
-    "editor.fontVariations": false,
-    "workbench.tree.fontSize": 16,
-    "workbench.colorCustomizations": {
-        // Editor colors
-        "editor.foreground": "#f8f8f2",
-        "editor.background": "#1e1e1e",
-        "editorLineNumber.foreground": "#858585",
-        "editorCursor.foreground": "#f8f8f0",
-        "editor.selectionBackground": "#44475a",
-        "editor.selectionHighlightBackground": "#44475a80",
-        "editor.inactiveSelectionBackground": "#44475a80",
-        "editor.wordHighlightBackground": "#8be9fd50",
-        "editor.findMatchBackground": "#ffb86c80",
-        "editor.findMatchHighlightBackground": "#ffb86c40",
-        "editor.lineHighlightBackground": "#2d2d2d",
-        "editorLineNumber.activeForeground": "#f8f8f2",
-        "editorIndentGuide.background": "#3b3b3b",
-        "editorIndentGuide.activeBackground": "#6d6d6d",
-        "editorWhitespace.foreground": "#3b3b3b",
-        
-        // File Explorer colors
-        "sideBar.background": "#1e1e1e",
-        "sideBar.foreground": "#f8f8f2",
-        "sideBar.border": "#44475a",
-        "sideBarTitle.foreground": "#f8f8f2",
-        "sideBarSectionHeader.background": "#282a36",
-        "sideBarSectionHeader.foreground": "#f8f8f2",
-        "list.activeSelectionBackground": "#44475a",
-        "list.activeSelectionForeground": "#f8f8f2",
-        "list.hoverBackground": "#343746",
-        "list.hoverForeground": "#f8f8f2",
-        "list.inactiveSelectionBackground": "#343746",
-        "list.inactiveSelectionForeground": "#f8f8f2",
-        "list.focusBackground": "#44475a",
-        "list.focusForeground": "#f8f8f2",
-        "list.highlightForeground": "#50fa7b",
-        "list.dropBackground": "#44475a80",
-        "list.errorForeground": "#ff5555",
-        "list.warningForeground": "#ffb86c",
-        "listFilterWidget.background": "#282a36",
-        "listFilterWidget.outline": "#44475a",
-        "listFilterWidget.noMatchesOutline": "#ff5555",
-        "tree.indentGuidesStroke": "#44475a",
-        "tree.tableColumnsBorder": "#44475a",
-        "tree.tableOddRowsBackground": "#1e1e1e"
-    },
-    "editor.tokenColorCustomizations": {
-        "textMateRules": [
-            {
-                "scope": ["comment"],
-                "settings": {
-                    "foreground": "#6272a4"
-                }
-            },
-            {
-                "scope": ["string", "string.quoted"],
-                "settings": {
-                    "foreground": "#f1fa8c"
-                }
-            },
-            {
-                "scope": ["constant.numeric", "constant.character.numeric"],
-                "settings": {
-                    "foreground": "#bd93f9"
-                }
-            },
-            {
-                "scope": ["constant.language", "constant.character.escape", "punctuation.definition.constant"],
-                "settings": {
-                    "foreground": "#ff79c6"
-                }
-            },
-            {
-                "scope": ["storage.type", "storage.modifier", "keyword.control"],
-                "settings": {
-                    "foreground": "#ff79c6"
-                }
-            },
-            {
-                "scope": ["entity.name.function", "support.function"],
-                "settings": {
-                    "foreground": "#50fa7b"
-                }
-            },
-            {
-                "scope": ["variable.parameter"],
-                "settings": {
-                    "foreground": "#ffb86c"
-                }
-            },
-            {
-                "scope": ["entity.name.type.class", "entity.name.type.interface", "entity.name.type.enum", "entity.name.type.module", "entity.other.inherited-class"],
-                "settings": {
-                    "foreground": "#8be9fd"
-                }
-            },
-            {
-                "scope": ["entity.other.attribute-name"],
-                "settings": {
-                    "foreground": "#bd93f9"
-                }
-            },
-            {
-                "scope": ["invalid"],
-                "settings": {
-                    "foreground": "#ff5555"
-                }
-            },
-            {
-                "scope": ["markup.heading"],
-                "settings": {
-                    "foreground": "#ff79c6"
-                }
-            }
-        ]
-    }
+    "files.autoSaveDelay": 1000,
+    "explorer.confirmDelete": false,
+    "explorer.confirmDragAndDrop": false
 }

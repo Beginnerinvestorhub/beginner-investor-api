@@ -1,0 +1,229 @@
+version: '3.8'
+
+services:
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: fintech_redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --appendonly yes
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  # Database (PostgreSQL)
+  database:
+    image: postgres:15-alpine
+    container_name: fintech_db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${DB_NAME:-fintech_db}
+      POSTGRES_USER: ${DB_USER:-postgres}
+      POSTGRES_PASSWORD: ${DB_PASSWORD}
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../infrastructure/database/init-scripts:/docker-entrypoint-initdb.d
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${DB_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # Core Services (Always Running)
+  backend-api:
+    build:
+      context: ../../services/backend-api-service
+      dockerfile: Dockerfile
+      target: runner
+    container_name: fintech_backend_api
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: ${NODE_ENV:-production}
+      PORT: 3000
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT}
+      MARKET_DATA_SERVICE_URL: http://market-data:8001
+      AI_SERVICE_URL: http://ai-engine:8002
+      RISK_ENGINE_URL: http://risk-engine:8003
+      PORTFOLIO_SERVICE_URL: http://portfolio-simulation:8004
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+      market-data:
+        condition: service_started
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 512M
+        reservations:
+          cpus: '0.5'
+          memory: 256M
+
+  market-data:
+    build:
+      context: ../../services/market-data-ingestion-service
+      dockerfile: Dockerfile
+      target: runner
+    container_name: fintech_market_data
+    restart: unless-stopped
+    ports:
+      - "8001:8001"
+    environment:
+      PYTHONPATH: /app
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      DATA_INGESTION_INTERVAL: ${DATA_INGESTION_INTERVAL:-300}
+    depends_on:
+      redis:
+        condition: service_healthy
+      database:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '0.5'
+          memory: 256M
+        reservations:
+          cpus: '0.25'
+          memory: 128M
+
+  # Engine Services (On-Demand)
+  ai-engine:
+    build:
+      context: ../../services/ai-microservice-engine
+      dockerfile: Dockerfile
+      target: runner
+    container_name: fintech_ai_engine
+    restart: unless-stopped
+    ports:
+      - "8002:8002"
+    environment:
+      PYTHONPATH: /app
+      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      AI_MODEL: ${AI_MODEL:-gpt-4}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'
+          memory: 1G
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+
+  risk-engine:
+    build:
+      context: ../../services/python-risk-engine
+      dockerfile: Dockerfile
+      target: runner
+    container_name: fintech_risk_engine
+    restart: unless-stopped
+    ports:
+      - "8003:8003"
+    environment:
+      PYTHONPATH: /app
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      RISK_CALCULATION_WORKERS: ${RISK_CALCULATION_WORKERS:-4}
+    depends_on:
+      redis:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '2.0'
+          memory: 2G
+        reservations:
+          cpus: '1.0'
+          memory: 1G
+
+  # Application Services
+  portfolio-simulation:
+    build:
+      context: ../../services/portfolio-simulation-service
+      dockerfile: Dockerfile
+      target: runner
+    container_name: fintech_portfolio_simulation
+    restart: unless-stopped
+    ports:
+      - "8004:8004"
+    environment:
+      PYTHONPATH: /app
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      RISK_ENGINE_URL: http://risk-engine:8003
+      MARKET_DATA_URL: http://market-data:8001
+      SIMULATION_WORKERS: ${SIMULATION_WORKERS:-2}
+    depends_on:
+      redis:
+        condition: service_healthy
+      risk-engine:
+        condition: service_healthy
+      market-data:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    deploy:
+      resources:
+        limits:
+          cpus: '1.5'
+          memory: 2G
+        reservations:
+          cpus: '0.75'
+          memory: 1G
+
+networks:
+  default:
+    name: fintech_network
+    driver: bridge
+
+volumes:
+  redis_data:
+  postgres_data:
+  market_data_cache:
+  ai_models:
+  risk_models:
+  portfolio_data:

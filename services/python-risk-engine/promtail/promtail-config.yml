@@ -1,0 +1,196 @@
+server:
+  http_listen_port: 9080
+  grpc_listen_port: 0
+
+positions:
+  filename: /tmp/positions.yaml
+
+clients:
+  - url: http://loki:3100/loki/api/v1/push
+
+scrape_configs:
+  - job_name: system
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: varlogs
+          __path__: /var/log/*log
+
+  - job_name: containers
+    pipeline_stages:
+      - json:
+          expressions:
+            stream: stream
+            container: container_name
+            log: log
+      - labels:
+          stream:
+          container:
+      - output:
+          source: log
+
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+        filters:
+          - name: label
+            values: ["logging=promtail"]
+
+  - job_name: python-engine
+    pipeline_stages:
+      - json:
+          output: log
+          source: log
+      - labels:
+          level:
+          service:
+          environment:
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+    static_configs:
+      - targets:
+          - localhost
+        labels:
+          job: python-engine
+          __path__: /var/log/python-engine/*.log
+          environment: production
+
+  - job_name: docker
+    docker_sd_configs:
+      - host: unix:///var/run/docker.sock
+        refresh_interval: 5s
+    relabel_configs:
+      - source_labels: ['__meta_docker_container_name']
+        regex: '/(.*)'
+        target_label: 'container'
+      - source_labels: ['__meta_docker_container_log_file']
+        target_label: 'log_file'
+      - source_labels: ['__meta_docker_container_name']
+        regex: 'python-engine-.*'
+        action: keep
+    pipeline_stages:
+      - json:
+          output: log
+          source: log
+      - labels:
+          level:
+          service:
+          environment:
+      - timestamp:
+          source: time
+          format: RFC3339Nano
+
+  - job_name: journal
+    journal:
+      max_age: 12h
+      labels:
+        job: systemd-journal
+    relabel_configs:
+      - source_labels: ['__journal__container_name']
+        target_label: 'container'
+      - source_labels: ['__journal__hostname']
+        target_label: 'host'
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'unit'
+      - source_labels: ['__journal__priority']
+        target_label: 'priority'
+      - source_labels: ['__journal__unit']
+        target_label: 'systemd_unit'
+      - source_labels: ['__journal__boot_id']
+        target_label: 'boot_id'
+      - source_labels: ['__journal__transport']
+        target_label: 'transport'
+      - source_labels: ['__journal__comm']
+        target_label: 'command'
+      - source_labels: ['__journal__exe']
+        target_label: 'executable'
+      - source_labels: ['__journal__cmdline']
+        target_label: 'cmdline'
+      - source_labels: ['__journal__pid']
+        target_label: 'pid'
+      - source_labels: ['__journal__uid']
+        target_label: 'uid'
+      - source_labels: ['__journal__gid']
+        target_label: 'gid'
+      - source_labels: ['__journal__systemd_cgroup']
+        target_label: 'systemd_cgroup'
+      - source_labels: ['__journal__systemd_slice']
+        target_label: 'systemd_slice'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_session']
+        target_label: 'systemd_session'
+      - source_labels: ['__journal__systemd_owner_uid']
+        target_label: 'systemd_owner_uid'
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'systemd_unit'
+      - source_labels: ['__journal__systemd_invocation_id']
+        target_label: 'systemd_invocation_id'
+      - source_labels: ['__journal__systemd_user_unit']
+        target_label: 'systemd_user_unit'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_user_session']
+        target_label: 'systemd_user_session'
+      - source_labels: ['__journal__systemd_cgroup']
+        target_label: 'systemd_cgroup'
+      - source_labels: ['__journal__systemd_slice']
+        target_label: 'systemd_slice'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_session']
+        target_label: 'systemd_session'
+      - source_labels: ['__journal__systemd_owner_uid']
+        target_label: 'systemd_owner_uid'
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'systemd_unit'
+      - source_labels: ['__journal__systemd_invocation_id']
+        target_label: 'systemd_invocation_id'
+      - source_labels: ['__journal__systemd_user_unit']
+        target_label: 'systemd_user_unit'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_user_session']
+        target_label: 'systemd_user_session'
+      - source_labels: ['__journal__systemd_cgroup']
+        target_label: 'systemd_cgroup'
+      - source_labels: ['__journal__systemd_slice']
+        target_label: 'systemd_slice'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_session']
+        target_label: 'systemd_session'
+      - source_labels: ['__journal__systemd_owner_uid']
+        target_label: 'systemd_owner_uid'
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'systemd_unit'
+      - source_labels: ['__journal__systemd_invocation_id']
+        target_label: 'systemd_invocation_id'
+      - source_labels: ['__journal__systemd_user_unit']
+        target_label: 'systemd_user_unit'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_user_session']
+        target_label: 'systemd_user_session'
+      - source_labels: ['__journal__systemd_cgroup']
+        target_label: 'systemd_cgroup'
+      - source_labels: ['__journal__systemd_slice']
+        target_label: 'systemd_slice'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_session']
+        target_label: 'systemd_session'
+      - source_labels: ['__journal__systemd_owner_uid']
+        target_label: 'systemd_owner_uid'
+      - source_labels: ['__journal__systemd_unit']
+        target_label: 'systemd_unit'
+      - source_labels: ['__journal__systemd_invocation_id']
+        target_label: 'systemd_invocation_id'
+      - source_labels: ['__journal__systemd_user_unit']
+        target_label: 'systemd_user_unit'
+      - source_labels: ['__journal__systemd_user_slice']
+        target_label: 'systemd_user_slice'
+      - source_labels: ['__journal__systemd_user_session']
+        target_label: 'systemd_user_session'

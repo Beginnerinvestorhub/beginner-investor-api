@@ -95,5 +95,4 @@ services:
   region: virginia
   dockerContext: .
   dockerfilePath: ./tools/services/backend-api/Dockerfile
-  autoDeployTrigger: commit
-version: "1"
+  autoDeployTrigger: commitversion: "1"

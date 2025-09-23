@@ -1,0 +1,60 @@
+version: '3.8'
+
+# Development overrides for local development
+services:
+  backend-api:
+    build:
+      target: dev
+    environment:
+      NODE_ENV: development
+    volumes:
+      - ./backend-api-service:/app
+      - /app/node_modules
+    command: ["npm", "run", "dev"]
+
+  market-data:
+    environment:
+      DATA_INGESTION_INTERVAL: 60  # More frequent updates for dev
+      LOG_LEVEL: debug
+    volumes:
+      - ./market-data-ingestion-service:/app
+
+  ai-engine:
+    environment:
+      LOG_LEVEL: debug
+      AI_MODEL: gpt-3.5-turbo  # Cheaper model for development
+    volumes:
+      - ./ai-microservice-engine:/app
+
+  risk-engine:
+    environment:
+      LOG_LEVEL: debug
+      RISK_CALCULATION_WORKERS: 2  # Fewer workers for dev
+    volumes:
+      - ./python-risk-engine:/app
+
+  portfolio-simulation:
+    environment:
+      LOG_LEVEL: debug
+      SIMULATION_WORKERS: 1  # Single worker for dev
+    volumes:
+      - ./portfolio-simulation-service:/app
+
+  # Development tools
+  adminer:
+    image: adminer:latest
+    container_name: fintech_adminer
+    restart: unless-stopped
+    ports:
+      - "8080:8080"
+    environment:
+      ADMINER_DEFAULT_SERVER: database
+
+  redis-commander:
+    image: rediscommander/redis-commander:latest
+    container_name: fintech_redis_commander
+    restart: unless-stopped
+    ports:
+      - "8081:8081"
+    environment:
+      REDIS_HOSTS: local:redis:6379

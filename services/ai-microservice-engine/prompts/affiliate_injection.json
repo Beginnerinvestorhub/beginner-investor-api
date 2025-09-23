@@ -1,0 +1,7 @@
+{
+  "affiliate_injection_prompt": "Given the following content and context, naturally integrate the provided affiliate link in a way that adds value to the reader. The link should feel like a helpful suggestion rather than an advertisement.\n\nContent: {content}\n\nAffiliate Link: {affiliate_link}\n\nContext: {context}\n\nRewritten content with affiliate link:",
+  
+  "affiliate_suggestion_prompt": "Based on the following content, suggest relevant affiliate products or services that would be genuinely helpful to the reader. Include a brief explanation of why each recommendation is valuable.\n\nContent: {content}\n\nContext: {context}\n\nAffiliate suggestions:",
+  
+  "seo_optimized_prompt": "Optimize the following content for search engines while naturally incorporating the provided affiliate link. Ensure the content remains valuable and engaging for readers.\n\nContent: {content}\n\nAffiliate Link: {affiliate_link}\n\nTarget Keywords: {keywords}\n\nOptimized content:"
+}

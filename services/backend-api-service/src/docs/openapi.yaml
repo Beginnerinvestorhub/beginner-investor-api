@@ -1,0 +1,341 @@
+openapi: 3.0.3
+info:
+  title: Beginner Investor Hub API
+  description: |
+    # Beginner Investor Hub API
+    
+    This is the official API documentation for the Beginner Investor Hub application.
+    The API follows RESTful principles and uses JSON for request/response payloads.
+    
+    ## Authentication
+    
+    Most endpoints require authentication. Include your JWT token in the `Authorization` header:
+    
+    ```
+    Authorization: Bearer <your-jwt-token>
+    ```
+    
+    ## Rate Limiting
+    
+    - 100 requests per 15 minutes per IP address
+    - 1000 requests per day per authenticated user
+    
+    ## Error Handling
+    
+    Errors follow the standard HTTP status codes and include a JSON response with error details.
+    
+    ```json
+    {
+      "error": {
+        "code": "validation_error",
+        "message": "Invalid input data",
+        "details": {
+          "email": ["Must be a valid email address"]
+        }
+      }
+    }
+    ```
+    
+  version: 1.0.0
+  contact:
+    name: API Support
+    email: support@beginnerinvestorhub.com
+  license:
+    name: Proprietary
+    url: https://beginnerinvestorhub.com/terms
+
+servers:
+  - url: https://api.beginnerinvestorhub.com/v1
+    description: Production API
+  - url: https://staging-api.beginnerinvestorhub.com/v1
+    description: Staging API
+  - url: http://localhost:3000/v1
+    description: Local development
+
+tags:
+  - name: Authentication
+    description: User authentication and authorization
+  - name: Users
+    description: User profiles and account management
+  - name: Investments
+    description: Investment portfolio management
+  - name: Gamification
+    description: Points, badges, and leaderboards
+  - name: AI
+    description: AI-powered investment recommendations
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+      
+  schemas:
+    Error:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: "validation_error"
+            message:
+              type: string
+              example: "Invalid input data"
+            details:
+              type: object
+              additionalProperties:
+                type: array
+                items:
+                  type: string
+                example: ["Must be a valid email address"]
+    
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+          example: "123e4567-e89b-12d3-a456-426614174000"
+        email:
+          type: string
+          format: email
+          example: "user@example.com"
+        name:
+          type: string
+          example: "John Doe"
+        avatarUrl:
+          type: string
+          format: uri
+          example: "https://example.com/avatars/john.jpg"
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    
+    Investment:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        userId:
+          type: string
+          format: uuid
+        symbol:
+          type: string
+          example: "AAPL"
+        shares:
+          type: number
+          format: float
+          example: 10.5
+        averagePrice:
+          type: number
+          format: float
+          example: 150.25
+        totalValue:
+          type: number
+          format: float
+          example: 1577.63
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+
+paths:
+  # Authentication
+  /auth/register:
+    post:
+      tags: [Authentication]
+      summary: Register a new user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password, name]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+                  minLength: 8
+                name:
+                  type: string
+                  minLength: 2
+      responses:
+        201:
+          description: User registered successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        400:
+          description: Invalid input
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+  
+  /auth/login:
+    post:
+      tags: [Authentication]
+      summary: Authenticate a user
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [email, password]
+              properties:
+                email:
+                  type: string
+                  format: email
+                password:
+                  type: string
+                  format: password
+      responses:
+        200:
+          description: Authentication successful
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  token:
+                    type: string
+                    description: JWT access token
+                  user:
+                    $ref: '#/components/schemas/User'
+        401:
+          description: Invalid credentials
+  
+  # Users
+  /users/me:
+    get:
+      tags: [Users]
+      summary: Get current user profile
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: User profile
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+  
+  # Investments
+  /investments:
+    get:
+      tags: [Investments]
+      summary: Get user's investments
+      security:
+        - BearerAuth: []
+      parameters:
+        - in: query
+          name: page
+          schema:
+            type: integer
+            minimum: 1
+            default: 1
+          description: Page number
+        - in: query
+          name: limit
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 20
+          description: Items per page
+      responses:
+        200:
+          description: List of investments
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Investment'
+                  pagination:
+                    type: object
+                    properties:
+                      page:
+                        type: integer
+                      limit:
+                        type: integer
+                      total:
+                        type: integer
+  
+  # Gamification
+  /gamification/leaderboard:
+    get:
+      tags: [Gamification]
+      summary: Get leaderboard
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: Leaderboard data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  leaderboard:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        userId:
+                          type: string
+                        name:
+                          type: string
+                        score:
+                          type: number
+                        rank:
+                          type: integer
+  
+  # AI Recommendations
+  /ai/recommendations:
+    get:
+      tags: [AI]
+      summary: Get AI investment recommendations
+      security:
+        - BearerAuth: []
+      responses:
+        200:
+          description: AI recommendations
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  recommendations:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        symbol:
+                          type: string
+                        name:
+                          type: string
+                        confidence:
+                          type: number
+                        reason:
+                          type: string
+
+# Add more endpoints as needed...

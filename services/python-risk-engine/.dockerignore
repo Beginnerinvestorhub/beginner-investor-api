@@ -1,0 +1,100 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.coverage
+htmlcov/
+.tox/
+.nox/
+.pytest_cache/
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Local development
+.env
+.env.*
+!.env.example
+
+# Logs
+logs/
+*.log
+
+# OS specific
+.DS_Store
+Thumbs.db
+
+# Project specific
+data/
+notebooks/
+*.ipynb
+
+# Documentation
+docs/_build/
+
+# Docker
+Dockerfile
+.dockerignore
+
+# Local development
+local_setup/
+
+# Git
+.git/
+.gitignore
+
+# Cache
+.cache/
+
+# Local development
+*.local
+
+# VS Code
+.vscode/
+
+# IDE specific files
+.idea/
+
+# Project specific exclusions (add more as needed)
+*.csv
+*.xlsx
+*.xls
+*.db
+*.sqlite3
