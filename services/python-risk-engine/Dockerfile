@@ -1,7 +1,6 @@
 # Multi-stage build for Python Risk Engine
 FROM python:3.11-slim AS base
 
-# Set environment variables
 ENV PYTHONUNBUFFERED=1 \
     PYTHONDONTWRITEBYTECODE=1 \
     PIP_NO_CACHE_DIR=1 \
@@ -11,10 +10,8 @@ ENV PYTHONUNBUFFERED=1 \
 FROM base AS builder
 WORKDIR /app
 
-# Install build dependencies for numerical and financial computing
 RUN apt-get update && apt-get install -y \
     build-essential \
-    curl \
     gcc \
     g++ \
     gfortran \
@@ -25,7 +22,6 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     && rm -rf /var/lib/apt/lists/*
 
-# Copy requirements and install Python dependencies
 COPY requirements.txt .
 RUN pip install --user --no-warn-script-location -r requirements.txt
 
@@ -33,7 +29,6 @@ RUN pip install --user --no-warn-script-location -r requirements.txt
 FROM base AS runner
 WORKDIR /app
 
-# Install runtime dependencies for numerical computing
 RUN apt-get update && apt-get install -y \
     curl \
     libopenblas0 \
@@ -42,27 +37,21 @@ RUN apt-get update && apt-get install -y \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Create non-root user
 RUN useradd --create-home --shell /bin/bash app
 
-# Copy installed packages from builder
-COPY --from=builder /root/.local /home/app/.local
+# Copy installed packages with correct ownership
+COPY --from=builder --chown=app:app /root/.local /home/app/.local
 
-# Copy application code
+# Copy application code with correct ownership
 COPY --chown=app:app . .
 
-# Ensure PATH includes user packages
 ENV PATH="/home/app/.local/bin:$PATH"
 
-# Switch to non-root user
 USER app
 
-# Expose port
 EXPOSE 8005
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:8005/health || exit 1
 
-# Start the application
 CMD ["python", "app.py"]
