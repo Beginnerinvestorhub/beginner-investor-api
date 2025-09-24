@@ -1,5 +1,3 @@
-# Exported from Render on 2025-09-23T23:59:39Z
-version: "1"
 services:
 - type: web
   name: python-risk-engine
@@ -17,7 +15,7 @@ services:
     sync: false
   region: virginia
   dockerContext: .
-  dockerfilePath: services/python-risk-engine/Dockerfile
+  dockerfilePath: ./services/python-risk-engine/Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: Backend API
@@ -63,7 +61,7 @@ services:
     sync: false
   region: virginia
   dockerContext: .
-  
+  dockerfilePath: ./services/market-data-ingestion-service/Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: ai-microservice-engine
@@ -85,7 +83,41 @@ services:
     sync: false
   region: virginia
   dockerContext: .
-  
+  dockerfilePath: ./services/ai-microservice-engine/Dockerfile
+  autoDeployTrigger: commit
+- type: web
+  name: behavioral-nudge-engine
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: BEHAVIORAL_NUDGE_ENABLED
+    sync: false
+  - key: REDIS_URL
+    sync: false
+  - key: PORT
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./services/behavioral-nudge-engine/Dockerfile
+  autoDeployTrigger: commit
+- type: web
+  name: portfolio-simulation-service
+  runtime: docker
+  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+  plan: free
+  envVars:
+  - key: REDIS_URL
+    sync: false
+  - key: PORT
+    sync: false
+  - key: NODE_ENV
+    sync: false
+  region: virginia
+  dockerContext: .
+  dockerfilePath: ./services/portfolio-simulation-service/Dockerfile
   autoDeployTrigger: commit
 databases:
 - name: beginner-investor-db
