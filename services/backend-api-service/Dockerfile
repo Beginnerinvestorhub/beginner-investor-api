@@ -39,15 +39,14 @@ COPY --from=builder /app/dist ./dist
 COPY --from=deps /app/node_modules ./node_modules
 COPY package*.json ./
 
-# Set correct permissions
+# (Optional) Ensure files are owned by nextjs
+# RUN chown -R nextjs:nodejs /app
+
 USER nextjs
 
-# Expose port
 EXPOSE 3000
 
-# Health check
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
   CMD curl -f http://localhost:3000/health || exit 1
 
-# Start the application
 CMD ["node", "dist/index.js"]
