@@ -7,8 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-# Build stage
-FROM base AS builder
+
+#FROM base AS builder
 WORKDIR /app
 
 # Install system dependencies for building
@@ -44,7 +44,7 @@ COPY --chown=app:app . .
 ENV PATH="/home/app/.local/bin:$PATH"
 
 # Switch to non-root user
-USER app
+USER appuser
 
 # Expose port
 EXPOSE 8001
