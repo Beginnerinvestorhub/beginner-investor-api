@@ -97,24 +97,3 @@ databases:
   - source: 0.0.0.0/0
     description: everywhere
   postgresMajorVersion: "17"
-
-- type: web
-  name: behavioral-nudge-engine
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: NUDGE_ENGINE_ENABLED
-    sync: false
-  - key: DATABASE_URL
-    sync: false
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: .
-  dockerfilePath: ./services/behavioral-nudge-engine/Dockerfile
-  autoDeployTrigger: commit
