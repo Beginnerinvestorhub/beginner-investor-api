@@ -7,8 +7,8 @@ ENV PYTHONUNBUFFERED=1 \
     PIP_NO_CACHE_DIR=1 \
     PIP_DISABLE_PIP_VERSION_CHECK=1
 
-
-#FROM base AS builder
+# --- Builder stage ---
+FROM base AS builder
 WORKDIR /app
 
 # Install system dependencies for building
@@ -21,7 +21,7 @@ RUN apt-get update && apt-get install -y \
 COPY requirements.txt .
 RUN pip install --user --no-warn-script-location -r requirements.txt
 
-# Production stage
+# --- Production stage ---
 FROM base AS runner
 WORKDIR /app
 
@@ -34,7 +34,7 @@ RUN apt-get update && apt-get install -y \
 # Create non-root user
 RUN useradd --create-home --shell /bin/bash app
 
-# Copy installed packages from builder
+# Copy installed Python packages from builder
 COPY --from=builder /root/.local /home/app/.local
 
 # Copy application code
@@ -44,7 +44,7 @@ COPY --chown=app:app . .
 ENV PATH="/home/app/.local/bin:$PATH"
 
 # Switch to non-root user
-USER appuser
+USER app
 
 # Expose port
 EXPOSE 8001
