@@ -23,24 +23,24 @@ RUN pip install --user --no-warn-script-location -r requirements.txt
 
 # --- Production stage ---
 FROM base AS runner
+
 RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
     && rm -rf /var/lib/apt/lists/* \
     && apt-get clean
 
-# Create non-root user and home directory
 RUN useradd --create-home --shell /bin/bash app
 
-# Copy dependencies from builder
+# Copy dependencies from builder with correct ownership
 COPY --from=builder --chown=app:app /root/.local /home/app/.local
 
-# Set up app directory
+# Set up app directory for code
 WORKDIR /home/app/app
 
-# Copy application code
+# Copy application code with correct ownership
 COPY --chown=app:app . .
 
-# Set environment
+# Set environment for user packages and app module
 ENV PATH="/home/app/.local/bin:$PATH" \
     PYTHONPATH="/home/app/app"
 
