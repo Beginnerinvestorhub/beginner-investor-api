@@ -14,8 +14,8 @@ services:
   - key: FLASK_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: ./services/python-risk-engine/
+  dockerContext: ./services/python-risk-engine/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: Backend API
@@ -36,8 +36,8 @@ services:
   - key: NODE_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: ./services/backend-api-service/
+  dockerContext: ./services/backend-api-service/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: market-data-ingestion-service
@@ -60,8 +60,8 @@ services:
   - key: NODE_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: ./services/market-data-ingestion-service/
+  dockerContext: ./services/market-data-ingestion-service/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: ai-microservice-engine
@@ -82,8 +82,8 @@ services:
   - key: NODE_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: ./services/ai-microservice-engine/
+  dockerContext: ./services/ai-microservice-engine/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: behavioral-nudge-engine
@@ -100,8 +100,8 @@ services:
   - key: NODE_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: ./services/behavioral-nudge-engine/
+  dockerContext: ./services/behavioral-nudge-engine/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 - type: web
   name: portfolio-simulation-service
@@ -116,8 +116,8 @@ services:
   - key: NODE_ENV
     sync: false
   region: virginia
-  dockerContext: Dockerfile
-  dockerfilePath: /services/portfolio-simulation-service/
+  dockerContext: ./services/portfolio-simulation-service/
+  dockerfilePath: Dockerfile
   autoDeployTrigger: commit
 databases:
 - name: beginner-investor-db
