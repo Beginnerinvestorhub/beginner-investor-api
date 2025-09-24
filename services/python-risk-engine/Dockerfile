@@ -1,86 +1,68 @@
+# Multi-stage build for Python Risk Engine
+FROM python:3.11-slim AS base
 
-FROM python:3.10-slim AS builder
+# Set environment variables
+ENV PYTHONUNBUFFERED=1 \
+    PYTHONDONTWRITEBYTECODE=1 \
+    PIP_NO_CACHE_DIR=1 \
+    PIP_DISABLE_PIP_VERSION_CHECK=1
 
-Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 
-
-PYTHONUNBUFFERED=1 
-
-PYTHONPATH=/app 
-
-PIP_NO_CACHE_DIR=1 
-
-PIP_DISABLE_PIP_VERSION_CHECK=1 
-
-PIP_DEFAULT_TIMEOUT=100
-
-Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends 
-
-build-essential 
-
-&& rm -rf /var/lib/apt/lists/*
-
-Set work directory
+# Build stage
+FROM base AS builder
 WORKDIR /app
 
-Copy only requirements first to leverage Docker cache
-Updated path to correctly locate requirements.txt
-COPY services/python-risk-engine/requirements.txt .
+# Install build dependencies for numerical and financial computing
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    curl \
+    gcc \
+    g++ \
+    gfortran \
+    libblas-dev \
+    liblapack-dev \
+    libopenblas-dev \
+    libhdf5-dev \
+    pkg-config \
+    && rm -rf /var/lib/apt/lists/*
 
-Install Python dependencies in a virtual environment
-RUN python -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
+# Copy requirements and install Python dependencies
+COPY requirements.txt .
+RUN pip install --user --no-warn-script-location -r requirements.txt
 
-Install dependencies in a single RUN command to reduce layers
-RUN pip install --upgrade pip && 
+# Production stage
+FROM base AS runner
+WORKDIR /app
 
-pip install --no-cache-dir -r requirements.txt
+# Install runtime dependencies for numerical computing
+RUN apt-get update && apt-get install -y \
+    curl \
+    libopenblas0 \
+    libgomp1 \
+    libhdf5-103 \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
 
-FROM python:3.10-slim
+# Create non-root user
+RUN useradd --create-home --shell /bin/bash app
 
-Set environment variables
-ENV PYTHONDONTWRITEBYTECODE=1 
+# Copy installed packages from builder
+COPY --from=builder /root/.local /home/app/.local
 
-PYTHONUNBUFFERED=1 
+# Copy application code
+COPY --chown=app:app . .
 
-PYTHONPATH=/app 
+# Ensure PATH includes user packages
+ENV PATH="/home/app/.local/bin:$PATH"
 
-PATH="/opt/venv/bin:$PATH"
+# Switch to non-root user
+USER app
 
-Install runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends 
+# Expose port
+EXPOSE 8005
 
-libgomp1 
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:8005/health || exit 1
 
-&& rm -rf /var/lib/apt/lists/*
-
-Create non-root user
-RUN groupadd -r appgroup && 
-
-useradd -r -g appgroup -s /bin/false appuser && 
-
-mkdir -p /app && 
-
-chown -R appuser:appgroup /app
-
-Copy virtual environment from builder
-COPY --from=builder /opt/venv /opt/venv
-
-Copy application code
-Updated path to correctly copy the application code
-COPY --chown=appuser:appgroup services/python-risk-engine/. /app
-
-Switch to non-root user
-USER appuser
-
-Health check
-HEALTHCHECK --interval=30s --timeout=30s --start-period=5s --retries=3 
-
-CMD curl -f http://localhost:8000/health || exit 1
-
-Expose the port the app runs on
-EXPOSE 8000
-
-Command to run the application
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000", "--proxy-headers"]
+# Start the application
+CMD ["python", "app.py"]
