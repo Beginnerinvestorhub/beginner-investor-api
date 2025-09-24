@@ -1,11 +1,9 @@
 # Multi-stage build for Node.js API Gateway
 FROM node:20-alpine AS base
 
-# Install dependencies only when needed
+# Dependencies stage (production only)
 FROM base AS deps
 WORKDIR /app
-
-# Copy package files
 COPY package*.json ./
 RUN npm ci --only=production && npm cache clean --force
 
@@ -29,6 +27,9 @@ RUN npm run build
 FROM node:20-alpine AS runner
 WORKDIR /app
 
+# Install curl for healthcheck
+RUN apk add --no-cache curl
+
 # Create non-root user
 RUN addgroup --system --gid 1001 nodejs
 RUN adduser --system --uid 1001 nextjs
@@ -36,7 +37,7 @@ RUN adduser --system --uid 1001 nextjs
 # Copy built application
 COPY --from=builder /app/dist ./dist
 COPY --from=deps /app/node_modules ./node_modules
-COPY package.json ./
+COPY package*.json ./
 
 # Set correct permissions
 USER nextjs
