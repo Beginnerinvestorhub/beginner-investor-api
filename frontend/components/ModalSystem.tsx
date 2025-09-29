@@ -1,102 +1,14 @@
-/**
- * Modal System Component
- * Global modal display and management system
- */
-
-import React, { Fragment } from 'react';
-import { Dialog, Transition } from '@headlessui/react';
-import { XMarkIcon } from '@heroicons/react/24/outline';
-import { useModals, useUI } from '../store';
-import { Modal } from '../store/types';
-
-// Modal size configurations
-const modalSizes = {
-  sm: 'max-w-md',
-  md: 'max-w-lg',
-  lg: 'max-w-2xl',
-  xl: 'max-w-4xl',
-};
-
-// Confirm Modal Component
-const ConfirmModal: React.FC<{
-  title: string;
-  message: string;
-  onConfirm: () => void;
-  onCancel?: () => void;
-  confirmText?: string;
-  cancelText?: string;
-  confirmVariant?: 'primary' | 'danger';
-}> = ({ 
-  title, 
-  message, 
-  onConfirm, 
-  onCancel, 
-  confirmText = 'Confirm',
-  cancelText = 'Cancel',
-  confirmVariant = 'primary'
-}) => {
-  const { closeModal } = useUI();
-
-  const handleConfirm = () => {
-    onConfirm();
-    closeModal('');
-  };
-
-  const handleCancel = () => {
-    onCancel?.();
-    closeModal('');
-  };
-
-  const confirmButtonClass = confirmVariant === 'danger'
-    ? 'bg-red-600 hover:bg-red-700 focus:ring-red-500'
-    : 'bg-indigo-600 hover:bg-indigo-700 focus:ring-indigo-500';
-
-  return (
-    <div className="bg-white dark:bg-gray-800 px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
-      <div className="sm:flex sm:items-start">
-        <div className="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left w-full">
-          <Dialog.Title as="h3" className="text-lg leading-6 font-medium text-gray-900 dark:text-white">
-            {title}
-          </Dialog.Title>
-          <div className="mt-2">
-            <p className="text-sm text-gray-500 dark:text-gray-400">
-              {message}
-            </p>
-          </div>
-        </div>
-      </div>
-      <div className="mt-5 sm:mt-4 sm:flex sm:flex-row-reverse">
-        <button
-          type="button"
-          onClick={handleConfirm}
-          className={`w-full inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-2 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-offset-2 sm:ml-3 sm:w-auto sm:text-sm ${confirmButtonClass}`}
-        >
-          {confirmText}
-        </button>
-        <button
-          type="button"
-          onClick={handleCancel}
-          className="mt-3 w-full inline-flex justify-center rounded-md border border-gray-300 dark:border-gray-600 shadow-sm px-4 py-2 bg-white dark:bg-gray-700 text-base font-medium text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 sm:mt-0 sm:w-auto sm:text-sm"
-        >
-          {cancelText}
-        </button>
-      </div>
-    </div>
-  );
-};
-
-// Modal components registry
-const modalComponents: Record<string, React.ComponentType<any>> = {
-  ConfirmModal,
-  // Add more modal components here as needed
-};
-
 // Individual Modal Component
-const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isActive }) => {
+// Renamed isActive to isTopmost for clarity
+const ModalItem: React.FC<{ modal: Modal; isTopmost: boolean }> = ({ modal, isTopmost }) => { 
   const { closeModal } = useUI();
 
+  // Use a stable reference to determine if the modal can be closed via backdrop/esc key
+  const isClosable = modal.closable !== false; 
+
+  // onClose is only called if the modal is dismissible AND it's the topmost one
   const handleClose = () => {
-    if (modal.closable !== false) {
+    if (isTopmost && isClosable) {
       closeModal(modal.id);
     }
   };
@@ -107,10 +19,26 @@ const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isAct
     console.error(`Modal component "${modal.component}" not found`);
     return null;
   }
+  
+  // NOTE: Headless UI's Dialog requires 'open' or 'show'. We'll use the presence
+  // in the `modals` array to signal 'open', and rely on z-index for stacking.
+  // The Transition component will manage the animation on mount/unmount.
 
   return (
-    <Transition appear show={isActive} as={Fragment}>
-      <Dialog as="div" className="relative z-50" onClose={handleClose}>
+    // We use Transition.Child to apply the backdrop to all open modals, 
+    // but only the topmost one should be fully visible/interactive.
+    // The Dialog element itself will be the wrapper for the entire screen overlay.
+    <Transition appear show={true} as={Fragment}> 
+      <Dialog 
+        // We set 'open' to true for all rendered modals. Their layering is handled by z-index.
+        open={true} 
+        as="div" 
+        // Use a dynamic z-index for stacking. Higher index for later modals in the array.
+        className={`relative z-[${50 + modal.zIndexOffset || 0}]`} 
+        // Only allow closing on the topmost modal
+        onClose={isTopmost ? handleClose : () => {}} 
+      >
+        {/* Backdrop: Only apply a visible backdrop for the topmost modal */}
         <Transition.Child
           as={Fragment}
           enter="ease-out duration-300"
@@ -120,7 +48,8 @@ const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isAct
           leaveFrom="opacity-100"
           leaveTo="opacity-0"
         >
-          <div className="fixed inset-0 bg-black bg-opacity-25 dark:bg-opacity-50" />
+          {/* We make the backdrop darker for the top modal for focus */}
+          <div className={`fixed inset-0 bg-black ${isTopmost ? 'bg-opacity-25 dark:bg-opacity-50' : 'bg-opacity-0'}`} />
         </Transition.Child>
 
         <div className="fixed inset-0 overflow-y-auto">
@@ -134,8 +63,12 @@ const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isAct
               leaveFrom="opacity-100 scale-100"
               leaveTo="opacity-0 scale-95"
             >
-              <Dialog.Panel className={`w-full ${modalSizes[modal.size || 'md']} transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all`}>
-                {modal.closable !== false && (
+              <Dialog.Panel 
+                // Only the topmost modal should accept pointer events
+                className={`w-full ${modalSizes[modal.size || 'md']} transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all ${isTopmost ? 'pointer-events-auto' : 'pointer-events-none'}`}
+              >
+                {/* Close Button: Only show/enable for the topmost, closable modal */}
+                {isTopmost && isClosable && (
                   <div className="absolute right-0 top-0 pr-4 pt-4">
                     <button
                       type="button"
@@ -147,6 +80,7 @@ const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isAct
                     </button>
                   </div>
                 )}
+                {/* The Modal Component itself */}
                 <ModalComponent {...modal.props} />
               </Dialog.Panel>
             </Transition.Child>
@@ -157,16 +91,20 @@ const ModalItem: React.FC<{ modal: Modal; isActive: boolean }> = ({ modal, isAct
   );
 };
 
+
 export const ModalSystem: React.FC = () => {
   const modals = useModals();
+
+  // Determine the index of the topmost modal for layering/interaction control
+  const topIndex = modals.length - 1;
 
   return (
     <>
       {modals.map((modal, index) => (
         <ModalItem
           key={modal.id}
-          modal={modal}
-          isActive={index === modals.length - 1} // Only the top modal is active
+          modal={{ ...modal, zIndexOffset: index * 10 }} // Pass an offset for z-index stacking
+          isTopmost={index === topIndex} 
         />
       ))}
     </>
