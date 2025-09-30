@@ -1,23 +1,12 @@
 {
   "version": 2,
-  "builds": [
-    {
-      "src": "package.json",
-      "use": "@vercel/next",
-      "config": {
-        "distDir": ".next"
-      }
-    }
-  ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "/"
-    }
-  ],
+  "buildCommand": "cd frontend && npm run build",
+  "devCommand": "cd frontend && npm run dev",
+  "installCommand": "cd frontend && npm install",
+  "framework": "nextjs",
+  "outputDirectory": "frontend/.next",
   "env": {
     "NEXT_PUBLIC_API_URL": "https://beginner-investor-hub-api.onrender.com",
-    "NEXT_PUBLIC_FIREBASE_API_KEY": "@firebase-api-key",
     "NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN": "@firebase-auth-domain",
     "NEXT_PUBLIC_FIREBASE_PROJECT_ID": "@firebase-project-id",
     "NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET": "@firebase-storage-bucket",
@@ -31,7 +20,6 @@
     }
   },
   "regions": ["iad1"],
-  "public": true,
   "cleanUrls": true,
   "trailingSlash": false,
   "headers": [
