@@ -1,0 +1,123 @@
+# Beginner Investor Hub
+Beginner Investor Hub — Backend Services
+
+This repository contains the backend services for Beginner Investor Hub, including:
+
+backend-api-service — API gateway and user-facing endpoints.
+
+market-data-ingestion-service — Fetches and caches market data.
+
+ai-microservice-engine — AI-powered behavioral nudge engine.
+
+python-risk-engine — Risk calculation engine.
+
+portfolio-simulation-service — Simulates portfolios using market data and risk engine.
+
+Frontend is hosted on Vercel and communicates with these services via APIs.
+
+Table of Contents
+
+Project Structure
+
+Dependencies
+
+Environment Variables
+
+Docker Setup
+
+Local Development
+
+Production Deployment
+
+Service Architecture
+
+Security & Best Practices
+
+Healthchecks & Monitoring
+
+Project Structure
+.
+├── backend-api-service/
+├── market-data-ingestion-service/
+├── ai-microservice-engine/
+├── python-risk-engine/
+├── portfolio-simulation-service/
+├── prisma/
+├── scripts/
+├── services/          # Docker build contexts
+├── docker-compose.yml
+└── README.md
+
+
+backend-api-service: Node.js/TypeScript API, Express, Prisma.
+
+market-data-ingestion-service: Node.js service for external market APIs.
+
+ai-microservice-engine: Node.js service using OpenAI for behavioral nudges.
+
+python-risk-engine: Python service for risk metrics (NumPy, Pandas).
+
+portfolio-simulation-service: Node.js service integrating all engines for simulations.
+
+prisma/: Database schema and migrations.
+
+scripts/: Utilities such as warm-cache, seeding, docs generation.
+
+Dependencies
+
+Node.js >= 20
+
+npm >= 10
+
+Python >= 3.12 (for python-risk-engine)
+
+PostgreSQL >= 15 (managed via Render)
+
+Redis (external service for caching)
+
+Firebase Admin SDK for authentication
+## Project Structure
+
+```
+beginnerinvestorhub/
+├── .vscode/                 # VS Code workspace settings
+│   └── settings.json        # Editor configuration and theming
+│
+├── docs/                    # Project documentation
+│   └── PERFORMANCE-OPTIMIZATION.md
+│
+├── frontend/                # Next.js frontend application
+│   ├── components/          # React components
+│   ├── pages/               # Next.js pages
+│   ├── public/              # Static assets
+│   ├── styles/              # Global styles
+│   ├── next.config.js       # Next.js configuration
+│   └── package.json         # Frontend dependencies
+│
+├── monitoring/              # Monitoring and observability
+│   ├── alertmanager/        # Alert manager configuration
+│   ├── grafana/             # Grafana dashboards
+│   ├── prometheus/          # Prometheus configuration
+│   └── docker-compose.yml   # Monitoring stack
+│
+├── scripts/                 # Utility scripts
+│   ├── security-audit.js    # Security auditing
+│   ├── setup-cicd-env.sh    # CI/CD setup
+│   └── setup-monitoring.sh  # Monitoring setup
+│
+├── tools-restructured/      # Main application code
+│   ├── frontend/            # Shared frontend components
+│   ├── infrastructure/      # Infrastructure as Code
+│   └── services/            # Backend services
+│       ├── ai_microservice/  # AI/ML services
+│       └── backend-api/      # Main API service
+│
+├── .github/                 # GitHub configurations
+│   └── workflows/           # CI/CD workflows
+│
+├── .gitignore               # Git ignore rules
+├── DEPLOYMENT.md            # Deployment instructions
+├── dev-setup.ps1            # Development environment setup
+├── migrate.sh               # Database migration script
+└── package.json             # Root project dependencies
+```

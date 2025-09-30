@@ -1,0 +1,36 @@
+# Dependency folders (handled inside Docker)
+node_modules
+src/node_modules
+.pnpm
+.pnpm-store
+dist
+
+# Build output
+dist
+.next
+out
+
+# Docker and Git metadata
+Dockerfile
+.dockerignore
+.git
+.gitignore
+
+# Environment and secrets
+.env
+.env.*
+prisma/dev.db
+
+# Logs and coverage
+*.log
+coverage
+__tests__/
+.vitest
+.nyc_output
+
+# Editor and OS noise
+*.swp
+*.swo
+*.DS_Store
+*.idea
+.vscode

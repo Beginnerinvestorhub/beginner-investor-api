@@ -1,0 +1,92 @@
+{
+  "frontend": {
+    "platform": "vercel",
+    "framework": "nextjs",
+    "buildCommand": "npm run build",
+    "environment": {
+      "NEXT_PUBLIC_FIREBASE_CONFIG": {
+        "apiKey": "${FIREBASE_API_KEY}",
+        "authDomain": "${FIREBASE_AUTH_DOMAIN}",
+        "projectId": "${FIREBASE_PROJECT_ID}",
+        "appId": "${FIREBASE_APP_ID}"
+      },
+      "NEXT_PUBLIC_API_URL": "https://backend-api.onrender.com",
+      "NEXT_PUBLIC_AI_SERVICE_URL": "https://ai-engine.onrender.com",
+      "NEXT_PUBLIC_INVESTMENT_ENGINE_URL": "https://investment-engine.onrender.com"
+    }
+  },
+  "services": {
+    "backend-api": {
+      "platform": "render",
+      "type": "web",
+      "plan": "starter",
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 3
+      },
+      "environmentGroups": [
+        "firebase",
+        "redis",
+        "database"
+      ]
+    },
+    "investment-engine": {
+      "platform": "render",
+      "type": "web",
+      "plan": "starter",
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 2
+      },
+      "environmentGroups": [
+        "redis",
+        "database",
+        "market-data"
+      ]
+    },
+    "ai-engine": {
+      "platform": "render",
+      "type": "web",
+      "plan": "starter",
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 2
+      },
+      "environmentGroups": [
+        "redis",
+        "openai",
+        "behavioral"
+      ]
+    }
+  },
+  "infrastructure": {
+    "firebase": {
+      "features": [
+        "authentication",
+        "cloud-messaging",
+        "analytics"
+      ]
+    },
+    "redis": {
+      "provider": "redis.com",
+      "features": {
+        "rateLimit": {
+          "window": "15m",
+          "max": 100
+        },
+        "cache": {
+          "defaultTTL": 3600
+        },
+        "session": {
+          "maxAge": 86400
+        }
+      }
+    },
+    "database": {
+      "platform": "render",
+      "type": "postgresql",
+      "version": "15",
+      "plan": "starter"
+    }
+  }
+}

@@ -16,7 +16,7 @@ import { useNotifications, useUI } from '../store';
 import { Notification } from '../store/types';
 
 const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({ type }) => {
-  const iconClass = "h-6 w-6";
+  const iconClass = "h-5 w-5"; // Reduced from h-6 w-6
   
   switch (type) {
     case 'success':
@@ -81,16 +81,16 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
   };
 
   return (
-    <div className={`max-w-sm w-full border rounded-lg shadow-lg p-4 ${getNotificationStyles(notification.type)}`}>
-      <div className="flex">
-        <div className="flex-shrink-0">
+    <div className={`max-w-sm w-full border rounded-lg shadow-md p-3 ${getNotificationStyles(notification.type)}`}>
+      <div className="flex items-start">
+        <div className="flex-shrink-0 pt-0.5">
           <NotificationIcon type={notification.type} />
         </div>
-        <div className="ml-3 w-0 flex-1">
-          <p className={`text-sm font-medium ${getTitleStyles(notification.type)}`}>
+        <div className="ml-2.5 w-0 flex-1">
+          <p className={`text-sm font-semibold leading-5 ${getTitleStyles(notification.type)}`}>
             {notification.title}
           </p>
-          <p className={`mt-1 text-sm ${getMessageStyles(notification.type)}`}>
+          <p className={`mt-0.5 text-sm leading-5 ${getMessageStyles(notification.type)}`}>
             {notification.message}
           </p>
           {notification.actions && notification.actions.length > 0 && (

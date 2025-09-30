@@ -1,0 +1,137 @@
+// This is your Prisma schema file
+// Learn more about Prisma: https://pris.ly/docs
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// User model linked to Firebase Auth
+model User {
+  id            String    @id // Firebase Auth UID
+  email         String    @unique
+  displayName   String?
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  profileComplete Boolean @default(false)
+  
+  // Profile information
+  riskTolerance Int?     @default(5) // Scale of 1-10
+  investmentGoals String[]
+  experienceLevel String? // "beginner", "intermediate", "advanced"
+  
+  // Investment data
+  portfolio     Portfolio?
+  transactions  Transaction[]
+  watchlist    WatchlistItem[]
+  
+  // Learning progress
+  learningProgress LearningProgress?
+  quizResults     QuizResult[]
+  
+  // Behavioral data
+  nudgePreferences NudgePreferences?
+  nudgeHistory    NudgeHistory[]
+}
+
+model Portfolio {
+  id          String   @id @default(cuid())
+  userId      String   @unique
+  user        User     @relation(fields: [userId], references: [id])
+  totalValue  Float
+  lastUpdated DateTime @updatedAt
+  
+  // Portfolio composition
+  holdings    Holding[]
+  cash        Float    @default(0)
+  
+  // Risk metrics
+  volatility  Float?
+  sharpeRatio Float?
+  beta        Float?
+}
+
+model Holding {
+  id          String   @id @default(cuid())
+  portfolioId String
+  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  symbol      String
+  quantity    Float
+  avgPrice    Float
+  lastPrice   Float
+  updatedAt   DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  type        String   // "buy", "sell"
+  symbol      String
+  quantity    Float
+  price       Float
+  timestamp   DateTime @default(now())
+  status      String   // "pending", "completed", "failed"
+}
+
+model WatchlistItem {
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  symbol      String
+  addedAt     DateTime @default(now())
+  alerts      Alert[]
+}
+
+model Alert {
+  id              String        @id @default(cuid())
+  watchlistItemId String
+  watchlistItem   WatchlistItem @relation(fields: [watchlistItemId], references: [id])
+  type            String        // "price", "volume", "news"
+  condition       String        // JSON string containing alert conditions
+  active         Boolean       @default(true)
+}
+
+model LearningProgress {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  completedModules String[]
+  currentModule String?
+  progress      Float    @default(0)
+  lastActivity  DateTime @default(now())
+}
+
+model QuizResult {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  moduleId      String
+  score         Int
+  maxScore      Int
+  completedAt   DateTime @default(now())
+}
+
+model NudgePreferences {
+  id            String   @id @default(cuid())
+  userId        String   @unique
+  user          User     @relation(fields: [userId], references: [id])
+  frequency     String   @default("medium") // "low", "medium", "high"
+  types         String[] // ["educational", "risk", "opportunity"]
+  activeHours   Json     // Store time preferences as JSON
+}
+
+model NudgeHistory {
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  type          String
+  content       String
+  delivered     DateTime @default(now())
+  interacted    Boolean @default(false)
+  interactionType String?
+}

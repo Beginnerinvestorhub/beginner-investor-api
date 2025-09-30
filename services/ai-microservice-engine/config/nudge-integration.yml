@@ -1,0 +1,113 @@
+# AI Microservice Configuration with Behavioral Nudge Integration
+
+# AI Model Settings
+model_settings:
+  engine: gpt-4
+  temperature: 0.7
+  max_tokens: 150
+  presence_penalty: 0.6
+  frequency_penalty: 0.3
+
+# Behavioral Nudge Configuration
+nudge_settings:
+  enabled: true
+  refresh_interval: 3600  # 1 hour
+  max_daily_nudges: 5
+  minimum_interval: 1800  # 30 minutes between nudges
+
+# Nudge Strategies
+strategies:
+  risk_awareness:
+    enabled: true
+    priority: 1
+    triggers:
+      - portfolio_volatility_high
+      - excessive_trading
+      - concentration_risk
+    
+  investment_education:
+    enabled: true
+    priority: 2
+    triggers:
+      - new_user
+      - low_diversification
+      - market_event
+    
+  goal_setting:
+    enabled: true
+    priority: 3
+    triggers:
+      - goal_progress
+      - milestone_reached
+      - regular_review
+
+# User Journey Adaptation
+user_journey:
+  phases:
+    - beginner:
+        education_focus: true
+        risk_tolerance: low
+        nudge_frequency: high
+    - intermediate:
+        education_focus: balanced
+        risk_tolerance: medium
+        nudge_frequency: medium
+    - advanced:
+        education_focus: specialized
+        risk_tolerance: custom
+        nudge_frequency: low
+
+# Integration Points
+integration:
+  market_data:
+    enabled: true
+    update_interval: 300  # 5 minutes
+  
+  risk_engine:
+    enabled: true
+    check_interval: 900  # 15 minutes
+  
+  portfolio_simulation:
+    enabled: true
+    analysis_interval: 3600  # 1 hour
+
+# Response Templates
+response_templates:
+  risk_alert:
+    template: "Based on {trigger}, consider {action} to maintain your risk profile within {target_range}"
+    variables:
+      - trigger
+      - action
+      - target_range
+  
+  education_tip:
+    template: "Learning opportunity: {concept}. This relates to your recent {activity}"
+    variables:
+      - concept
+      - activity
+  
+  goal_update:
+    template: "You're {progress}% towards your {goal_type} goal. Next milestone: {next_milestone}"
+    variables:
+      - progress
+      - goal_type
+      - next_milestone
+
+# Cache Configuration
+cache:
+  user_profile_ttl: 3600
+  market_data_ttl: 300
+  nudge_history_ttl: 86400
+  strategy_state_ttl: 1800
+
+# Monitoring
+monitoring:
+  metrics:
+    - nudge_effectiveness
+    - user_engagement
+    - strategy_success_rate
+  alerts:
+    - type: low_engagement
+      threshold: 0.3
+    - type: high_rejection_rate
+      threshold: 0.4

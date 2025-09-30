@@ -1,131 +1,142 @@
 services:
-- type: web
-  name: python-risk-engine
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: RISK_CALCULATION_ENABLED
-    sync: false
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: FLASK_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/python-risk-engine/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
-- type: web
-  name: Backend API
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: CORS_ORIGIN
-    sync: false
-  - key: DATABASE_URL
-    sync: false
-  - key: COOKIE_SECRET
-    sync: false
-  - key: JWT_SECRET
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/backend-api-service/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
-- type: web
-  name: market-data-ingestion-service
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: MARKET_DATA_API_KEY
-    sync: false
-  - key: FINNHUB_API_KEY
-    sync: false
-  - key: ALPHA_VANTAGE_API_KEY
-    sync: false
-  - key: DATABASE_URL
-    sync: false
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/market-data-ingestion-service/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
-- type: web
-  name: ai-microservice-engine
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: BEHAVIORAL_NUDGE_ENABLED
-    sync: false
-  - key: MODEL_API_ENDPOINT
-    sync: false
-  - key: OPENAI_API_KEY
-    sync: false
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/ai-microservice-engine/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
-- type: web
-  name: behavioral-nudge-engine
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: BEHAVIORAL_NUDGE_ENABLED
-    sync: false
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/behavioral-nudge-engine/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
-- type: web
-  name: portfolio-simulation-service
-  runtime: docker
-  repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
-  plan: free
-  envVars:
-  - key: REDIS_URL
-    sync: false
-  - key: PORT
-    sync: false
-  - key: NODE_ENV
-    sync: false
-  region: virginia
-  dockerContext: ./services/portfolio-simulation-service/
-  dockerfilePath: Dockerfile
-  autoDeployTrigger: commit
+  # Backend API Service
+  - type: web
+    name: backend-api
+    runtime: image
+    image:
+      url: docker.io/karingler/backend-api-service:latest
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PORT
+        value: 3000
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: REDIS_URL
+        value: redis://<REDIS_HOST>:6379
+      - key: JWT_SECRET
+        generateValue: true
+      - key: COOKIE_SECRET
+        generateValue: true
+      - key: CORS_ORIGIN
+        value: https://your-frontend.vercel.app
+    autoDeploy: true
+
+  # Market Data Service
+  - type: web
+    name: market-data
+    runtime: docker
+    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: REDIS_URL
+        value: redis://<REDIS_HOST>:6379
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: PORT
+        value: 3002
+      - key: MARKET_DATA_API_KEY
+        sync: false
+      - key: FINNHUB_API_KEY
+        sync: false
+      - key: ALPHA_VANTAGE_API_KEY
+        sync: false
+    dockerContext: .
+    dockerfilePath: services/market-data-ingestion-service/Dockerfile
+    autoDeploy: true
+
+  # AI Nudge Engine
+  - type: web
+    name: ai-nudge-service
+    runtime: docker
+    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: REDIS_URL
+        value: redis://<REDIS_HOST>:6379
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: PORT
+        value: 3003
+      - key: OPENAI_API_KEY
+        sync: false
+      - key: AI_MODEL_VERSION
+        value: gpt-4
+      - key: AI_TEMPERATURE
+        value: "0.7"
+      - key: AI_MAX_TOKENS
+        value: "150"
+      - key: BEHAVIORAL_NUDGE_ENABLED
+        value: "true"
+    dockerContext: .
+    dockerfilePath: services/ai-microservice-engine/Dockerfile
+    autoDeploy: true
+
+  # Risk Engine
+  - type: web
+    name: risk-engine
+    runtime: docker
+    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: REDIS_URL
+        value: redis://<REDIS_HOST>:6379
+      - key: PORT
+        value: 3001
+      - key: RISK_CALCULATION_WORKERS
+        value: "2"
+    dockerContext: .
+    dockerfilePath: services/python-risk-engine/Dockerfile
+    autoDeploy: true
+
+  # Portfolio Simulation Service
+  - type: web
+    name: portfolio-simulation
+    runtime: docker
+    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: REDIS_URL
+        value: redis://<REDIS_HOST>:6379
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: PORT
+        value: 3004
+      - key: RISK_ENGINE_URL
+        value: https://risk-engine.onrender.com
+      - key: MARKET_DATA_URL
+        value: https://market-data.onrender.com
+      - key: AI_SERVICE_URL
+        value: https://ai-nudge-service.onrender.com
+    dockerContext: .
+    dockerfilePath: services/portfolio-simulation-service/Dockerfile
+    autoDeploy: true
+
 databases:
 - name: beginner-investor-db
-  databaseName: investment_hub_9nuh
+  databaseName: investment_hub
   user: investment_hub_user
   plan: free
   region: virginia
   ipAllowList:
-  - source: 0.0.0.0/0
-    description: everywhere
+    - source: 0.0.0.0/0
+      description: everywhere
   postgresMajorVersion: "17"

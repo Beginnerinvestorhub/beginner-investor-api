@@ -1,54 +1,41 @@
-# Multi-stage build for AI microservice
-FROM python:3.11-slim-bookworm AS base
+# syntax=docker/dockerfile:1.4
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1 \
-    PYTHONFAULTHANDLER=1 \
-    PYTHONHASHSEED=random \
-    PIP_DEFAULT_TIMEOUT=100
-
+# Stage 1: Builder
+FROM python:3.11-slim AS builder
 WORKDIR /app
 
-# --- Builder stage ---
-FROM base AS builder
+# Install build dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
-    gcc \
+    libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
-COPY requirements.txt .
-RUN pip install --user --no-warn-script-location -r requirements.txt
+# Install pip tools
+RUN pip install --upgrade pip setuptools wheel
 
-# --- Production stage ---
-FROM base AS runner
+# Copy requirements and install
+COPY requirements.txt ./
+RUN pip install --user --no-cache-dir -r requirements.txt
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Stage 2: Runtime
+FROM python:3.11-slim AS runner
+WORKDIR /app
 
-RUN useradd --create-home --shell /bin/bash app
+# Create non-root user
+RUN addgroup --system aiuser && adduser --system --ingroup aiuser aiuser
 
-# Copy dependencies from builder with correct ownership
-COPY --from=builder --chown=app:app /root/.local /home/app/.local
+# Copy installed packages from builder
+COPY --from=builder /root/.local /root/.local
+ENV PATH=/root/.local/bin:$PATH
 
-# Set up app directory for code
-WORKDIR /home/app/app
+# Copy app code
+COPY src ./src
+COPY .env.example ./
 
-# Copy application code with correct ownership
-COPY --chown=app:app . .
+# Set ownership and permissions
+RUN chown -R aiuser:aiuser /app
+USER aiuser
 
-# Set environment for user packages and app module
-ENV PATH="/home/app/.local/bin:$PATH" \
-    PYTHONPATH="/home/app/app"
-
-USER app
-
-EXPOSE 8002
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8002/health || exit 1
-
-CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002", "--no-access-log"]
+EXPOSE 8000
+CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

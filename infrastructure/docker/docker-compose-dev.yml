@@ -1,60 +1,105 @@
 version: '3.8'
 
-# Development overrides for local development
 services:
   backend-api:
     build:
-      target: dev
+      context: ./backend-api-service
+      dockerfile: Dockerfile
+    container_name: backend-api
+    ports:
+      - "3000:3000"
     environment:
       NODE_ENV: development
-    volumes:
-      - ./backend-api-service:/app
-      - /app/node_modules
+      PORT: 3000
+      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: devsecret
+      COOKIE_SECRET: devsecret
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      - db
+      - redis
     command: ["npm", "run", "dev"]
 
   market-data:
+    build:
+      context: ./market-data-ingestion-service
+      dockerfile: Dockerfile
+    container_name: market-data
+    ports:
+      - "3002:3002"
     environment:
-      DATA_INGESTION_INTERVAL: 60  # More frequent updates for dev
-      LOG_LEVEL: debug
-    volumes:
-      - ./market-data-ingestion-service:/app
+      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      MARKET_DATA_API_KEY: devkey
+      FINNHUB_API_KEY: devkey
+      ALPHA_VANTAGE_API_KEY: devkey
 
-  ai-engine:
+  ai-nudge-service:
+    build:
+      context: ./ai-microservice-engine
+      dockerfile: Dockerfile
+    container_name: ai-nudge
+    ports:
+      - "3003:3003"
     environment:
-      LOG_LEVEL: debug
-      AI_MODEL: gpt-3.5-turbo  # Cheaper model for development
-    volumes:
-      - ./ai-microservice-engine:/app
+      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      OPENAI_API_KEY: devkey
+      AI_MODEL_VERSION: gpt-4
+      AI_TEMPERATURE: 0.7
+      AI_MAX_TOKENS: 150
+      BEHAVIORAL_NUDGE_ENABLED: "true"
 
   risk-engine:
+    build:
+      context: ./python-risk-engine
+      dockerfile: Dockerfile
+    container_name: risk-engine
+    ports:
+      - "3001:3001"
     environment:
-      LOG_LEVEL: debug
-      RISK_CALCULATION_WORKERS: 2  # Fewer workers for dev
-    volumes:
-      - ./python-risk-engine:/app
+      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      PORT: 3001
+      RISK_CALCULATION_WORKERS: 2
 
   portfolio-simulation:
+    build:
+      context: ./portfolio-simulation-service
+      dockerfile: Dockerfile
+    container_name: portfolio-simulation
+    ports:
+      - "3004:3004"
     environment:
-      LOG_LEVEL: debug
-      SIMULATION_WORKERS: 1  # Single worker for dev
+      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      PORT: 3004
+      RISK_ENGINE_URL: http://risk-engine:3001
+      MARKET_DATA_URL: http://market-data:3002
+      AI_SERVICE_URL: http://ai-nudge:3003
+    depends_on:
+      - risk-engine
+      - market-data
+      - ai-nudge-service
+
+  db:
+    image: postgres:17-alpine
+    container_name: beginner-investor-db
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: investment_hub
+    ports:
+      - "5432:5432"
     volumes:
-      - ./portfolio-simulation-service:/app
+      - db-data:/var/lib/postgresql/data
 
-  # Development tools
-  adminer:
-    image: adminer:latest
-    container_name: fintech_adminer
-    restart: unless-stopped
+  redis:
+    image: redis:7-alpine
+    container_name: redis
     ports:
-      - "8080:8080"
-    environment:
-      ADMINER_DEFAULT_SERVER: database
+      - "6379:6379"
 
-  redis-commander:
-    image: rediscommander/redis-commander:latest
-    container_name: fintech_redis_commander
-    restart: unless-stopped
-    ports:
-      - "8081:8081"
-    environment:
-      REDIS_HOSTS: local:redis:6379
+volumes:
+  db-data:

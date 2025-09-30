@@ -1,57 +1,56 @@
-# Multi-stage build for Python Risk Engine
-FROM python:3.11-slim AS base
+# syntax=docker/dockerfile:1.4
 
-ENV PYTHONUNBUFFERED=1 \
-    PYTHONDONTWRITEBYTECODE=1 \
-    PIP_NO_CACHE_DIR=1 \
-    PIP_DISABLE_PIP_VERSION_CHECK=1
-
-# Build stage
-FROM base AS builder
+FROM python:3.12-slim-bullseye AS base
 WORKDIR /app
 
-RUN apt-get update && apt-get install -y \
-    build-essential \
-    gcc \
-    g++ \
-    gfortran \
-    libblas-dev \
-    liblapack-dev \
-    libopenblas-dev \
-    libhdf5-dev \
-    pkg-config \
-    && rm -rf /var/lib/apt/lists/*
+# Environment setup
+ENV PYTHONDONTWRITEBYTECODE=1 \
+    PYTHONUNBUFFERED=1 \
+    PYTHONPATH=/app
 
-COPY requirements.txt .
-RUN pip install --user --no-warn-script-location -r requirements.txt
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    curl gnupg build-essential libffi-dev libpq-dev \
+    && apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Production stage
-FROM base AS runner
+# Install Node.js + pnpm
+RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
+    && apt-get install -y nodejs \
+    && corepack enable \
+    && corepack prepare pnpm@latest --activate
+
+# Create non-root user
+RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+
+# -----------------------------
+# Stage 1: Python dependencies
+# -----------------------------
+COPY pyproject.toml poetry.lock ./
+RUN pip install --no-cache-dir poetry \
+    && poetry config virtualenvs.create false \
+    && poetry install --no-interaction --no-ansi
+
+# -----------------------------
+# Stage 2: Node risk engine
+# -----------------------------
+COPY risk-engine/package.json risk-engine/pnpm-lock.yaml ./risk-engine/
+WORKDIR /app/risk-engine
+RUN pnpm install --frozen-lockfile \
+    && pnpm run build  # if applicable
+
+# -----------------------------
+# Stage 3: Final setup
+# -----------------------------
 WORKDIR /app
+COPY . .
 
-RUN apt-get update && apt-get install -y \
-    curl \
-    libopenblas0 \
-    libgomp1 \
-    libhdf5-103 \
-    && rm -rf /var/lib/apt/lists/* \
-    && apt-get clean
+# Set ownership
+RUN chown -R appuser:appgroup /app
+USER appuser
 
-RUN useradd --create-home --shell /bin/bash app
+EXPOSE 3001
 
-# Copy installed packages with correct ownership
-COPY --from=builder --chown=app:app /root/.local /home/app/.local
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3001/health || exit 1
 
-# Copy application code with correct ownership
-COPY --chown=app:app . .
-
-ENV PATH="/home/app/.local/bin:$PATH"
-
-USER app
-
-EXPOSE 8005
-
-HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8005/health || exit 1
-
-CMD ["python", "app.py"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "3001"]
