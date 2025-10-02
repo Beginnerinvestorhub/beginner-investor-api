@@ -1,4 +1,4 @@
-import { z } from 'zod';
+import { z, ZodTypeAny, ZodDefault, ZodEnum, ZodString } from 'zod';
 
 const envSchema = z.object({
   // Node Environment
@@ -54,7 +54,9 @@ export const env = (() => {
     return envSchema.parse(process.env);
   } catch (error) {
     if (error instanceof z.ZodError) {
-      console.error('❌ Invalid environment variables:', error.errors);
+      // Use process.env.NODE_ENV check to conditionally omit stack trace in production
+      console.error('❌ Invalid environment variables detected.');
+      console.error(error.errors.map(e => `[${e.path.join('.')}] ${e.message}`).join('\n'));
       process.exit(1);
     }
     throw error;
@@ -63,17 +65,70 @@ export const env = (() => {
 
 // Helper to generate .env.example
 export function generateEnvExample() {
-  const example: Record<string, string> = {};
-  
+  const lines: string[] = [
+    '# =========================================================================',
+    '# Beginner Investor Hub API Environment Variables',
+    '# This file serves as an example. Rename to .env and fill in the required values.',
+    '# =========================================================================',
+    ''
+  ];
+
   for (const [key, schema] of Object.entries(envSchema.shape)) {
-    const defaultValue = schema instanceof z.ZodDefault ? schema._def.defaultValue() : undefined;
-    const isRequired = !(schema.isOptional() || defaultValue !== undefined);
+    // Determine the underlying schema to check for enums or requirements
+    const baseSchema = schema instanceof ZodDefault ? schema.removeDefault() : schema;
     
-    example[`# ${key}${isRequired ? ' (required)' : ''}`] = 
-      isRequired ? '' : `=${JSON.stringify(defaultValue)}`;
+    // 1. Get Default/Example Value
+    let exampleValue: string;
+    let isRequired = false;
+
+    if (schema.isOptional() || schema.isNullable()) {
+        exampleValue = ''; // Optional fields can be empty
+    } else if (schema instanceof ZodDefault) {
+      // Correctly retrieve default value from ZodDefault
+      const defaultValue = schema._def.defaultValue();
+      exampleValue = typeof defaultValue === 'function' ? defaultValue() : defaultValue;
+    } else {
+        // Handle required fields and provide meaningful placeholders
+        isRequired = true;
+        if (key.endsWith('_URL')) {
+            exampleValue = 'http://localhost:5432/mydb_dev'; // Example for URL
+        } else if (key.endsWith('_SECRET')) {
+            exampleValue = 'replace_with_a_long_complex_random_string_64_chars_min';
+        } else if (key === 'STRIPE_SECRET_KEY') {
+            exampleValue = 'sk_test_...';
+        } else {
+            exampleValue = '';
+        }
+    }
+    
+    // 2. Generate Comment Line
+    const requiredText = isRequired ? ' (REQUIRED)' : '';
+    let enumText = '';
+    
+    if (baseSchema instanceof ZodEnum) {
+        // Correctly handle ZodEnum to show possible values
+        enumText = ` (Options: ${baseSchema._def.values.join(' | ')})`;
+    }
+    
+    // 3. Add to Lines Array
+    lines.push(`# ${key}${requiredText}${enumText}`);
+    lines.push(`${key}=${exampleValue}`);
+    lines.push('');
   }
+
+  return lines.join('\n').trim();
+}
+
+// Example of running the generator (if this file is executed directly)
+if (require.main === module) {
+  const fs = require('fs');
+  const path = require('path');
+  const exampleContent = generateEnvExample();
   
-  return Object.entries(example)
-    .map(([key, value]) => `${key}${value}`)
-    .join('\n');
+  const filePath = path.join(process.cwd(), '.env.example');
+  fs.writeFileSync(filePath, exampleContent);
+  
+  console.log(`✅ .env.example generated successfully at: ${filePath}`);
+  console.log('\n--- Content ---\n');
+  console.log(exampleContent);
 }

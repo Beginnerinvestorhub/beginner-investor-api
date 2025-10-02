@@ -7,7 +7,7 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="Portfolio Simulation Service")
+app = FastAPI(title="Portfolio Simulation")
 
 # Configure CORS
 app.add_middleware(
@@ -25,7 +25,7 @@ async def health_check():
 @app.get("/")
 async def root():
     return {
-        "message": "Portfolio Simulation Service",
+        "message": "Portfolio Simulation ",
         "workers": os.getenv("SIMULATION_WORKERS", 2)
     }
 

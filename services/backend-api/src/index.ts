@@ -8,7 +8,17 @@ import rateLimit from 'express-rate-limit';
 import { trackAffiliate } from './middleware/affiliate.middleware';
 
 // Load environment variables
-dotenv.config();
+import path from 'path';
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+
+console.log('✅ ENV Check:', {
+  DATABASE_URL: process.env.DATABASE_URL,
+  JWT_SECRET: process.env.JWT_SECRET,
+  COOKIE_SECRET: process.env.COOKIE_SECRET,
+  REDIS_URL: process.env.REDIS_URL,
+  STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+});
+
 
 const app = express();
 
@@ -37,7 +47,7 @@ app.set('trust proxy', 1);
 app.use(trackAffiliate);
 
 // Health check endpoint
-app.get('/health', (req, res) => {
+app.get('/health', (_req, res) => {
   res.json({ 
     status: 'healthy',
     timestamp: new Date().toISOString(),
@@ -46,9 +56,9 @@ app.get('/health', (req, res) => {
 });
 
 // Root endpoint
-app.get('/', (req, res) => {
+app.get('/', (_req, res) => {
   res.json({ 
-    message: 'Backend API Service',
+    message: 'Backend API ',
     version: process.env.npm_package_version,
     environment: process.env.NODE_ENV || 'development',
     documentation: '/docs' // Link to API documentation if available
@@ -75,7 +85,7 @@ apiRouter.use('/affiliate', affiliateRoutes);
 app.use('/api/v1', apiRouter);
 
 // Error handling middleware
-app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   
   const statusCode = err.statusCode || 500;
@@ -90,12 +100,12 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 });
 
 // 404 handler
-app.use((req, res) => {
+app.use((_req, res) => {
   res.status(404).json({
     status: 'error',
     statusCode: 404,
     message: 'Not Found',
-    path: req.path
+    path:_req.path
   });
 });
 

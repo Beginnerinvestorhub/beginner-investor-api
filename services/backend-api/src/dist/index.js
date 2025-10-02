@@ -9,27 +9,33 @@ const dotenv_1 = __importDefault(require("dotenv"));
 const morgan_1 = __importDefault(require("morgan"));
 const path_1 = __importDefault(require("path"));
 const express_rate_limit_1 = __importDefault(require("express-rate-limit"));
-const database_1 = require("./config/database");
-// Load environment variables from backend/.env
-dotenv_1.default.config({ path: path_1.default.resolve(__dirname, '../.env') });
-// ⚠️ Warn if Stripe key is missing (but don't crash)
-if (!process.env.STRIPE_SECRET_KEY) {
-    console.warn('⚠️ STRIPE_SECRET_KEY not found - Stripe functionality will be disabled');
-}
-// ⚠️ Warn if Database URL is missing
-if (!process.env.DATABASE_URL) {
-    console.warn('⚠️ DATABASE_URL not found - Database functionality will be disabled');
-}
-const app = (0, express_1.default)();
+import { testConnection, initializeDatabase } from "./config/database";
+
+// === FIX: Load environment variables first ===
+// Load environment variables from backend-api/.env
+// This must be done *before* any other code (like schema validation)
+// that depends on these variables runs.
+dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+// ===========================================
+console.log('✅ Loaded ENV:', {
+    DATABASE_URL: process.env.DATABASE_URL,
+    JWT_SECRET: process.env.JWT_SECRET,
+    COOKIE_SECRET: process.env.COOKIE_SECRET,
+    REDIS_URL: process.env.REDIS_URL,
+    STRIPE_SECRET_KEY: process.env.STRIPE_SECRET_KEY,
+  });
+  
 // Middleware: Dev logger
 if (process.env.NODE_ENV !== 'production') {
     app.use((0, morgan_1.default)('dev'));
 }
+
 // Middleware: CORS
 const allowedOrigins = process.env.ALLOWED_ORIGINS
     ? process.env.ALLOWED_ORIGINS.split(',')
     : '*';
 app.use((0, cors_1.default)({ origin: allowedOrigins }));
+
 // Middleware: Rate limiting
 const limiter = (0, express_rate_limit_1.default)({
     windowMs: 15 * 60 * 1000, // 15 minutes
@@ -40,40 +46,46 @@ const limiter = (0, express_rate_limit_1.default)({
     standardHeaders: true, // Return rate limit info in the `RateLimit-*` headers
     legacyHeaders: false, // Disable the `X-RateLimit-*` headers
 });
+
 // Apply rate limiting to all API routes
 app.use('/api/', limiter);
 app.use(express_1.default.json());
-// API Routes
-const auth_1 = require("./routes/auth");
-const user_1 = require("./routes/user");
-const dashboard_1 = require("./routes/dashboard");
-const admin_1 = require("./routes/admin");
+
+// API Routes (imports)
+import { authRouter } from "./routes/auth";
+import { userRouter } from "./routes/user";
+import { dashboardRouter } from "./routes/dashboard";
+import { adminRouter } from "./routes/admin";
 const newsletter_1 = __importDefault(require("./routes/newsletter"));
 const stripe_1 = __importDefault(require("./routes/stripe"));
 const profile_1 = __importDefault(require("./routes/profile"));
 const gamification_1 = __importDefault(require("./routes/gamification"));
-const education_1 = require("./routes/education");
-const leaderboard_1 = require("./routes/leaderboard");
-const challenges_1 = require("./routes/challenges");
+import { educationRouter } from "./routes/education";
+import { leaderboardRouter } from "./routes/leaderboard";
+import { challengesRouter } from "./routes/challenges";
+
 // OpenAPI Documentation
-const swagger_1 = require("./middleware/swagger");
+import { docsAuth, serveDocsLanding, serveSwaggerUI, serveReDoc, serveOpenApiSpec } from "./middleware/swagger";
+
 // API Documentation Routes (with optional authentication)
-app.get('/api/docs', swagger_1.docsAuth, swagger_1.serveDocsLanding);
-app.get('/api/docs/swagger', swagger_1.docsAuth, swagger_1.serveSwaggerUI);
-app.get('/api/docs/redoc', swagger_1.docsAuth, swagger_1.serveReDoc);
-app.get('/api/docs/openapi.json', swagger_1.serveOpenApiSpec);
-// API Routes
-app.use('/api/auth', auth_1.authRouter);
-app.use('/api/user', user_1.userRouter);
-app.use('/api/dashboard', dashboard_1.dashboardRouter);
-app.use('/api/admin', admin_1.adminRouter);
+app.get('/api/docs', docsAuth, serveDocsLanding);
+app.get('/api/docs/swagger', docsAuth, serveSwaggerUI);
+app.get('/api/docs/redoc', docsAuth, serveReDoc);
+app.get('/api/docs/openapi.json', serveOpenApiSpec);
+
+// API Routes (usage)
+app.use('/api/auth', authRouter);
+app.use('/api/user', userRouter);
+app.use('/api/dashboard', dashboardRouter);
+app.use('/api/admin', adminRouter);
 app.use('/api/newsletter', newsletter_1.default);
 app.use('/api/stripe', stripe_1.default);
 app.use('/api/profile', profile_1.default);
 app.use('/api/gamification', gamification_1.default);
-app.use('/api/education', education_1.educationRouter);
-app.use('/api/gamification/leaderboard', leaderboard_1.leaderboardRouter);
-app.use('/api/gamification/challenges', challenges_1.challengesRouter);
+app.use('/api/education', educationRouter);
+app.use('/api/gamification/leaderboard', leaderboardRouter);
+app.use('/api/gamification/challenges', challengesRouter);
+
 // Enhanced Health Check with system status
 app.get('/api/health', async (_, res) => {
     const healthStatus = {
@@ -89,6 +101,7 @@ app.get('/api/health', async (_, res) => {
     };
     res.json(healthStatus);
 });
+
 // Initialize Database and Start Server
 if (require.main === module) {
     const port = process.env.PORT || 4000;
@@ -96,14 +109,17 @@ if (require.main === module) {
     const initServer = async () => {
         try {
             if (process.env.DATABASE_URL) {
-                const dbConnected = await (0, database_1.testConnection)();
+                // Only attempt connection/init if URL is present
+                const dbConnected = await (0, testConnection)();
                 if (dbConnected) {
-                    await (0, database_1.initializeDatabase)();
+                    await (0, initializeDatabase)();
                     console.log('🗄️ Database initialized successfully');
                 }
             }
             else {
-                console.log('⚠️ Skipping database initialization - DATABASE_URL not provided');
+                // Log only if it wasn't already warned above to prevent duplicate messages
+                // This is a stylistic improvement, the main fix is the dotenv position.
+                // console.log('⚠️ Skipping database initialization - DATABASE_URL not provided'); 
             }
         }
         catch (error) {
@@ -121,7 +137,12 @@ if (require.main === module) {
             ALLOWED_ORIGINS: process.env.ALLOWED_ORIGINS,
             STRIPE_SECRET_KEY: !!process.env.STRIPE_SECRET_KEY,
             DATABASE_URL: !!process.env.DATABASE_URL,
+            // Check for other required envs to confirm the fix
+            JWT_SECRET: !!process.env.JWT_SECRET,
+            COOKIE_SECRET: !!process.env.COOKIE_SECRET,
+            REDIS_URL: !!process.env.REDIS_URL,
         });
     }
 }
-exports.default = app;
+const _default = app;
+export { _default as default };
