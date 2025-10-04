@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
 from uuid import UUID, uuid4
+import enum
 
 from sqlalchemy import (
     Column,
@@ -22,7 +23,7 @@ from sqlalchemy.orm import relationship, validates
 from .base import Base
 
 # Enums for portfolio types and statuses
-class PortfolioType(str, Enum):
+class PortfolioType(enum.Enum):
     CASH = "cash"
     RETIREMENT = "retirement"
     TAXABLE = "taxable"
@@ -30,7 +31,7 @@ class PortfolioType(str, Enum):
     TRUST = "trust"
     OTHER = "other"
 
-class PortfolioStatus(str, Enum):
+class PortfolioStatus(enum.Enum):
     ACTIVE = "active"
     CLOSED = "closed"
     FROZEN = "frozen"
@@ -202,7 +203,7 @@ class PortfolioAsset(Base):
         }
 
 
-class PortfolioTransactionType(str, Enum):
+class PortfolioTransactionType(enum.Enum):
     BUY = "buy"
     SELL = "sell"
     DIVIDEND = "dividend"
@@ -247,7 +248,8 @@ class PortfolioTransaction(Base):
     
     # Relationships
     portfolio = relationship("Portfolio", back_populates="transactions")
-    asset = relationship("PortfolioAsset", back_populates="transactions")
+    asset = relationship("PortfolioAsset", back_populates="transactions", 
+                        foreign_keys=[portfolio_id, asset_id])
     
     # Indexes
     __table_args__ = (
