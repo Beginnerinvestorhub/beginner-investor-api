@@ -1,8 +1,8 @@
 from datetime import datetime, timedelta
 from decimal import Decimal
-from typing import List, Optional, Dict, Any, Type, TypeVar
+from typing import List, Optional, Dict, Any
 from uuid import UUID, uuid4
-from enum import Enum
+import enum
 
 from sqlalchemy import (
     Column,
@@ -12,7 +12,6 @@ from sqlalchemy import (
     ForeignKey,
     Numeric,
     Integer,
-    Enum as SQLEnum,
     CheckConstraint,
     Index,
     Text,
@@ -22,13 +21,13 @@ from sqlalchemy import (
     or_,
     select
 )
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB, ENUM
 from sqlalchemy.orm import relationship, validates, Session
 
 from .base import Base, ModelType
 
 
-class SubscriptionStatus(str, Enum):
+class SubscriptionStatus(enum.Enum):
     """Subscription status values."""
     ACTIVE = "active"
     TRIALING = "trialing"
@@ -40,7 +39,7 @@ class SubscriptionStatus(str, Enum):
     PAUSED = "paused"
 
 
-class BillingInterval(str, Enum):
+class BillingInterval(enum.Enum):
     """Billing interval for subscription plans."""
     DAY = "day"
     WEEK = "week"
@@ -48,7 +47,7 @@ class BillingInterval(str, Enum):
     YEAR = "year"
 
 
-class PlanTier(str, Enum):
+class PlanTier(enum.Enum):
     """Subscription plan tiers."""
     FREE = "free"
     BASIC = "basic"
@@ -65,14 +64,22 @@ class SubscriptionPlan(Base):
     # Plan identification
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    tier = Column(SQLEnum(PlanTier), nullable=False, index=True)
+    tier = Column(
+        ENUM(*[e.value for e in PlanTier], name='plan_tier', create_type=False),
+        nullable=False,
+        index=True
+    )
     is_active = Column(Boolean, default=True, nullable=False)
     
     # Pricing
-    amount = Column(Numeric(10, 2), nullable=False)  # in USD
+    amount = Column(Numeric(10, 2), nullable=False)
     currency = Column(String(3), default="USD", nullable=False)
-    interval = Column(SQLEnum(BillingInterval), default=BillingInterval.MONTH, nullable=False)
-    interval_count = Column(Integer, default=1, nullable=False)  # e.g., 3 for "every 3 months"
+    interval = Column(
+        ENUM(*[e.value for e in BillingInterval], name='billing_interval', create_type=False),
+        default='month',
+        nullable=False
+    )
+    interval_count = Column(Integer, default=1, nullable=False)
     
     # Trial settings
     trial_period_days = Column(Integer, default=0, nullable=False)
@@ -95,7 +102,7 @@ class SubscriptionPlan(Base):
     @property
     def price_display(self) -> str:
         """Get a formatted price string."""
-        return f"${self.amount:.2f} / {self.interval.value}"
+        return f"${self.amount:.2f} / {self.interval}"
     
     def has_feature(self, feature_name: str) -> bool:
         """Check if this plan includes a specific feature."""
@@ -107,11 +114,11 @@ class SubscriptionPlan(Base):
             "id": str(self.id),
             "name": self.name,
             "description": self.description,
-            "tier": self.tier.value,
+            "tier": self.tier,
             "is_active": self.is_active,
             "amount": float(self.amount),
             "currency": self.currency,
-            "interval": self.interval.value,
+            "interval": self.interval,
             "interval_count": self.interval_count,
             "trial_period_days": self.trial_period_days,
             "price_display": self.price_display,
@@ -130,7 +137,7 @@ class PlanFeature(Base):
     plan_id = Column(PG_UUID(as_uuid=True), ForeignKey('subscription_plans.id', ondelete='CASCADE'), nullable=False)
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    value = Column(JSONB, default=dict, nullable=False)  # Can store various value types
+    value = Column(JSONB, default=dict, nullable=False)
     is_enabled = Column(Boolean, default=True, nullable=False)
     
     # Relationships
@@ -160,7 +167,12 @@ class UserSubscription(Base):
     
     user_id = Column(PG_UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     plan_id = Column(PG_UUID(as_uuid=True), ForeignKey('subscription_plans.id', ondelete='RESTRICT'), nullable=False)
-    status = Column(SQLEnum(SubscriptionStatus), nullable=False, default=SubscriptionStatus.INCOMPLETE, index=True)
+    status = Column(
+        ENUM(*[e.value for e in SubscriptionStatus], name='subscription_status', create_type=False),
+        nullable=False,
+        default='incomplete',
+        index=True
+    )
     
     # Billing information
     current_period_start = Column(DateTime, nullable=False, default=datetime.utcnow)
@@ -189,34 +201,6 @@ class UserSubscription(Base):
         Index('idx_subscription_period', 'current_period_start', 'current_period_end'),
     )
     
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        # Set initial period end based on plan
-        if self.plan and not self.current_period_end:
-            self.set_next_period()
-    
-    def set_next_period(self):
-        """Set the next billing period based on the plan's interval."""
-        if not self.plan:
-            return
-            
-        now = datetime.utcnow()
-        self.current_period_start = now
-        
-        if self.plan.interval == BillingInterval.DAY:
-            delta = timedelta(days=self.plan.interval_count)
-        elif self.plan.interval == BillingInterval.WEEK:
-            delta = timedelta(weeks=self.plan.interval_count)
-        elif self.plan.interval == BillingInterval.MONTH:
-            # Handle month arithmetic properly
-            month = now.month - 1 + self.plan.interval_count
-            year = now.year + month // 12
-            month = month % 12 + 1
-            day = min(now.day, [31, 29 if year % 4 == 0 and (year % 100 != 0 or year % 400 == 0) else 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31][month-1])
-            self.current_period_end = now.replace(year=year, month=month, day=day)
-        else:  # YEAR
-            self.current_period_end = now.replace(year=now.year + self.plan.interval_count)
-    
     @property
     def is_trialing(self) -> bool:
         """Check if the subscription is in trial period."""
@@ -229,7 +213,7 @@ class UserSubscription(Base):
         """Check if the subscription is currently active."""
         now = datetime.utcnow()
         return (
-            self.status in [SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING] and 
+            self.status in ['active', 'trialing'] and 
             (self.current_period_end is None or self.current_period_end > now) and
             not self.cancel_at_period_end
         )
@@ -240,7 +224,7 @@ class UserSubscription(Base):
             "id": str(self.id),
             "user_id": str(self.user_id),
             "plan_id": str(self.plan_id),
-            "status": self.status.value,
+            "status": self.status,
             "current_period_start": self.current_period_start.isoformat() if self.current_period_start else None,
             "current_period_end": self.current_period_end.isoformat() if self.current_period_end else None,
             "cancel_at_period_end": self.cancel_at_period_end,
@@ -255,7 +239,7 @@ class UserSubscription(Base):
         }
 
 
-class InvoiceStatus(str, Enum):
+class InvoiceStatus(enum.Enum):
     """Invoice status values."""
     DRAFT = "draft"
     OPEN = "open"
@@ -272,10 +256,15 @@ class Invoice(Base):
     
     subscription_id = Column(PG_UUID(as_uuid=True), ForeignKey('user_subscriptions.id', ondelete='CASCADE'), nullable=False, index=True)
     number = Column(String(50), unique=True, nullable=False)
-    status = Column(SQLEnum(InvoiceStatus), nullable=False, default=InvoiceStatus.DRAFT, index=True)
+    status = Column(
+        ENUM(*[e.value for e in InvoiceStatus], name='invoice_status', create_type=False),
+        nullable=False,
+        default='draft',
+        index=True
+    )
     
     # Billing information
-    amount_due = Column(Numeric(12, 2), nullable=False)  # in cents
+    amount_due = Column(Numeric(12, 2), nullable=False)
     amount_paid = Column(Numeric(12, 2), default=0, nullable=False)
     amount_remaining = Column(Numeric(12, 2), nullable=False)
     currency = Column(String(3), default="USD", nullable=False)
@@ -300,39 +289,20 @@ class Invoice(Base):
     
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-        # Generate invoice number if not provided
         if not self.number:
             self.number = f"INV-{datetime.utcnow().strftime('%Y%m%d')}-{str(uuid4())[:8].upper()}"
     
     @property
     def is_paid(self) -> bool:
         """Check if the invoice is fully paid."""
-        return self.status == InvoiceStatus.PAID and self.amount_remaining <= 0
-    
-    def add_item(self, description: str, amount: Decimal, quantity: int = 1, metadata: Optional[Dict] = None) -> 'InvoiceItem':
-        """Add an item to the invoice."""
-        item = InvoiceItem(
-            invoice_id=self.id,
-            description=description,
-            amount=amount,
-            quantity=quantity,
-            metadata=metadata or {}
-        )
-        self.items.append(item)
-        return item
-    
-    def calculate_totals(self):
-        """Calculate and update invoice totals based on items."""
-        total = sum(item.amount * item.quantity for item in self.items)
-        self.amount_due = total - self.amount_paid
-        self.amount_remaining = max(0, self.amount_due - self.amount_paid)
+        return self.status == 'paid' and self.amount_remaining <= 0
     
     def to_dict(self, include_items: bool = True) -> Dict[str, Any]:
         """Convert the invoice to a dictionary."""
         return {
             "id": str(self.id),
             "number": self.number,
-            "status": self.status.value,
+            "status": self.status,
             "amount_due": float(self.amount_due),
             "amount_paid": float(self.amount_paid),
             "amount_remaining": float(self.amount_remaining),
@@ -355,7 +325,7 @@ class InvoiceItem(Base):
     
     invoice_id = Column(PG_UUID(as_uuid=True), ForeignKey('invoices.id', ondelete='CASCADE'), nullable=False, index=True)
     description = Column(Text, nullable=False)
-    amount = Column(Numeric(12, 2), nullable=False)  # in cents
+    amount = Column(Numeric(12, 2), nullable=False)
     quantity = Column(Integer, default=1, nullable=False)
     metadata_ = Column("metadata", JSONB, default=dict, nullable=False)
     
@@ -379,49 +349,3 @@ class InvoiceItem(Base):
             "invoice_id": str(self.invoice_id),
             "created_at": self.created_at.isoformat() if self.created_at else None,
         }
-
-
-# Update the User model to include the relationship with subscriptions
-# This assumes you have a User model in user.py
-from .user import User
-
-# Add the relationship to the User model if it doesn't exist
-if not hasattr(User, 'subscriptions'):
-    User.subscriptions = relationship(
-        "UserSubscription", 
-        back_populates="user",
-        cascade="all, delete-orphan"
-    )
-
-# Add the relationship to the User model if it doesn't exist
-if not hasattr(User, 'active_subscription'):
-    @property
-    def active_subscription(self) -> Optional[UserSubscription]:
-        """Get the user's active subscription, if any."""
-        if not hasattr(self, '_active_subscription'):
-            # This assumes you have a way to access the database session
-            # In a real application, you'd want to use a proper session
-            from ..connection import SessionLocal
-            db = SessionLocal()
-            try:
-                self._active_subscription = db.query(UserSubscription).filter(
-                    UserSubscription.user_id == self.id,
-                    UserSubscription.status.in_([SubscriptionStatus.ACTIVE, SubscriptionStatus.TRIALING]),
-                    or_(
-                        UserSubscription.current_period_end.is_(None),
-                        UserSubscription.current_period_end > datetime.utcnow()
-                    ),
-                    UserSubscription.cancel_at_period_end == False
-                ).order_by(UserSubscription.created_at.desc()).first()
-            finally:
-                db.close()
-        return self._active_subscription
-    
-    User.active_subscription = active_subscription
-    
-    @property
-    def has_active_subscription(self) -> bool:
-        """Check if the user has an active subscription."""
-        return self.active_subscription is not None
-    
-    User.has_active_subscription = has_active_subscription
