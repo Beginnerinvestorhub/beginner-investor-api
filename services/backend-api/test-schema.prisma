@@ -1,0 +1,65 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// --- ENUMS ---
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+}
+
+// --- MODELS ---
+
+model User {
+  id               String   @id @default(cuid())
+  email            String   @unique
+  displayName      String?
+  createdAt        DateTime @default(now())
+  updatedAt        DateTime @updatedAt
+  profileComplete  Boolean  @default(false)
+
+  // Profile
+  riskTolerance    Int?     @default(5)
+  investmentGoals  String[]
+
+  // Subscription
+  subscription     Subscription?
+
+  // Affiliate
+  referrals        Referral[]       @relation("Referrer")
+}
+
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String           @unique
+  user        User             @relation(fields: [userId], references: [id])
+  tier        SubscriptionTier @default(FREE)
+  status      String           @default("active")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  expiresAt   DateTime?
+}
+
+model Referral {
+  id              String         @id @default(cuid())
+  referrerId      String
+  referrer        User           @relation("Referrer", fields: [referrerId], references: [id])
+  referredEmail   String
+  campaign        String?
+  status          ReferralStatus @default(PENDING)
+  commissionPaid  Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+}

@@ -16,8 +16,7 @@
     "incremental": true,
     "baseUrl": ".",
     "paths": {
-      "@/*": ["./src/*"],
-      "next-auth": ["src/types/next-auth.d.ts"]
+      "@/*": ["./src/*"]
     },
     "typeRoots": [
       "./node_modules/@types",

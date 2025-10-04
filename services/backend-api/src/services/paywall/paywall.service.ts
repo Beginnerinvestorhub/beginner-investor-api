@@ -1,36 +1,41 @@
 import { PrismaClient, SubscriptionTier } from '@prisma/client';
-import { Service } from '../base.service';
+import BaseService  from '../base.service';
+import { prisma } from '../../config/prisma'; // use singleton
 
-export class PaywallService extends Service {
-  private prisma: PrismaClient;
-
-  constructor() {
-    super();
-    this.prisma = new PrismaClient();
+export class PaywallService extends BaseService {
+  constructor(cacheTtl?: number) {
+    super(cacheTtl);
   }
 
   async getUserSubscription(userId: string) {
-    return this.prisma.subscription.findUnique({
-      where: { userId },
-      include: { tier: true }
-    });
+    const key = this.generateCacheKey(`subscription:${userId}`);
+    return this.getCachedOrFetch(key, () =>
+      prisma.subscription.findUnique({
+        where: { userId },
+        include: { tier: true }
+      })
+    );
   }
 
   async hasAccess(userId: string, requiredTier: SubscriptionTier): Promise<boolean> {
     const subscription = await this.getUserSubscription(userId);
-    if (!subscription) return false;
-    
-    // Check if user's subscription tier meets or exceeds required tier
-    const tierOrder = [SubscriptionTier.FREE, SubscriptionTier.BASIC, SubscriptionTier.PREMIUM, SubscriptionTier.ENTERPRISE];
-    const userTierIndex = tierOrder.indexOf(subscription.tier.name as SubscriptionTier);
+    if (!subscription || !subscription.tier?.name) return false;
+
+    const tierOrder: SubscriptionTier[] = [
+      SubscriptionTier.FREE,
+      SubscriptionTier.BASIC,
+      SubscriptionTier.PREMIUM,
+      SubscriptionTier.ENTERPRISE,
+    ];
+
+    const userTierIndex = tierOrder.indexOf(subscription.tier.name);
     const requiredTierIndex = tierOrder.indexOf(requiredTier);
-    
-    return userTierIndex >= requiredTierIndex;
+
+    return userTierIndex >= 0 && userTierIndex >= requiredTierIndex;
   }
 
-  async createCheckoutSession(userId: string, tier: SubscriptionTier) {
-    // Implementation for creating a checkout session with Stripe or another payment processor
-    // This is a placeholder implementation
+  async createCheckoutSession(_userId: string, _tier: SubscriptionTier) {
+    // TODO: integrate with Stripe (or other)
     return {
       sessionId: `cs_${Math.random().toString(36).substring(2, 15)}`,
       url: 'https://checkout.stripe.com/...',
@@ -38,15 +43,13 @@ export class PaywallService extends Service {
   }
 
   async handleWebhookEvent(event: any) {
-    // Handle webhook events from payment processor
-    // This is a placeholder implementation
     switch (event.type) {
       case 'checkout.session.completed':
-        // Update user's subscription
+        // TODO: Update user's subscription in DB
         break;
       case 'customer.subscription.updated':
       case 'customer.subscription.deleted':
-        // Update or cancel subscription
+        // TODO: Update or cancel subscription
         break;
     }
   }

@@ -26,11 +26,13 @@ class BaseMarketDataService(ABC):
         self.rate_limit_period = rate_limit_period
         self._request_timestamps: List[datetime] = []
         self._session: Optional[aiohttp.ClientSession] = None
+        self._session_lock = asyncio.Lock()
         
     async def get_session(self) -> aiohttp.ClientSession:
         """Get or create an aiohttp client session."""
-        if self._session is None or self._session.closed:
-            self._session = aiohttp.ClientSession()
+        async with self._session_lock:
+            if self._session is None or self._session.closed:
+                self._session = aiohttp.ClientSession()
         return self._session
         
     async def close(self):

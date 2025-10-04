@@ -1,5 +1,8 @@
 import { PrismaClient } from '@prisma/client';
-import { Service } from '../base.service';
+// Assuming BaseService is a default export
+import BaseService from '../base.service';
+
+// --- INTERFACES ---
 
 export interface ReferralData {
   referrerId: string;
@@ -7,91 +10,124 @@ export interface ReferralData {
   campaign?: string;
 }
 
-export interface Commission {
+export interface CommissionSummary {
   amount: number;
   currency: string;
   status: 'pending' | 'approved' | 'paid' | 'rejected';
   referralId: string;
 }
 
-export class AffiliateService extends Service {
+// --- SERVICE CLASS ---
+
+export class AffiliateService extends BaseService {
+  private static instance: AffiliateService;
   private prisma: PrismaClient;
 
-  constructor() {
-    super();
+  private constructor() {
+    super(300); // Cache TTL = 5 minutes
     this.prisma = new PrismaClient();
   }
 
+  public static getInstance(): AffiliateService {
+    if (!AffiliateService.instance) {
+      AffiliateService.instance = new AffiliateService();
+    }
+    return AffiliateService.instance;
+  }
+
+  /**
+   * Creates a new referral record when a user refers someone.
+   */
   async createReferral(data: ReferralData) {
     return this.prisma.referral.create({
       data: {
         referrer: { connect: { id: data.referrerId } },
         referredEmail: data.referredEmail,
         campaign: data.campaign,
-        status: 'PENDING'
-      }
+        status: 'PENDING',
+      },
     });
   }
 
+  /**
+   * Marks a referral record as converted (e.g., when the referred user signs up/purchases).
+   */
   async recordConversion(referralId: string) {
     return this.prisma.referral.update({
       where: { id: referralId },
-      data: { status: 'CONVERTED' }
+      data: { status: 'CONVERTED' },
     });
   }
 
+  /**
+   * Generates a unique affiliate link for a user and campaign.
+   */
   async generateAffiliateLink(userId: string, campaign?: string) {
     const baseUrl = process.env.APP_URL || 'https://beginnerinvestorhub.com';
     const params = new URLSearchParams({
       ref: userId,
-      ...(campaign && { campaign })
+      ...(campaign ? { campaign } : {}),
     });
-    
+
     return `${baseUrl}/signup?${params.toString()}`;
   }
 
+  /**
+   * Retrieves all referrals associated with a specific user.
+   */
   async getReferrals(userId: string) {
     return this.prisma.referral.findMany({
       where: { referrerId: userId },
-      orderBy: { createdAt: 'desc' }
+      orderBy: { createdAt: 'desc' },
     });
   }
 
-  async calculateCommissions(userId: string) {
+  /**
+   * Calculates commissions for all converted referrals that have associated purchases.
+   */
+  async calculateCommissions(userId: string): Promise<CommissionSummary[]> {
     const referrals = await this.prisma.referral.findMany({
       where: {
         referrerId: userId,
         status: 'CONVERTED',
-        commissionPaid: false
+        commissionPaid: false,
       },
       include: {
-        // Assuming there's a related subscription or purchase
-        subscription: true
-      }
+        subscription: true, // Assumes your Referral model has a subscription relation
+      },
     });
 
-    // Calculate commissions based on your business logic
     const commissionRate = 0.1; // 10% commission
-    const commissions = referrals.map(referral => ({
-      amount: (referral.subscription?.amount || 0) * commissionRate,
-      currency: 'USD',
-      status: 'pending' as const,
-      referralId: referral.id
-    }));
+
+    const commissions: CommissionSummary[] = referrals
+      .filter((r) => r.subscription && r.subscription.amount > 0)
+      .map((referral) => ({
+        amount: referral.subscription!.amount * commissionRate,
+        currency: 'USD',
+        status: 'pending',
+        referralId: referral.id,
+      }));
 
     return commissions;
   }
 
-  async trackAffiliateVisit(referrerId: string, ipAddress: string, userAgent: string) {
+  /**
+   * Tracks an affiliate link visit for analytics and fraud detection.
+   */
+  async trackAffiliateVisit(
+    referrerId: string,
+    ipAddress: string,
+    userAgent: string
+  ) {
     return this.prisma.affiliateVisit.create({
       data: {
         referrer: { connect: { id: referrerId } },
         ipAddress,
         userAgent,
-        timestamp: new Date()
-      }
+        timestamp: new Date(),
+      },
     });
   }
 }
 
-export const affiliateService = new AffiliateService();
+export const affiliateService = AffiliateService.getInstance();

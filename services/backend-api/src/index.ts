@@ -9,7 +9,7 @@ import { trackAffiliate } from './middleware/affiliate.middleware';
 
 // Load environment variables
 import path from 'path';
-dotenv.config({ path: path.resolve(process.cwd(), '.env') });
+dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
 console.log('✅ ENV Check:', {
   DATABASE_URL: process.env.DATABASE_URL,

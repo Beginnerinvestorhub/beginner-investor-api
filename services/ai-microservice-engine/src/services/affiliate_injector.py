@@ -29,6 +29,10 @@ class AffiliateInjector:
         self.openai_api_key = os.getenv("OPENAI_API_KEY")
         if not self.openai_api_key:
             logger.warning("OPENAI_API_KEY not found in environment variables")
+        
+        # Initialize OpenAI client for new API
+        if self.openai_api_key:
+            openai.api_key = self.openai_api_key
     
     def _load_prompts(self) -> Dict[str, str]:
         """Load prompt templates from JSON files in the prompts directory."""
@@ -76,7 +80,8 @@ class AffiliateInjector:
         )
         
         try:
-            response = await openai.ChatCompletion.acreate(
+            client = openai.AsyncOpenAI(api_key=self.openai_api_key)
+            response = await client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that helps integrate affiliate links naturally into content."},
@@ -86,7 +91,7 @@ class AffiliateInjector:
                 max_tokens=1000
             )
             
-            return response.choices[0].message['content'].strip()
+            return response.choices[0].message.content.strip()
             
         except Exception as e:
             logger.error(f"Error generating content with OpenAI: {e}")
@@ -119,7 +124,8 @@ class AffiliateInjector:
         )
         
         try:
-            response = await openai.ChatCompletion.acreate(
+            client = openai.AsyncOpenAI(api_key=self.openai_api_key)
+            response = await client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are a helpful assistant that suggests relevant affiliate products."},
@@ -130,7 +136,7 @@ class AffiliateInjector:
             )
             
             # Parse the response into a list of suggestions
-            suggestions_text = response.choices[0].message['content'].strip()
+            suggestions_text = response.choices[0].message.content.strip()
             # Simple parsing - in a real implementation, you might want to use a more robust approach
             suggestions = [{"product": line.split(":")[0].strip(), 
                           "description": ":".join(line.split(":")[1:]).strip()}
@@ -174,7 +180,8 @@ class AffiliateInjector:
         )
         
         try:
-            response = await openai.ChatCompletion.acreate(
+            client = openai.AsyncOpenAI(api_key=self.openai_api_key)
+            response = await client.chat.completions.create(
                 model=model,
                 messages=[
                     {"role": "system", "content": "You are an SEO expert that helps optimize content for search engines while naturally incorporating affiliate links."},
@@ -184,7 +191,7 @@ class AffiliateInjector:
                 max_tokens=1500
             )
             
-            return response.choices[0].message['content'].strip()
+            return response.choices[0].message.content.strip()
             
         except Exception as e:
             logger.error(f"Error optimizing content for SEO: {e}")

@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { RedisService } from '../services/redis/redis.service';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
+import { RedisClientType } from 'redis';
 
 const RATE_LIMIT = 10; // 10 requests
 const WINDOW_SECONDS = 60; // per minute
@@ -15,7 +16,7 @@ const WINDOW_SECONDS = 60; // per minute
 export const nudgeRateLimiter = async (req: Request, res: Response, next: NextFunction) => {
     const clientId = req.user?.id || req.ip; // Use authenticated user ID or IP
     const key = `nudge_limit:${clientId}`;
-    const redis = RedisService.getInstance();
+    const redis = RedisService.getInstance() as unknown as RedisClientType;
 
     try {
         const current = await redis.incr(key);

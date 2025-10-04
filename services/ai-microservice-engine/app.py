@@ -9,6 +9,7 @@ import logging
 
 # Import services
 from src.services.affiliate_injector import AffiliateInjector
+from src.services.ai_nudge_service import AIEnhancedNudgeService
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -21,6 +22,7 @@ app = FastAPI(title="AI Microservice")
 
 # Initialize services
 affiliate_injector = AffiliateInjector()
+nudge_service = AIEnhancedNudgeService()
 
 # Configure CORS
 app.add_middleware(
@@ -42,20 +44,20 @@ class AffiliateSuggestionRequest(BaseModel):
     content: str
     context: str = ""
     model: str = "gpt-3.5-turbo"
-
 class SEOOptimizationRequest(BaseModel):
     content: str
     affiliate_link: str
     keywords: List[str]
     context: str = ""
-    model: str = "gpt-3.5-turbo"
 
-# Health check endpoint
-@app.get("/health")
-async def health_check():
-    return {"status": "healthy"}
+class NudgeRequest(BaseModel):
+    user_id: str
+    investment_experience: str
+    risk_profile: dict
+    portfolio_metrics: dict
+    recent_actions: List[dict] = []
+    market_conditions: dict = {}
 
-# Root endpoint
 @app.get("/")
 async def root():
     return {"message": "AI Microservice API - Affiliate Injection Service"}
@@ -127,6 +129,37 @@ async def optimize_content_seo(request: SEOOptimizationRequest):
         return {"status": "success", "data": optimized_content}
     except Exception as e:
         logger.error(f"Error in optimize_content_seo: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+# Generate personalized investment nudge
+@app.post("/api/v1/nudge/generate")
+async def generate_personalized_nudge(request: NudgeRequest):
+    """
+    Generate a personalized behavioral nudge based on user profile and market conditions.
+
+    - **user_id**: Unique identifier for the user
+    - **investment_experience**: Experience level (beginner/intermediate/advanced)
+    - **risk_profile**: User's risk tolerance and preferences
+    - **portfolio_metrics**: Current portfolio performance metrics
+    - **recent_actions**: User's recent investment activities
+    - **market_conditions**: Current market conditions and trends
+    """
+    try:
+        from src.services.ai_nudge_service import NudgeContext
+
+        context = NudgeContext(
+            user_id=request.user_id,
+            investment_experience=request.investment_experience,
+            risk_profile=request.risk_profile,
+            portfolio_metrics=request.portfolio_metrics,
+            recent_actions=request.recent_actions,
+            market_conditions=request.market_conditions
+        )
+
+        nudge_response = await nudge_service.generate_personalized_nudge(context)
+        return {"status": "success", "data": nudge_response.dict()}
+    except Exception as e:
+        logger.error(f"Error generating nudge: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
 if __name__ == "__main__":

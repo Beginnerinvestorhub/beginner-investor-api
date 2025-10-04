@@ -1,86 +1,74 @@
+// components/FeatureCard.tsx
 
-
+import { isValidElement, cloneElement, ReactNode } from 'react';
 import Link from 'next/link';
-import { ReactElement } from 'react';
 
-interface FeatureCardProps {
-  icon: ReactElement;
+export interface FeatureCardProps {
+  icon: ReactNode;
   title: string;
   description: string;
-  href: string;
-  linkText: string;
-  // New prop to handle dynamic styling
-  iconColor: 'indigo' | 'green' | 'blue' | 'purple'; 
+  className?: string;
+  iconColor?: 'indigo' | 'green' | 'blue' | 'purple';
+  href?: string;
+  linkText?: string;
 }
 
-<<<<<<< HEAD
-export default function FeatureCard({ icon, title, description, className }: FeatureCardProps) {
-  const sizedIcon = isValidElement(icon)
-    ? cloneElement(icon, {
-        className: 'w-6 h-6 sm:w-7 sm:h-7 text-indigo-500',
-      })
-    : icon;
-
-  return (
-    <div className={`bg-white rounded-lg shadow-sm p-5 sm:p-6 w-full flex flex-col items-center text-center transition-all duration-200 ease-in-out hover:shadow-md ${className}`}>
-      <div className="mb-4 bg-indigo-50 p-3 sm:p-4 rounded-full flex items-center justify-center">
-        {sizedIcon}
-      </div>
-      <h3 className="text-lg sm:text-xl font-bold text-gray-800 mb-2">{title}</h3>
-      <p className="text-sm sm:text-base text-gray-600 leading-relaxed">{description}</p>
-=======
-// Map color prop to Tailwind classes
-const colorMap = {
-  indigo: {
-    bg: 'bg-indigo-100',
-    text: 'text-indigo-600',
-    ring: 'ring-indigo-500',
-  },
-  green: {
-    bg: 'bg-green-100',
-    text: 'text-green-600',
-    ring: 'ring-green-500',
-  },
-  blue: {
-    bg: 'bg-blue-100',
-    text: 'text-blue-600',
-    ring: 'ring-blue-500',
-  },
-  purple: {
-    bg: 'bg-purple-100',
-    text: 'text-purple-600',
-    ring: 'ring-purple-500',
-  },
+const iconColorClasses: Record<NonNullable<FeatureCardProps['iconColor']>, string> = {
+  indigo: 'text-indigo-500',
+  green: 'text-green-500',
+  blue: 'text-blue-500',
+  purple: 'text-purple-500',
 };
 
 export default function FeatureCard({
   icon,
   title,
   description,
+  className = '',
+  iconColor = 'indigo',
   href,
   linkText,
-  iconColor,
 }: FeatureCardProps) {
-  const colors = colorMap[iconColor];
+  const sizedIcon = isValidElement(icon)
+    ? cloneElement(icon, {
+        className: `h-6 w-6 ${iconColorClasses[iconColor]}`,
+        'aria-hidden': true,
+      })
+    : null;
 
-  return (
-    <div className="bg-white rounded-xl shadow-lg p-6 border border-gray-100 transition duration-300 hover:shadow-xl hover:border-gray-200">
-      {/* Icon Container: Smaller, circular, and colored background */}
-      <div className={`flex items-center justify-center h-12 w-12 rounded-full ${colors.bg} mb-4`}>
-        {/* The icon itself is now h-6 w-6 and should have been passed the text color */}
-        {icon} 
+  const cardContent = (
+    <div className={`group relative bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 ${className}`}>
+      <div className="flex items-start space-x-4">
+        <div className="flex-shrink-0">{sizedIcon}</div>
+        <div className="flex-1 min-w-0">
+          <h3 className="text-lg font-semibold text-gray-900 group-hover:text-indigo-600 transition-colors">
+            {title}
+          </h3>
+          <p className="mt-2 text-sm text-gray-600 leading-relaxed">
+            {description}
+          </p>
+          {linkText && (
+            <div className="mt-4">
+              <span className="inline-flex items-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
+                {linkText}
+                <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </div>
+          )}
+        </div>
       </div>
-      
-      <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-      <p className="text-gray-600 mb-4">{description}</p>
-      
-      <Link href={href} className={`text-sm font-semibold flex items-center ${colors.text} hover:underline`}>
-        {linkText}
-        <svg className="ml-1 h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-        </svg>
-      </Link>
->>>>>>> eddd123aa796b3298570cc09d87d890408a8071c
     </div>
   );
+
+  if (href) {
+    return (
+      <Link href={href} className="block">
+        {cardContent}
+      </Link>
+    );
+  }
+
+  return cardContent;
 }

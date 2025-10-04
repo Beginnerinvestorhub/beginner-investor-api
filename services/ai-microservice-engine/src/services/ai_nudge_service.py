@@ -2,8 +2,10 @@ from typing import List, Dict, Optional, Any
 from datetime import datetime
 import logging
 from pydantic import BaseModel, Field, validator
-from openai import AsyncOpenAI
+import openai
 import json
+
+from .service_integrator import service_integrator
 
 class NudgeContext(BaseModel):
     user_id: str
@@ -39,15 +41,17 @@ class AIEnhancedNudgeService:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.logger = logging.getLogger(__name__)
-        self.client = AsyncOpenAI()
+{{ ... }}
 
     async def generate_personalized_nudge(
         self,
         context: NudgeContext
     ) -> NudgeResponse:
-        """Generate a personalized behavioral nudge using AI"""
+        """Generate a personalized behavioral nudge using AI and integrate with behavioral-nudge-engine"""
+
+        # First, use AI to analyze the context and generate nudge content
         prompt = self._build_prompt(context)
-        
+
         try:
             response = await self.client.chat.completions.create(
                 model=self.model_name,
@@ -58,19 +62,50 @@ class AIEnhancedNudgeService:
                 temperature=self.temperature,
                 max_tokens=self.max_tokens
             )
-            
+
             if not response.choices or not response.choices[0].message.content:
                 raise ValueError("Empty response from AI model")
-                
+
             parsed_response = self._parse_ai_response(response.choices[0].message.content)
-            return self._enhance_with_resources(parsed_response, context)
-            
+
+            # Enhance with resources based on nudge type
+            enhanced_response = self._enhance_with_resources(parsed_response, context)
+
+            # Now integrate with behavioral-nudge-engine to store the nudge
+            nudge_data = {
+                "user_id": context.user_id,
+                "type": enhanced_response.type,
+                "title": f"AI-Generated {enhanced_response.type.title()} Nudge",
+                "content": enhanced_response.message,
+                "priority": enhanced_response.priority,
+                "metadata": {
+                    "generated_by": "ai-microservice-engine",
+                    "ai_model": self.model_name,
+                    "context": parsed_response.get("context", ""),
+                    "investment_experience": context.investment_experience,
+                    "generated_at": datetime.utcnow().isoformat()
+                }
+            }
+
+            # Try to create the nudge in behavioral-nudge-engine
+            try:
+                integration_result = await service_integrator.create_behavioral_nudge(nudge_data)
+                if "error" not in integration_result:
+                    enhanced_response.metadata["behavioral_engine_id"] = integration_result.get("id")
+                    self.logger.info(f"Successfully integrated nudge with behavioral-nudge-engine: {integration_result.get('id')}")
+                else:
+                    self.logger.warning(f"Failed to integrate with behavioral-nudge-engine: {integration_result['error']}")
+            except Exception as e:
+                self.logger.error(f"Error integrating with behavioral-nudge-engine: {str(e)}")
+
+            return enhanced_response
+
         except Exception as e:
             self.logger.error(f"Error generating nudge: {str(e)}", exc_info=True)
             raise
 
     def _build_prompt(self, context: NudgeContext) -> str:
-        """Build a context-aware prompt for the AI"""
+{{ ... }}
         return f"""
         Generate a personalized investment nudge for a {context.investment_experience} investor.
         

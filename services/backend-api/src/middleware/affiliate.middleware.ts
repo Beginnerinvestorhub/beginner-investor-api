@@ -1,5 +1,13 @@
 import { Request, Response, NextFunction } from 'express';
 import { affiliateService } from '../services/affiliate/affiliate.service';
+import { SessionData } from 'express-session';
+
+declare module 'express-session' {
+  interface SessionData {
+    referrerId?: string;
+    campaign?: string;
+  }
+}
 
 export const trackAffiliate = (req: Request, res: Response, next: NextFunction) => {
   // Check for referral code in query params

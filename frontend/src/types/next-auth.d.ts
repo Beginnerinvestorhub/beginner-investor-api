@@ -33,7 +33,7 @@ declare module 'next-auth/jwt' {
 }
 
 // This ensures the file is treated as a module
-export {}; { DefaultSession } from 'next-auth';
+export {};
 
 declare module 'next-auth' {
   interface Session {

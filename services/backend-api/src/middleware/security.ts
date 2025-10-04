@@ -37,7 +37,7 @@ const securityHeaders: RequestHandler = (req, res, next) => {
     noSniff: true,
     referrerPolicy: { policy: 'same-origin' },
     frameguard: {
-      action: 'sameorigin'
+      action: 'deny'
     }
   })(req, res, next);
 };

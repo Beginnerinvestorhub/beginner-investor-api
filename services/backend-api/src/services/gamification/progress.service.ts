@@ -1,17 +1,23 @@
-import { Prisma, PrismaClient, UserProgress } from '@prisma/client';
+import { Prisma } from '@prisma/client';
 import { prisma } from '../../config/prisma';
-import { BaseService } from '../base.service';
+import BaseService from '../base.service';
 
-export interface UserProgressWithRank extends UserProgress {
-  rank?: number;
+export interface UserProgressWithRank {
+  id: string;
+  userId: string;
+  level: number;
+  experience: number;
+  totalPoints: number;
+  rank: number;
+  lastActivityAt: Date;
   xpToNextLevel: number;
 }
 
 export class ProgressService extends BaseService {
   private static instance: ProgressService;
-  
+
   private constructor() {
-    super(300); // 5 minutes cache TTL by default
+    super(300);
   }
 
   public static getInstance(): ProgressService {
@@ -22,13 +28,9 @@ export class ProgressService extends BaseService {
   }
 
   public async addExperience(userId: string, xpToAdd: number): Promise<UserProgressWithRank> {
-    if (xpToAdd <= 0) {
-      return this.getUserProgress(userId);
-    }
+    if (xpToAdd <= 0) return this.getUserProgress(userId);
 
-    // Use a transaction to ensure data consistency
     return prisma.$transaction(async (tx) => {
-      // Get or create user progress with row-level lock
       let progress = await tx.userProgress.upsert({
         where: { userId },
         create: {
@@ -41,19 +43,16 @@ export class ProgressService extends BaseService {
         update: {},
       });
 
-      // Calculate new experience and level
       let { level, experience } = progress;
       let newExperience = experience + xpToAdd;
       let levelUps = 0;
 
-      // Calculate level ups
       while (newExperience >= this.getXpForLevel(level + 1)) {
         newExperience -= this.getXpForLevel(level + 1);
         level++;
         levelUps++;
       }
 
-      // Update progress
       progress = await tx.userProgress.update({
         where: { userId },
         data: {
@@ -64,15 +63,11 @@ export class ProgressService extends BaseService {
         },
       });
 
-      // Recalculate ranks if there were level ups
       if (levelUps > 0) {
         await this.recalculateRanks(tx);
       }
 
-      // Get the user's rank
       const rank = await this.getUserRank(userId, tx);
-      
-      // Invalidate caches
       await this.invalidateUserCaches(userId);
 
       return {
@@ -85,19 +80,14 @@ export class ProgressService extends BaseService {
 
   public async getUserProgress(userId: string): Promise<UserProgressWithRank> {
     const cacheKey = this.generateCacheKey('user:progress', userId);
-    
-    return this.getCachedOrFetch(cacheKey, async () => {
-      const progress = await prisma.userProgress.findUnique({
-        where: { userId },
-      });
 
-      if (!progress) {
-        // Create default progress if it doesn't exist
-        return this.createDefaultProgress(userId);
-      }
+    return this.getCachedOrFetch(cacheKey, async () => {
+      const progress = await prisma.userProgress.findUnique({ where: { userId } });
+
+      if (!progress) return this.createDefaultProgress(userId);
 
       const rank = await this.getUserRank(userId);
-      
+
       return {
         ...progress,
         rank,
@@ -106,17 +96,16 @@ export class ProgressService extends BaseService {
     });
   }
 
-  public async getLeaderboard(limit: number = 10): Promise<UserProgressWithRank[]> {
+  public async getLeaderboard(limit = 10): Promise<UserProgressWithRank[]> {
     const cacheKey = this.generateCacheKey('leaderboard:progress', limit);
-    
+
     return this.getCachedOrFetch(cacheKey, async () => {
-      // Use raw query for better performance with ranking
       const leaderboard = await prisma.$queryRaw<UserProgressWithRank[]>`
         WITH ranked_users AS (
           SELECT 
             *,
             RANK() OVER (ORDER BY level DESC, "totalPoints" DESC) as rank,
-            (SELECT (100 * (level + 1) * (level + 1)) - experience as xp_to_next_level)
+            (100 * (level + 1) * (level + 1)) - experience as "xpToNextLevel"
           FROM "UserProgress"
           ORDER BY level DESC, "totalPoints" DESC
           LIMIT ${limit}
@@ -130,8 +119,7 @@ export class ProgressService extends BaseService {
 
   public async recalculateRanks(tx?: Prisma.TransactionClient): Promise<void> {
     const prismaClient = tx || prisma;
-    
-    // Update ranks based on level and total points
+
     await prismaClient.$executeRaw`
       UPDATE "UserProgress" up1
       SET "rank" = subquery.rank
@@ -144,24 +132,20 @@ export class ProgressService extends BaseService {
       WHERE up1.id = subquery.id;
     `;
 
-    // Invalidate all leaderboard caches
     await this.invalidateCache('leaderboard:progress:*');
   }
 
   public async getUserRank(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
     const prismaClient = tx || prisma;
-    
+
     const result = await prismaClient.$queryRaw<Array<{ rank: number }>>`
-      SELECT "rank" 
-      FROM "UserProgress" 
-      WHERE "userId" = ${userId};
+      SELECT "rank" FROM "UserProgress" WHERE "userId" = ${userId};
     `;
 
     return result[0]?.rank || 0;
   }
 
   private getXpForLevel(level: number): number {
-    // Quadratic leveling formula: 100 * level^2
     return 100 * level * level;
   }
 
@@ -176,25 +160,22 @@ export class ProgressService extends BaseService {
       },
     });
 
-    // Recalculate all ranks to include the new user
     await this.recalculateRanks();
 
     return {
       ...progress,
       rank: 0,
-      xpToNextLevel: this.getXpForLevel(2), // 100 * 2^2 = 400 XP to next level
+      xpToNextLevel: this.getXpForLevel(2),
     };
   }
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
       this.generateCacheKey('user:progress', userId),
-      'leaderboard:progress:*', // Invalidate all leaderboard caches
+      'leaderboard:progress:*',
     ];
-    
     await this.invalidateCache(cacheKeys);
   }
 }
 
-// Export a singleton instance
 export const progressService = ProgressService.getInstance();

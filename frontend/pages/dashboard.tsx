@@ -8,10 +8,10 @@ import MarketDataWidget from '../components/MarketDataWidget';
 import { useGamificationAPI } from '../hooks/useGamificationAPI';
 import UserStatsCard from '../components/gamification/UserStatsCard';
 import AchievementNotification from '../components/gamification/AchievementNotification';
-import { useOnboardingCompleted } from '../store/learningStore';
+import { useOnboardingCompleted } from '../src/store/learningStore';
 import PersonalizedLearningDashboard from '../components/learning/PersonalizedLearningDashboard';
 
-const STRIPE_PRICE_ID = 'price_12345';
+const STRIPE_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_12345'; // Fallback for development
 
 // Define a type for your notification item
 type NotificationItem = {

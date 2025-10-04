@@ -7,9 +7,14 @@ from fastapi import FastAPI, Depends, HTTPException, status
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.security import OAuth2PasswordBearer
 
-from .core.config import settings
-from .api.v1.api import api_router
-from .core.security import verify_token
+try:
+    from .core.config import settings
+    from .api.v1.api import api_router
+    from .core.security import verify_token
+except ImportError as e:
+    print(f"Import error: {e}")
+    print("Please ensure all modules are properly structured")
+    raise
 
 app = FastAPI(
     title=settings.PROJECT_NAME,
@@ -49,6 +54,17 @@ async def test_protected_route(token: str = Depends(verify_token)):
     return {
         "message": "This is a protected endpoint",
         "user_id": token.get("sub")
+    }
+
+# Root endpoint
+@app.get("/")
+async def root():
+    """Root endpoint with service information."""
+    return {
+        "message": "Portfolio Simulation Service",
+        "version": "0.1.0",
+        "docs": "/docs",
+        "health": "/health"
     }
 
 if __name__ == "__main__":

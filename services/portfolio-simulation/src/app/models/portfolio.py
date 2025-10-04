@@ -2,47 +2,48 @@
 from typing import Dict, List, Optional, Any
 from datetime import datetime
 import json
+from uuid import UUID, uuid4
 
 from sqlalchemy import Column, String, Float, Text, Boolean, ForeignKey, JSON
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
-from sqlalchemy.orm import relationship, Mapped
+from sqlalchemy.orm import relationship, Mapped, mapped_column
 
 from .base import Base, TimestampMixin
 
 
 class Portfolio(Base, TimestampMixin):
     """Represents an investment portfolio."""
-    
+
     __tablename__ = "portfolios"
-    
+
     # Basic Information
-    name: Mapped[str] = Column(String(255), nullable=False, index=True)
-    description: Mapped[Optional[str]] = Column(Text, nullable=True)
-    
+    name: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+
     # Owner Information
-    user_id: Mapped[UUID] = Column(
+    user_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         index=True,
         nullable=False,
         doc="ID of the user who owns this portfolio"
     )
-    
+
     # Portfolio Configuration
-    base_currency: Mapped[str] = Column(
+    base_currency: Mapped[str] = mapped_column(
         String(3),
         default="USD",
         nullable=False,
         doc="Base currency for the portfolio (ISO 4217 code)"
     )
-    
+
     # Performance Settings
-    target_return: Mapped[Optional[float]] = Column(
+    target_return: Mapped[Optional[float]] = mapped_column(
         Float,
         nullable=True,
         doc="Target annual return for the portfolio (as a decimal, e.g., 0.07 for 7%)"
     )
-    
-    risk_tolerance: Mapped[Optional[str]] = Column(
+
+    risk_tolerance: Mapped[Optional[str]] = mapped_column(
         String(20),
         nullable=True,
         doc="Risk tolerance level (e.g., 'conservative', 'moderate', 'aggressive')"
@@ -55,15 +56,15 @@ class Portfolio(Base, TimestampMixin):
         cascade="all, delete-orphan",
         lazy="selectin"
     )
-    
+
     # Metadata
-    tags: Mapped[Optional[dict]] = Column(
+    tags: Mapped[Optional[dict]] = mapped_column(
         JSON,
         nullable=True,
         server_default="{}",
         doc="Additional metadata or tags for the portfolio"
     )
-    
+
     # Relationships
     simulations: Mapped[List["Simulation"]] = relationship(
         "Simulation",
@@ -104,21 +105,21 @@ class Portfolio(Base, TimestampMixin):
 class PortfolioAsset(Base, TimestampMixin):
     """Database model for assets within a portfolio."""
     __tablename__ = "portfolio_assets"
-    
+
     # Core asset information
-    portfolio_id: Mapped[UUID] = Column(
-        PG_UUID(as_uuid=True), 
-        ForeignKey("portfolios.id", ondelete="CASCADE"), 
+    portfolio_id: Mapped[UUID] = mapped_column(
+        PG_UUID(as_uuid=True),
+        ForeignKey("portfolios.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
-    symbol: Mapped[str] = Column(String(20), nullable=False, index=True)
-    name: Mapped[str] = Column(String(100), nullable=False)
-    asset_class: Mapped[str] = Column(String(20), nullable=False)
-    quantity: Mapped[float] = Column(Float, nullable=False)
-    average_cost: Mapped[float] = Column(Float, nullable=False)
-    current_price: Mapped[Optional[float]] = Column(Float, nullable=True)
-    
+    symbol: Mapped[str] = mapped_column(String(20), nullable=False, index=True)
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    asset_class: Mapped[str] = mapped_column(String(20), nullable=False)
+    quantity: Mapped[float] = mapped_column(Float, nullable=False)
+    average_cost: Mapped[float] = mapped_column(Float, nullable=False)
+    current_price: Mapped[Optional[float]] = mapped_column(Float, nullable=True)
+
     # Relationships
     portfolio: Mapped[Portfolio] = relationship("Portfolio", back_populates="assets")
     
@@ -142,24 +143,24 @@ class PortfolioAsset(Base, TimestampMixin):
 class Simulation(Base, TimestampMixin):
     """Database model for simulation runs."""
     __tablename__ = "simulations"
-    
+
     # Core simulation information
-    portfolio_id: Mapped[UUID] = Column(
+    portfolio_id: Mapped[UUID] = mapped_column(
         PG_UUID(as_uuid=True),
         ForeignKey("portfolios.id", ondelete="CASCADE"),
         nullable=False,
         index=True
     )
-    name: Mapped[str] = Column(String(100), nullable=False)
-    description: Mapped[Optional[str]] = Column(Text, nullable=True)
-    status: Mapped[str] = Column(String(20), default="pending", nullable=False)  # pending, running, completed, failed
-    
+    name: Mapped[str] = mapped_column(String(100), nullable=False)
+    description: Mapped[Optional[str]] = mapped_column(Text, nullable=True)
+    status: Mapped[str] = mapped_column(String(20), default="pending", nullable=False)  # pending, running, completed, failed
+
     # Simulation parameters (stored as JSON for flexibility)
-    parameters: Mapped[dict] = Column(JSON, nullable=False)
-    
+    parameters: Mapped[dict] = mapped_column(JSON, nullable=False)
+
     # Results (stored as JSON for flexibility)
-    results: Mapped[Optional[dict]] = Column(JSON, nullable=True)
-    
+    results: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+
     # Relationships
     portfolio: Mapped[Portfolio] = relationship("Portfolio", back_populates="simulations")
     
@@ -174,6 +175,5 @@ class Simulation(Base, TimestampMixin):
             "parameters": self.parameters,
             "results": self.results,
             "created_at": self.created_at.isoformat(),
-            "updated_at": self.updated_at.isoformat(),
-            "is_active": self.is_active
+            "updated_at": self.updated_at.isoformat()
         }

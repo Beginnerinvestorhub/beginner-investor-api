@@ -1,6 +1,6 @@
-import { Prisma, PrismaClient, BadgeType } from '@prisma/client';
+import { BadgeType } from '@prisma/client';
 import { prisma } from '../../config/prisma';
-import { BaseService } from '../base.service';
+import BaseService from '../base.service';
 
 export interface AwardBadgeInput {
   userId: string;
@@ -19,14 +19,14 @@ export interface BadgeLeaderboardEntry {
 export interface RareBadge {
   type: BadgeType;
   count: number;
-  rarity: number; // percentage of users who have this badge
+  rarity: number;
 }
 
 export class BadgeService extends BaseService {
   private static instance: BadgeService;
-  
+
   private constructor() {
-    super(300); // 5 minutes cache TTL by default
+    super(300);
   }
 
   public static getInstance(): BadgeService {
@@ -38,16 +38,11 @@ export class BadgeService extends BaseService {
 
   public async awardBadge(input: AwardBadgeInput) {
     const { userId, type, description, metadata = {}, allowDuplicates = false } = input;
-    
-    // Check if user already has this badge (if duplicates are not allowed)
-    if (!allowDuplicates) {
-      const hasBadge = await this.hasBadge(userId, type);
-      if (hasBadge) {
-        return null;
-      }
+
+    if (!allowDuplicates && await this.hasBadge(userId, type)) {
+      return null;
     }
 
-    // Create the badge
     const badge = await prisma.badge.create({
       data: {
         userId,
@@ -58,43 +53,32 @@ export class BadgeService extends BaseService {
       },
     });
 
-    // Invalidate relevant caches
     await this.invalidateUserCaches(userId);
-
     return badge;
   }
 
   public async getUserBadges(userId: string, type?: BadgeType) {
     const cacheKey = this.generateCacheKey('user:badges', userId, type || 'all');
-    
-    return this.getCachedOrFetch(cacheKey, () => {
-      return prisma.badge.findMany({
-        where: { 
-          userId,
-          ...(type ? { type } : {}),
-        },
+    return this.getCachedOrFetch(cacheKey, () =>
+      prisma.badge.findMany({
+        where: { userId, ...(type ? { type } : {}) },
         orderBy: { awardedAt: 'desc' },
-      });
-    });
+      })
+    );
   }
 
   public async hasBadge(userId: string, type: BadgeType): Promise<boolean> {
     const cacheKey = this.generateCacheKey('user:hasBadge', userId, type);
-    
     return this.getCachedOrFetch(cacheKey, async () => {
-      const count = await prisma.badge.count({
-        where: { userId, type },
-      });
-      
+      const count = await prisma.badge.count({ where: { userId, type } });
       return count > 0;
     });
   }
 
-  public async getBadgeLeaderboard(limit: number = 10): Promise<BadgeLeaderboardEntry[]> {
+  public async getBadgeLeaderboard(limit = 10): Promise<BadgeLeaderboardEntry[]> {
     const cacheKey = this.generateCacheKey('leaderboard:badges', limit);
-    
     return this.getCachedOrFetch(cacheKey, async () => {
-      const leaderboard = await prisma.$queryRaw<BadgeLeaderboardEntry[]>`
+      return prisma.$queryRaw<BadgeLeaderboardEntry[]>`
         WITH badge_counts AS (
           SELECT 
             "userId",
@@ -107,24 +91,16 @@ export class BadgeService extends BaseService {
         )
         SELECT * FROM badge_counts;
       `;
-
-      return leaderboard;
     });
   }
 
-  public async getRareBadges(limit: number = 5): Promise<RareBadge[]> {
+  public async getRareBadges(limit = 5): Promise<RareBadge[]> {
     const cacheKey = this.generateCacheKey('badges:rare', limit);
-    
     return this.getCachedOrFetch(cacheKey, async () => {
-      // Get total number of users
       const totalUsers = await prisma.user.count();
-      
-      if (totalUsers === 0) {
-        return [];
-      }
+      if (totalUsers === 0) return [];
 
-      // Get badge counts and calculate rarity
-      const rareBadges = await prisma.$queryRaw<Array<{ type: BadgeType, count: number }>>`
+      const rareBadges = await prisma.$queryRaw<Array<{ type: BadgeType; count: number }>>`
         SELECT 
           type,
           COUNT(DISTINCT "userId") as count
@@ -134,24 +110,22 @@ export class BadgeService extends BaseService {
         LIMIT ${limit};
       `;
 
-      return rareBadges.map(badge => ({
-        ...badge,
-        rarity: Math.round((badge.count / totalUsers) * 100) / 100, // 2 decimal places
+      return rareBadges.map(b => ({
+        ...b,
+        rarity: Math.round((b.count / totalUsers) * 10000) / 100, // 2 decimal places
       }));
-    }, 3600); // 1 hour cache TTL for rare badges
+    }, 3600);
   }
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
       this.generateCacheKey('user:badges', userId, '*'),
       this.generateCacheKey('user:hasBadge', userId, '*'),
-      'leaderboard:badges:*', // Invalidate all badge leaderboard caches
-      'badges:rare:*', // Invalidate rare badges cache
+      'leaderboard:badges:*',
+      'badges:rare:*',
     ];
-    
     await this.invalidateCache(cacheKeys);
   }
 }
 
-// Export a singleton instance
 export const badgeService = BadgeService.getInstance();

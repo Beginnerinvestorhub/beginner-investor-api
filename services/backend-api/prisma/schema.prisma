@@ -1,6 +1,3 @@
-// This is your Prisma schema file
-// Learn more about Prisma: https://pris.ly/docs
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -10,45 +7,88 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-// User model linked to Firebase Auth
+// --- ENUMS ---
+
+enum SubscriptionTier {
+  FREE
+  BASIC
+  PREMIUM
+  ENTERPRISE
+}
+
+enum ReferralStatus {
+  PENDING
+  CONVERTED
+}
+
+enum BadgeType {
+  ACHIEVEMENT
+  MILESTONE
+  PARTICIPATION
+  RARE
+}
+
+enum PointTransactionType {
+  REWARD
+  PENALTY
+  BONUS
+  PURCHASE
+}
+
+// --- MODELS ---
+
 model User {
-  id            String    @id // Firebase Auth UID
-  email         String    @unique
-  displayName   String?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  profileComplete Boolean @default(false)
-  
-  // Profile information
-  riskTolerance Int?     @default(5) // Scale of 1-10
-  investmentGoals String[]
-  experienceLevel String? // "beginner", "intermediate", "advanced"
-  
-  // Investment data
-  portfolio     Portfolio?
-  transactions  Transaction[]
-  watchlist    WatchlistItem[]
-  
-  // Learning progress
+  id               String           @id // Firebase Auth UID
+  email            String           @unique
+  displayName      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
+  profileComplete  Boolean          @default(false)
+
+  // Profile
+  riskTolerance    Int?             @default(5)
+  investmentGoals  String[]
+  experienceLevel  String?          // "beginner", "intermediate", "advanced"
+
+  // Investment
+  portfolio        Portfolio?
+  transactions     Transaction[]
+  watchlist        WatchlistItem[]
+
+  // Learning
   learningProgress LearningProgress?
-  quizResults     QuizResult[]
-  
-  // Behavioral data
+  quizResults      QuizResult[]
+
+  // Behavioral
   nudgePreferences NudgePreferences?
-  nudgeHistory    NudgeHistory[]
+  nudgeHistory     NudgeHistory[]
+
+  // Subscription
+  subscription     Subscription?
+
+  // Affiliate
+  referrals        Referral[]       @relation("Referrer")
+  affiliateVisits  AffiliateVisit[] @relation("UserVisits")
+  referrerVisits   AffiliateVisit[] @relation("ReferrerVisits")
+
+  // Gamification
+  badges           Badge[]
+  pointTransactions PointTransaction[]
+  userProgress     UserProgress?
+  streak           Streak?
 }
 
 model Portfolio {
-  id          String   @id @default(cuid())
-  userId      String   @unique
-  user        User     @relation(fields: [userId], references: [id])
+  id          String     @id @default(cuid())
+  userId      String     @unique
+  user        User       @relation(fields: [userId], references: [id], onDelete: Cascade)
   totalValue  Float
-  lastUpdated DateTime @updatedAt
-  
-  // Portfolio composition
+  lastUpdated DateTime   @updatedAt
+  cash        Float      @default(0)
+
+  // Composition
   holdings    Holding[]
-  cash        Float    @default(0)
-  
+
   // Risk metrics
   volatility  Float?
   sharpeRatio Float?
@@ -56,82 +96,197 @@ model Portfolio {
 }
 
 model Holding {
-  id          String   @id @default(cuid())
+  id          String     @id @default(cuid())
   portfolioId String
-  portfolio   Portfolio @relation(fields: [portfolioId], references: [id])
+  portfolio   Portfolio  @relation(fields: [portfolioId], references: [id], onDelete: Cascade)
   symbol      String
   quantity    Float
   avgPrice    Float
   lastPrice   Float
-  updatedAt   DateTime @updatedAt
+  updatedAt   DateTime   @updatedAt
+
+  @@index([portfolioId])
+  @@index([symbol])
 }
 
 model Transaction {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  type        String   // "buy", "sell"
-  symbol      String
-  quantity    Float
-  price       Float
-  timestamp   DateTime @default(now())
-  status      String   // "pending", "completed", "failed"
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type      String   // "buy", "sell"
+  symbol    String
+  quantity  Float
+  price     Float
+  timestamp DateTime @default(now())
+  status    String   // "pending", "completed", "failed"
+
+  @@index([userId])
+  @@index([timestamp])
 }
 
 model WatchlistItem {
-  id          String   @id @default(cuid())
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  symbol      String
-  addedAt     DateTime @default(now())
-  alerts      Alert[]
+  id        String     @id @default(cuid())
+  userId    String
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  symbol    String
+  addedAt   DateTime   @default(now())
+  alerts    Alert[]
+
+  @@unique([userId, symbol])
+  @@index([userId])
 }
 
 model Alert {
-  id              String        @id @default(cuid())
+  id              String         @id @default(cuid())
   watchlistItemId String
-  watchlistItem   WatchlistItem @relation(fields: [watchlistItemId], references: [id])
-  type            String        // "price", "volume", "news"
-  condition       String        // JSON string containing alert conditions
-  active         Boolean       @default(true)
+  watchlistItem   WatchlistItem  @relation(fields: [watchlistItemId], references: [id], onDelete: Cascade)
+  type            String         // "price", "volume", "news"
+  condition       String         // JSON string
+  active          Boolean        @default(true)
+
+  @@index([watchlistItemId])
 }
 
 model LearningProgress {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id])
+  id              String   @id @default(cuid())
+  userId          String   @unique
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   completedModules String[]
-  currentModule String?
-  progress      Float    @default(0)
-  lastActivity  DateTime @default(now())
+  currentModule   String?
+  progress        Float    @default(0)
+  lastActivity    DateTime @default(now())
 }
 
 model QuizResult {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  moduleId      String
-  score         Int
-  maxScore      Int
-  completedAt   DateTime @default(now())
+  id          String   @id @default(cuid())
+  userId      String
+  user        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  moduleId    String
+  score       Int
+  maxScore    Int
+  completedAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([moduleId])
 }
 
 model NudgePreferences {
-  id            String   @id @default(cuid())
-  userId        String   @unique
-  user          User     @relation(fields: [userId], references: [id])
-  frequency     String   @default("medium") // "low", "medium", "high"
-  types         String[] // ["educational", "risk", "opportunity"]
-  activeHours   Json     // Store time preferences as JSON
+  id           String   @id @default(cuid())
+  userId       String   @unique
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  frequency    String   @default("medium") // "low", "medium", "high"
+  types        String[]
+  activeHours  Json
 }
 
 model NudgeHistory {
-  id            String   @id @default(cuid())
-  userId        String
-  user          User     @relation(fields: [userId], references: [id])
-  type          String
-  content       String
-  delivered     DateTime @default(now())
-  interacted    Boolean @default(false)
+  id              String   @id @default(cuid())
+  userId          String
+  user            User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type            String
+  content         String
+  delivered       DateTime @default(now())
+  interacted      Boolean  @default(false)
   interactionType String?
+
+  @@index([userId])
+  @@index([delivered])
+}
+
+model Subscription {
+  id          String           @id @default(cuid())
+  userId      String           @unique
+  user        User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  tier        SubscriptionTier @default(FREE)
+  status      String           @default("active")
+  createdAt   DateTime         @default(now())
+  updatedAt   DateTime         @updatedAt
+  expiresAt   DateTime?
+
+  referral    Referral?        @relation("SubscriptionToReferral")
+}
+
+// --- AFFILIATE MODELS ---
+
+model Referral {
+  id              String         @id @default(cuid())
+  referrerId      String
+  referrer        User           @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+  referredEmail   String
+  campaign        String?
+  status          ReferralStatus @default(PENDING)
+  commissionPaid  Boolean        @default(false)
+  createdAt       DateTime       @default(now())
+  subscriptionId  String?        @unique
+  subscription    Subscription?  @relation("SubscriptionToReferral", fields: [subscriptionId], references: [id], onDelete: SetNull)
+
+  @@index([referrerId])
+  @@index([referredEmail])
+}
+
+model AffiliateVisit {
+  id         String   @id @default(cuid())
+  userId     String
+  user       User     @relation("UserVisits", fields: [userId], references: [id], onDelete: Cascade)
+  referrerId String
+  referrer   User     @relation("ReferrerVisits", fields: [referrerId], references: [id], onDelete: Cascade)
+  ipAddress  String
+  userAgent  String
+  timestamp  DateTime @default(now())
+
+  @@index([userId])
+  @@index([referrerId])
+  @@index([timestamp])
+}
+
+// --- GAMIFICATION MODELS ---
+
+model Badge {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  type        BadgeType
+  description String
+  metadata    Json
+  awardedAt   DateTime  @default(now())
+
+  @@index([userId])
+  @@index([type])
+}
+
+model PointTransaction {
+  id          String               @id @default(cuid())
+  userId      String
+  user        User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+  amount      Int
+  type        PointTransactionType
+  description String
+  metadata    Json
+  expiresAt   DateTime?
+  createdAt   DateTime             @default(now())
+
+  @@index([userId])
+  @@index([expiresAt])
+}
+
+model UserProgress {
+  id             String   @id @default(cuid())
+  userId         String   @unique
+  user           User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  level          Int      @default(1)
+  experience     Int      @default(0)
+  totalPoints    Int      @default(0)
+  rank           Int      @default(0)
+  lastActivityAt DateTime @default(now())
+
+  @@index([rank])
+}
+
+model Streak {
+  id               String   @id @default(cuid())
+  userId           String   @unique
+  user             User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  currentStreak    Int      @default(0)
+  longestStreak    Int      @default(0)
+  lastActivityDate DateTime @default(now())
 }

@@ -1,5 +1,5 @@
 import { createClient, RedisClientType, RedisClientOptions } from 'redis';
-import { logger } from '../../utils/logger';
+import logger from '../../utils/logger';
 import { env } from '../../config/env.schema';
 
 export class RedisService {
@@ -230,6 +230,59 @@ export class RedisService {
       return true;
     } catch (error) {
       logger.error('Redis health check failed:', error);
+      return false;
+    }
+  }
+
+  // Set operations
+  public async sAdd(key: string, ...members: string[]): Promise<number> {
+    try {
+      await this.ensureConnected();
+      return await this.client.sAdd(key, members);
+    } catch (error) {
+      logger.error(`Error adding to set ${key}:`, error);
+      return 0;
+    }
+  }
+
+  public async sMembers(key: string): Promise<string[]> {
+    try {
+      await this.ensureConnected();
+      return await this.client.sMembers(key);
+    } catch (error) {
+      logger.error(`Error getting set members ${key}:`, error);
+      return [];
+    }
+  }
+
+  // Database operations
+  public async dbSize(): Promise<number> {
+    try {
+      await this.ensureConnected();
+      return await this.client.dbSize();
+    } catch (error) {
+      logger.error('Error getting database size:', error);
+      return 0;
+    }
+  }
+
+  public async info(section?: string): Promise<string> {
+    try {
+      await this.ensureConnected();
+      return await this.client.info(section);
+    } catch (error) {
+      logger.error('Error getting Redis info:', error);
+      return '';
+    }
+  }
+
+  public async flushDb(): Promise<boolean> {
+    try {
+      await this.ensureConnected();
+      await this.client.flushDb();
+      return true;
+    } catch (error) {
+      logger.error('Error flushing database:', error);
       return false;
     }
   }

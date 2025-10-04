@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { performance } from 'perf_hooks';
-import { logger } from '../utils/logger';
+import logger from '../utils/logger';
 import { env } from '../config/env.schema';
 
 // Track request statistics
@@ -55,8 +55,14 @@ export const performanceMonitor = (req: Request, res: Response, next: NextFuncti
       logger.warn(`Slow request detected: ${method} ${path} took ${duration.toFixed(2)}ms`);
     }
 
-    // Call the original end function
-    return originalEnd.apply(res, args);
+    // Call the original end function with proper type handling
+    if (args.length === 0) {
+      return originalEnd.call(res);
+    } else if (args.length === 1) {
+      return originalEnd.call(res, args[0]);
+    } else {
+      return originalEnd.call(res, args[0], args[1]);
+    }
   };
 
   next();
@@ -97,10 +103,7 @@ if (env.NODE_ENV !== 'test') {
 }
 
 // Middleware to expose performance metrics via API
-export const getPerformanceMetricsHandler = (req: Request, res: Response) => {
+export const getPerformanceMetricsHandler = (_req: Request, res: Response) => {
   const metrics = getPerformanceMetrics();
-  res.json({
-    status: 'success',
-    data: metrics,
-  });
+  res.json(metrics);
 };

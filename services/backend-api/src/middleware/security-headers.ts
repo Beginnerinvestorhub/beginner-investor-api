@@ -13,7 +13,6 @@ type SecurityHeadersConfig = {
   enableXSSFilter?: boolean;
   enableNoSniff?: boolean;
   enableFrameGuard?: boolean;
-  enableHpkp?: boolean;
   enableIENoOpen?: boolean;
   enableReferrerPolicy?: boolean;
   enableDnsPrefetchControl?: boolean;
@@ -31,7 +30,6 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
     enableXSSFilter = true,
     enableNoSniff = true,
     enableFrameGuard = true,
-    enableHpkp = false, // Disabled by default as it can cause issues if misconfigured
     enableIENoOpen = true,
     enableReferrerPolicy = true,
     enableDnsPrefetchControl = true,
@@ -91,14 +89,8 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
           }
         : false,
 
-      // HPKP (HTTP Public Key Pinning) - Disabled by default
-      hpkp: enableHpkp
-        ? {
-            maxAge: 5184000, // 60 days in seconds
-            sha256s: [], // Add your public key hashes here
-            includeSubDomains: true,
-          }
-        : false,
+      // HPKP (HTTP Public Key Pinning) - Deprecated and removed from modern browsers
+      // This configuration is intentionally omitted as HPKP is deprecated
 
       // IE security
       ieNoOpen: enableIENoOpen,
