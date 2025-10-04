@@ -2,6 +2,7 @@ from datetime import datetime
 from decimal import Decimal
 from typing import List, Optional, Dict, Any
 from uuid import UUID, uuid4
+import enum # Standard Python enum module must be imported
 
 from sqlalchemy import (
     Column,
@@ -10,19 +11,23 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Numeric,
-    Enum,
     CheckConstraint,
     Index,
     Text,
     event,
+    ForeignKeyConstraint, # Needed for composite foreign keys
 )
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB, ENUM # SQLAlchemy ENUM
 from sqlalchemy.orm import relationship, validates
+from sqlalchemy.sql import and_ # Needed for composite relationship joins
 
 from .base import Base
 
-# Enums for portfolio types and statuses
-class PortfolioType(str, Enum):
+# ====================================================================
+# ENUM DEFINITIONS (MUST BE FIRST)
+# ====================================================================
+
+class PortfolioType(enum.Enum):
     CASH = "cash"
     RETIREMENT = "retirement"
     TAXABLE = "taxable"
@@ -30,10 +35,27 @@ class PortfolioType(str, Enum):
     TRUST = "trust"
     OTHER = "other"
 
-class PortfolioStatus(str, Enum):
+class PortfolioStatus(enum.Enum):
     ACTIVE = "active"
     CLOSED = "closed"
     FROZEN = "frozen"
+
+class PortfolioTransactionType(enum.Enum):
+    BUY = "buy"
+    SELL = "sell"
+    DIVIDEND = "dividend"
+    DEPOSIT = "deposit"
+    WITHDRAWAL = "withdrawal"
+    TRANSFER_IN = "transfer_in"
+    TRANSFER_OUT = "transfer_out"
+    FEE = "fee"
+    TAX = "tax"
+    ADJUSTMENT = "adjustment"
+
+
+# ====================================================================
+# MODEL DEFINITIONS
+# ====================================================================
 
 class Portfolio(Base):
     """
@@ -44,8 +66,18 @@ class Portfolio(Base):
     # Basic information
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    portfolio_type = Column(Enum(PortfolioType), nullable=False, default=PortfolioType.TAXABLE)
-    status = Column(Enum(PortfolioStatus), nullable=False, default=PortfolioStatus.ACTIVE)
+    
+    portfolio_type = Column(
+        ENUM(PortfolioType, name='portfolio_type', create_type=True),
+        nullable=False,
+        default=PortfolioType.TAXABLE.value
+    )
+    
+    status = Column(
+        ENUM(PortfolioStatus, name='portfolio_status', create_type=True),
+        nullable=False,
+        default=PortfolioStatus.ACTIVE.value
+    )
     
     # Ownership and access
     owner_id = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
@@ -58,7 +90,7 @@ class Portfolio(Base):
     total_gain_loss_pct = Column(Numeric(10, 4), default=0, nullable=False)
     
     # Metadata
-    currency = Column(String(3), default="USD", nullable=False)  # ISO 4217 currency code
+    currency = Column(String(3), default="USD", nullable=False)
     timezone = Column(String(50), default="UTC", nullable=False)
     
     # Relationships
@@ -158,7 +190,18 @@ class PortfolioAsset(Base):
     
     # Relationships
     portfolio = relationship("Portfolio", back_populates="assets")
-    transactions = relationship("PortfolioTransaction", back_populates="asset", cascade="all, delete-orphan")
+    
+    # FIX: Explicitly define the join for the composite foreign key
+    transactions = relationship(
+        "PortfolioTransaction", 
+        back_populates="asset",
+        primaryjoin=and_(
+            'PortfolioTransaction.portfolio_id == PortfolioAsset.portfolio_id',
+            'PortfolioTransaction.asset_id == PortfolioAsset.asset_id'
+        ),
+        foreign_keys='[PortfolioTransaction.portfolio_id, PortfolioTransaction.asset_id]',
+        cascade="all, delete-orphan"
+    )
     
     # Indexes
     __table_args__ = (
@@ -202,32 +245,29 @@ class PortfolioAsset(Base):
         }
 
 
-class PortfolioTransactionType(str, Enum):
-    BUY = "buy"
-    SELL = "sell"
-    DIVIDEND = "dividend"
-    DEPOSIT = "deposit"
-    WITHDRAWAL = "withdrawal"
-    TRANSFER_IN = "transfer_in"
-    TRANSFER_OUT = "transfer_out"
-    FEE = "fee"
-    TAX = "tax"
-    ADJUSTMENT = "adjustment"
-
-
 class PortfolioTransaction(Base):
     """
     Represents a transaction (buy, sell, dividend, etc.) within a portfolio.
     """
     __tablename__ = "portfolio_transactions"
+
+    # Primary key
+    id = Column(PG_UUID(as_uuid=True), primary_key=True, default=uuid4)
     
     # Transaction details
     portfolio_id = Column(PG_UUID(as_uuid=True), ForeignKey("portfolios.id"), index=True, nullable=False)
-    transaction_type = Column(Enum(PortfolioTransactionType), nullable=False)
+    asset_id = Column(String(50), nullable=True)  # Null for cash-only transactions
+    
+    # FIX: PortfolioTransactionType is now defined above this class
+    transaction_type = Column(
+        ENUM(PortfolioTransactionType, 
+             name="portfolio_transaction_type", 
+             create_type=True),
+        nullable=False
+    )
     transaction_date = Column(DateTime, nullable=False, index=True)
     
     # Asset information
-    asset_id = Column(String(50), nullable=True)  # Null for cash transactions
     asset_type = Column(String(20), nullable=True)
     
     # Transaction amounts
@@ -243,23 +283,32 @@ class PortfolioTransaction(Base):
     
     # Metadata
     description = Column(Text, nullable=True)
-    reference_id = Column(String(100), nullable=True, index=True)  # External reference ID
-    
+    reference_id = Column(String(100), nullable=True, index=True)
+
     # Relationships
     portfolio = relationship("Portfolio", back_populates="transactions")
-    asset = relationship("PortfolioAsset", back_populates="transactions")
     
-    # Indexes
-    __table_args__ = (
-        Index('idx_transaction_portfolio_date', 'portfolio_id', 'transaction_date'),
-        Index('idx_transaction_reference', 'reference_id'),
+    # FIX: Explicitly define the join for the composite foreign key
+    # No need to repeat primaryjoin here, but we must use foreign_keys to guide it
+    asset = relationship(
+        "PortfolioAsset", 
+        back_populates="transactions",
+        foreign_keys="[PortfolioTransaction.portfolio_id, PortfolioTransaction.asset_id]"
     )
-    
+
+    # Constraints
+    # NOTE: Since asset_id is nullable, we rely on the relationship's primaryjoin 
+    # instead of a strict table-level ForeignKeyConstraint.
+    __table_args__ = (
+        Index("idx_transaction_portfolio_date", "portfolio_id", "transaction_date"),
+        Index("idx_transaction_reference", "reference_id"),
+    )
+
     @property
     def net_amount(self) -> Decimal:
         """Calculate the net amount after fees and taxes."""
         return self.amount - self.fee - self.tax
-    
+
     def to_dict(self) -> Dict[str, Any]:
         """Convert transaction to dictionary."""
         return {

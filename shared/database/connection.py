@@ -4,12 +4,13 @@ import os
 import time
 from tenacity import retry, stop_after_attempt, wait_exponential, retry_if_exception_type
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,text
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
 from ..config import get_database_config
 
+<<<<<<< HEAD
 # Get database configuration from centralized config
 db_config = get_database_config()
 DATABASE_URL = db_config['url']
@@ -19,6 +20,18 @@ DATABASE_URL = db_config['url']
     stop=stop_after_attempt(5),
     wait=wait_exponential(multiplier=1, min=4, max=10),
     retry=retry_if_exception_type(Exception)
+=======
+# Create SQLAlchemy engine with connection pooling optimized for PostgreSQL
+engine = create_engine(
+    DATABASE_URL.replace("postgresql://", "postgresql+psycopg://"), 
+    poolclass=QueuePool,
+    pool_size=5,  # Number of connections to keep open
+    max_overflow=10,  # Number of connections to create beyond pool_size
+    pool_timeout=30,  # Seconds to wait before giving up on getting a connection
+    pool_recycle=3600,  # Recycle connections after 1 hour
+    pool_pre_ping=True,  # Enable connection health checks
+    echo=os.getenv("SQL_ECHO", "false").lower() == "true",  # Enable SQL logging if needed
+>>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
 )
 def create_database_engine():
     """Create database engine with retry logic"""
@@ -60,11 +73,11 @@ def get_db() -> Generator[Session, None, None]:
 
 def test_connection() -> bool:
     """
-    Test database connection and return True if successful.
+    test database connection and return True if successful.
     """
     try:
         with SessionLocal() as session:
-            session.execute("SELECT 1")
+            session.execute(text("SELECT 1"))
             return True
     except Exception as e:
         print(f"Database connection failed: {e}")
