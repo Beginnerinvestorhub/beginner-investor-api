@@ -40,7 +40,7 @@ def get_db() -> Generator[Session, None, None]:
 
 def test_connection() -> bool:
     """
-    Test database connection and return True if successful.
+    test database connection and return True if successful.
     """
     try:
         with SessionLocal() as session:
