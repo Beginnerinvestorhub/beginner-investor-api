@@ -14,7 +14,7 @@ if not DATABASE_URL:
 
 # Create SQLAlchemy engine with connection pooling optimized for PostgreSQL
 engine = create_engine(
-    DATABASE_URL,
+    DATABASE_URL.replace("postgresql://", "postgresql+psycopg://"), 
     poolclass=QueuePool,
     pool_size=5,  # Number of connections to keep open
     max_overflow=10,  # Number of connections to create beyond pool_size
