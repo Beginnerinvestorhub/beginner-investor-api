@@ -150,7 +150,6 @@ class User(Base):
 
         return data
 
-
 class UserRole(Base):
     """
     User role association model for many-to-many relationship between users and roles.
@@ -158,14 +157,28 @@ class UserRole(Base):
     __tablename__ = "user_roles"
     
     user_id = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), primary_key=True)
-    role = Column(String(50), primary_key=True)  # e.g., 'admin', 'user', 'premium'
+    role = Column(String(50), primary_key=True)
     
     # Additional role metadata
     granted_at = Column(DateTime, default=datetime.utcnow)
-    granted_by = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
+    
+    # The ForeignKey on granted_by is what caused the ambiguity
+    granted_by = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=True) 
     
     # Relationships
-    user = relationship("User", back_populates="roles")
+    # Explicitly tell SQLAlchemy this relationship is via user_id
+    user = relationship(
+        "User",
+        back_populates="roles",
+        foreign_keys=[user_id]
+    )
+    
+    # Optional: relationship to the user who granted the role
+    granted_by_user = relationship(
+        "User",
+        foreign_keys=[granted_by],
+        viewonly=True
+    )
     
     # Role-specific permissions (stored as JSON)
     permissions = Column(JSONB, default=list, nullable=False)
