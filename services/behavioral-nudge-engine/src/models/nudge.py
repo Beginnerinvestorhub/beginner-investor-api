@@ -1,11 +1,13 @@
 from datetime import datetime
-from sqlalchemy import Column, String, Enum as SQLEnum, JSON, DateTime, ForeignKey, Integer
-from sqlalchemy.orm import relationship
-from shared.database.models.base import BaseModel
+from sqlalchemy import Column, String, Enum as SQLEnum, JSON, DateTime, Integer
+from sqlalchemy.ext.declarative import declarative_base
 from enum import Enum
 from typing import Dict, Any, Optional, List
 from pydantic import BaseModel as PydanticBaseModel, Field, validator
-from uuid import UUID, uuid4
+from uuid import uuid4
+
+# Create a simple base for this service
+Base = declarative_base()
 
 class NudgeType(str, Enum):
     """Types of nudges that can be sent to users."""
@@ -123,3 +125,29 @@ class NudgeListResponse(BaseModel):
                 "has_more": False
             }
         }
+
+# SQLAlchemy model for database
+class Nudge(Base):
+    """SQLAlchemy model for nudges stored in the database."""
+    __tablename__ = "nudges"
+
+    id = Column(String, primary_key=True, index=True, default=lambda: str(uuid4()))
+    user_id = Column(String, index=True, nullable=False)
+    type = Column(SQLEnum(NudgeType), nullable=False)
+    title = Column(String(100), nullable=False)
+    content = Column(String, nullable=False)
+    priority = Column(Integer, default=0, nullable=False)
+    status = Column(SQLEnum(NudgeStatus), default=NudgeStatus.PENDING, nullable=False)
+    metadata = Column(JSON, default=dict)
+
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.utcnow, nullable=False)
+    updated_at = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
+    sent_at = Column(DateTime, nullable=True)
+    viewed_at = Column(DateTime, nullable=True)
+    clicked_at = Column(DateTime, nullable=True)
+    dismissed_at = Column(DateTime, nullable=True)
+    converted_at = Column(DateTime, nullable=True)
+
+    scheduled_for = Column(DateTime, nullable=True)
+    expires_at = Column(DateTime, nullable=True)

@@ -16,21 +16,24 @@ logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # Import routers
-from src.routes import nudge_routes
+from src.api.v1.endpoints.nudges import router as nudge_router
 
 # Application lifespan
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     # Startup: Initialize resources
     logger.info("Starting Behavioral Nudge Engine...")
-    
+
+    # Create database tables
+    from src.config.database import create_tables
+    create_tables()
+
     # Initialize services
-    app.state.nudge_generator = nudge_routes.nudge_generator
-    
-    # Add startup tasks here if needed
-    
+    from src.services.nudge_service import NudgeService
+    app.state.nudge_service = NudgeService()
+
     yield
-    
+
     # Shutdown: Clean up resources
     logger.info("Shutting down Behavioral Nudge Engine...")
 
@@ -45,7 +48,7 @@ app = FastAPI(
 # Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with specific origins
+    allow_origins=os.getenv("CORS_ORIGINS", "http://localhost:3000").split(","),
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -69,7 +72,7 @@ async def global_exception_handler(request: Request, exc: Exception):
     )
 
 # Include routers
-app.include_router(nudge_routes.router)
+app.include_router(nudge_router, prefix="/api/v1/nudges", tags=["nudges"])
 
 # Health check endpoint
 @app.get("/health", status_code=status.HTTP_200_OK)
@@ -97,7 +100,7 @@ if __name__ == "__main__":
     uvicorn.run(
         "app:app",
         host=os.getenv("HOST", "0.0.0.0"),
-        port=int(os.getenv("PORT", 8000)),
-        reload=os.getenv("ENV", "development") == "development",
+        port=int(os.getenv("PORT", 8005)),
+        reload=os.getenv("DEBUG", "false").lower() == "true",
         log_level="info"
     )

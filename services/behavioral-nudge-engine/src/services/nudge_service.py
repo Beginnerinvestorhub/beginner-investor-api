@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from ..models.nudge import (
     Nudge, NudgeStatus, NudgeType, NudgeCreate, NudgeUpdate, NudgeInDB, NudgeResponse
 )
-from shared.utils.logger import get_logger
 from ..repositories.nudge_repository import NudgeRepository
 
-logger = get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 class NudgeService:
     """
@@ -58,7 +58,7 @@ class NudgeService:
             
         try:
             # Create the nudge in the database
-            nudge = self.repository.create(nudge_data.dict())
+            nudge = self.repository.create(nudge_data)
             logger.info(f"Successfully created nudge {nudge.id}")
             return NudgeResponse.from_orm(nudge)
         except Exception as e:

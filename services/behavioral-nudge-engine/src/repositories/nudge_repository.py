@@ -5,9 +5,9 @@ from datetime import datetime
 from ...models.nudge import (
     Nudge, NudgeStatus, NudgeType, NudgeCreate, NudgeUpdate, NudgeInDB
 )
-from shared.utils.logger import get_logger
 
-logger = get_logger(__name__)
+import logging
+logger = logging.getLogger(__name__)
 
 class NudgeRepository:
     """Repository for handling nudge database operations."""
@@ -18,7 +18,7 @@ class NudgeRepository:
     def create(self, nudge_data: Dict[str, Any]) -> NudgeInDB:
         """Create a new nudge."""
         try:
-            nudge = Nudge(**nudge_data.dict())
+            nudge = Nudge(**nudge_data)
             self.db.add(nudge)
             self.db.commit()
             self.db.refresh(nudge)

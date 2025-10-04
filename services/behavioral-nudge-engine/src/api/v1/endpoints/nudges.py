@@ -2,13 +2,13 @@ from typing import List, Optional
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
-from shared.middleware.auth import get_current_user
-from shared.types.user import UserInDB
-from ....models.nudge import (
+from ...middleware.auth import get_current_user
+from ...types.user import UserInDB
+from ...models.nudge import (
     NudgeCreate, NudgeResponse, NudgeUpdate, NudgeStatus, NudgeType, NudgeListResponse
 )
-from ....services.nudge_service import NudgeService
-from ....config.database import get_db
+from ...services.nudge_service import NudgeService
+from ...config.database import get_db
 
 router = APIRouter()
 

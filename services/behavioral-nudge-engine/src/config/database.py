@@ -2,7 +2,9 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 import os
 from dotenv import load_dotenv
-from shared.database.models.base import BaseModel
+
+# Import local base instead of shared one
+from ..models.nudge import Base
 
 load_dotenv()
 
@@ -17,3 +19,7 @@ def get_db():
         yield db
     finally:
         db.close()
+
+# Create tables
+def create_tables():
+    Base.metadata.create_all(bind=engine)

@@ -22,74 +22,99 @@ class User(Base):
     User model for authentication and user management.
     """
     __tablename__ = "users"
-    
+
     # Authentication fields
     email = Column(String(255), unique=True, index=True, nullable=False)
     hashed_password = Column(String(255), nullable=True)  # Nullable for OAuth users
     is_active = Column(Boolean(), default=True)
     is_superuser = Column(Boolean(), default=False)
     email_verified = Column(Boolean(), default=False)
-    
+
     # User information
     first_name = Column(String(50), nullable=True)
     last_name = Column(String(50), nullable=True)
     phone_number = Column(String(20), nullable=True)
-    
+
     # Profile information
     profile_picture = Column(String(255), nullable=True)
     timezone = Column(String(50), default="UTC")
     locale = Column(String(10), default="en-US")
-    
+
     # OAuth and social login
     oauth_provider = Column(String(20), nullable=True)  # 'google', 'facebook', etc.
     oauth_id = Column(String(255), nullable=True, index=True)
     oauth_data = Column(JSONB, nullable=True)  # Store raw OAuth response
-    
+
     # Security
     last_login = Column(DateTime, nullable=True)
     last_password_change = Column(DateTime, nullable=True)
+    password_reset_token = Column(String(255), nullable=True)
+    password_reset_expires = Column(DateTime, nullable=True)
+
+    # Verification
+    verification_token = Column(String(255), nullable=True)
+    verification_expires = Column(DateTime, nullable=True)
+
+    # Account status
+    locked_until = Column(DateTime, nullable=True)
     failed_login_attempts = Column(Integer, default=0)
-    account_locked_until = Column(DateTime, nullable=True)
-    
+
     # Relationships
-    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
-    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
-    
-    # Audit fields
-    created_by = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
-    updated_by = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=True)
-    
+    portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
+    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
+
+    def __repr__(self) -> str:
+        return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
+
+    def is_locked(self) -> bool:
+        """Check if user account is locked due to too many failed attempts."""
+        if self.locked_until:
+            return datetime.utcnow() < self.locked_until
+        return False
+
+    def increment_failed_attempts(self) -> None:
+        """Increment failed login attempts and lock account if necessary."""
+        self.failed_login_attempts += 1
+        if self.failed_login_attempts >= 5:
+            # Lock for 30 minutes
+            self.locked_until = datetime.utcnow() + timedelta(minutes=30)
+
+    def reset_failed_attempts(self) -> None:
+        """Reset failed login attempts on successful login."""
+        self.failed_login_attempts = 0
+        self.locked_until = None
+
+    # Relationships
+    portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
+    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
+
     # Indexes
     __table_args__ = (
-        Index("idx_user_email_lower", "email", postgresql_using="btree", 
+        Index("idx_user_email_lower", "email", postgresql_using="btree",
               postgresql_ops={"email": "text_pattern_ops"}),
     )
-    
+
     @property
     def full_name(self) -> str:
         """Return the full name of the user."""
         return f"{self.first_name or ''} {self.last_name or ''}".strip() or self.email
-    
+
     @property
     def is_authenticated(self) -> bool:
         """Check if the user is authenticated."""
         return self.is_active
-    
+
     @property
     def is_admin(self) -> bool:
         """Check if the user has admin privileges."""
-        return self.is_superuser or any(role.role == "admin" for role in self.roles)
-    
+        return self.is_superuser
+
     def has_permission(self, permission: str) -> bool:
         """Check if the user has a specific permission."""
         if self.is_superuser:
             return True
-            
-        for role in self.roles:
-            if permission in role.permissions:
-                return True
         return False
-    
+
     def to_dict(self, include_sensitive: bool = False) -> dict:
         """Convert user to dictionary, optionally including sensitive information."""
         data = {
@@ -107,17 +132,16 @@ class User(Base):
             "created_at": self.created_at.isoformat() if self.created_at else None,
             "updated_at": self.updated_at.isoformat() if self.updated_at else None,
         }
-        
+
         if include_sensitive:
             data.update({
                 "phone_number": self.phone_number,
                 "oauth_provider": self.oauth_provider,
                 "last_login": self.last_login.isoformat() if self.last_login else None,
-                "roles": [role.role for role in self.roles],
             })
-            
+
         return data
-    
+
     def __repr__(self) -> str:
         return f"<User {self.email}>"
 

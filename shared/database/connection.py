@@ -3,16 +3,16 @@ from contextlib import contextmanager
 import os
 
 from sqlalchemy import create_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
-# Get database URL from environment variables
+# Get database URL from environment variables with fallback to PostgreSQL
 DATABASE_URL = os.getenv("DATABASE_URL")
 if not DATABASE_URL:
-    raise ValueError("DATABASE_URL environment variable is not set")
+    # Use the provided PostgreSQL database for production
+    DATABASE_URL = "postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a.virginia-postgres.render.com/investment_hub_9nuh"
 
-# Create SQLAlchemy engine with connection pooling
+# Create SQLAlchemy engine with connection pooling optimized for PostgreSQL
 engine = create_engine(
     DATABASE_URL,
     poolclass=QueuePool,
@@ -21,13 +21,11 @@ engine = create_engine(
     pool_timeout=30,  # Seconds to wait before giving up on getting a connection
     pool_recycle=3600,  # Recycle connections after 1 hour
     pool_pre_ping=True,  # Enable connection health checks
+    echo=os.getenv("SQL_ECHO", "false").lower() == "true",  # Enable SQL logging if needed
 )
 
 # Create session factory
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
-
-# Base class for declarative models
-Base = declarative_base()
 
 def get_db() -> Generator[Session, None, None]:
     """
@@ -40,21 +38,31 @@ def get_db() -> Generator[Session, None, None]:
     finally:
         db.close()
 
-@contextmanager
-def db_session() -> Generator[Session, None, None]:
+def test_connection() -> bool:
     """
-    Context manager for database sessions.
-    Use this for explicit session management.
+    Test database connection and return True if successful.
     """
-    db = SessionLocal()
     try:
-        yield db
-        db.commit()
+        with SessionLocal() as session:
+            session.execute("SELECT 1")
+            return True
     except Exception as e:
-        db.rollback()
-        raise e
-    finally:
-        db.close()
+        print(f"Database connection failed: {e}")
+        return False
+
+def create_tables():
+    """
+    Create all database tables defined in the models.
+    """
+    from .models.base import Base
+    Base.metadata.create_all(bind=engine)
+
+def drop_tables():
+    """
+    Drop all database tables (use with caution!).
+    """
+    from .models.base import Base
+    Base.metadata.drop_all(bind=engine)
 
 def init_db() -> None:
     """Initialize the database by creating all tables."""
@@ -65,7 +73,7 @@ def get_db_url() -> str:
     """Get the database URL with sensitive information redacted."""
     if not DATABASE_URL:
         return "Not configured"
-    
+
     # Redact password from the URL for logging
     if "@" in DATABASE_URL and "://" in DATABASE_URL:
         protocol, rest = DATABASE_URL.split("://", 1)
@@ -73,5 +81,5 @@ def get_db_url() -> str:
             user_pass, host = rest.split("@", 1)
             if ":" in user_pass:
                 user = user_pass.split(":", 1)[0]
-                return f"{protocol}://{user}:****@".join(rest.rsplit("@", 1))
+                return f"{protocol}://{user}:****@{host}"
     return DATABASE_URL

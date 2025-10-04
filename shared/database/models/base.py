@@ -3,16 +3,14 @@ from typing import Any, Dict, Optional, Type, TypeVar
 from uuid import uuid4
 
 from sqlalchemy import Column, DateTime, String
-from sqlalchemy.ext.declarative import as_declarative, declared_attr
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import DeclarativeBase, Session, declared_attr
 from sqlalchemy.dialects.postgresql import UUID
 
 ModelType = TypeVar("ModelType", bound="Base")
 
-@as_declarative()
-class Base:
-    """Base class for all database models."""
-    
+class Base(DeclarativeBase):
+    """Base class for all database models using SQLAlchemy 2.x."""
+
     id = Column(
         UUID(as_uuid=True),
         primary_key=True,
@@ -27,15 +25,17 @@ class Base:
     )
     deleted_at = Column(DateTime, nullable=True)
 
-    @declared_attr
+    @declared_attr.directive
     def __tablename__(cls) -> str:
-        ""
+        """
         Generate __tablename__ automatically.
         Converts CamelCase class name to snake_case table name.
         """
-        return "".join(["_".join([word.lower() for word in word]) for word in 
-                      [('', cls.__name__[0].lower())] + 
-                      [('', c) if c.isupper() else (c,) for c in cls.__name__[1:]]])
+        name = cls.__name__
+        # Handle common patterns like UserProfile -> user_profiles
+        import re
+        s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
+        return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
 
     def to_dict(self) -> Dict[str, Any]:
         """Convert model instance to dictionary."""
@@ -47,10 +47,18 @@ class Base:
 
     @classmethod
     def create(
-        cls, db: Session, obj_in: Dict[str, Any], commit: bool = True
+        cls, db: Session, obj_in: Dict[str, Any] | Any, commit: bool = True
     ) -> ModelType:
         """Create a new record in the database."""
-        obj_in_data = obj_in.dict() if hasattr(obj_in, "dict") else obj_in
+        if hasattr(obj_in, "dict"):
+            # Pydantic v1 compatibility
+            obj_in_data = obj_in.dict()
+        elif hasattr(obj_in, "model_dump"):
+            # Pydantic v2 compatibility
+            obj_in_data = obj_in.model_dump()
+        else:
+            obj_in_data = obj_in
+
         db_obj = cls(**obj_in_data)
         db.add(db_obj)
         if commit:
@@ -78,15 +86,20 @@ class Base:
 
     @classmethod
     def update(
-        cls, db: Session, *, db_obj: ModelType, obj_in: Dict[str, Any]
+        cls, db: Session, *, db_obj: ModelType, obj_in: Dict[str, Any] | Any
     ) -> ModelType:
         """Update a record."""
-        obj_data = obj_in.dict() if hasattr(obj_in, "dict") else obj_in
-        
+        if hasattr(obj_in, "dict"):
+            obj_data = obj_in.dict()
+        elif hasattr(obj_in, "model_dump"):
+            obj_data = obj_in.model_dump()
+        else:
+            obj_data = obj_in
+
         for field in obj_data:
             if hasattr(db_obj, field) and field != "id":
                 setattr(db_obj, field, obj_data[field])
-                
+
         db.add(db_obj)
         db.commit()
         db.refresh(db_obj)
@@ -95,7 +108,7 @@ class Base:
     @classmethod
     def remove(cls, db: Session, *, id: str) -> Optional[ModelType]:
         """Soft delete a record."""
-        obj = db.query(cls).get(id)
+        obj = db.query(cls).filter(cls.id == id).first()
         if obj:
             obj.deleted_at = datetime.utcnow()
             db.add(obj)
