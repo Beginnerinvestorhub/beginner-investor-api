@@ -1,5 +1,4 @@
- 
-# Import missing timedelta and Integer, and clean up unnecessary imports
+# Import missing timedelta and clean up unnecessary imports
 from datetime import datetime, timedelta
 from typing import Optional, List
 from uuid import UUID
@@ -12,8 +11,10 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Index,
-    Integer, # <-- Added missing Integer import
+    Integer,
 )
+# Ensure you have the 'User' class defined before the UserRole class
+# This requires a forward reference or string literal for remote_side if used in granted_by_user
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.orm import relationship
 
@@ -63,15 +64,22 @@ class User(Base):
 
     # Relationships (Corrected and Consolidated)
     
-    # FIX 1: Change back_populates to "owner" to match the Portfolio model's relationship name.
+    # FIX 1: back_populates matches Portfolio model's relationship name ("owner").
     portfolios = relationship("Portfolio", back_populates="owner", cascade="all, delete-orphan")
     
-    # FIX 2: Change model string reference from "Subscription" to "UserSubscription" 
-    # and update back_populates to "user" (assuming UserSubscription uses 'user').
+    # FIX 2: Model name matches UserSubscription class name.
     subscriptions = relationship("UserSubscription", back_populates="user", cascade="all, delete-orphan")
     
-    # Relationships for UserRole and UserSession
-    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+    # FIX 3: CRITICAL FIX for AmbiguousForeignKeysError on User.roles
+    # Explicitly defines the foreign key as the user_id column in the target class (UserRole)
+    roles = relationship(
+        "UserRole", 
+        back_populates="user", 
+        foreign_keys="[UserRole.user_id]", 
+        cascade="all, delete-orphan"
+    )
+    
+    # FIX 4: User.sessions relationship. This relies on UserSession being defined below.
     sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
     
 
@@ -94,7 +102,7 @@ class User(Base):
         """Increment failed login attempts and lock account if necessary."""
         self.failed_login_attempts += 1
         if self.failed_login_attempts >= 5:
-            # Lock for 30 minutes
+            # Lock for 30 minutes (timedelta imported at the top)
             self.locked_until = datetime.utcnow() + timedelta(minutes=30)
 
     def reset_failed_attempts(self) -> None:
@@ -137,8 +145,9 @@ class User(Base):
             "profile_picture": self.profile_picture,
             "timezone": self.timezone,
             "locale": self.locale,
-            "created_at": self.created_at.isoformat() if self.created_at else None,
-            "updated_at": self.updated_at.isoformat() if self.updated_at else None,
+            # Assuming created_at/updated_at are inherited from Base
+            "created_at": self.created_at.isoformat() if hasattr(self, 'created_at') and self.created_at else None,
+            "updated_at": self.updated_at.isoformat() if hasattr(self, 'updated_at') and self.updated_at else None,
         }
 
         if include_sensitive:
@@ -150,7 +159,6 @@ class User(Base):
 
         return data
 
-# Assuming 'User' is defined above and includes 'sessions' and 'roles' relationships.
 
 class UserRole(Base):
     """
@@ -169,18 +177,18 @@ class UserRole(Base):
     
     # Relationships
     # 1. Main user relationship (UserRole belongs to this User)
+    # FIX: Corrects NameError by referencing column object directly
     user = relationship(
-     "User", back_populates="roles", 
+     "User", 
+     back_populates="roles", 
      foreign_keys=[user_id]
     ) 
 
    # 2. Optional: relationship to the user who granted the role
     granted_by_user = relationship(
         "User",
-        # Explicitly define the foreign key
         foreign_keys=[granted_by],
-        # Specify the primary key to join to in the 'User' class
-        remote_side="User.id", 
+        remote_side="User.id", # Explicitly points to User.id to resolve ambiguity
         viewonly=True
     )
     
@@ -202,8 +210,8 @@ class UserSession(Base):
     
     # Session data
     user_agent = Column(Text, nullable=True)
-    ip_address = Column(String(45), nullable=True)  # IPv6 can be up to 45 chars
-    location = Column(JSONB, nullable=True)  # GeoIP data
+    ip_address = Column(String(45), nullable=True)
+    location = Column(JSONB, nullable=True)
     
     # Session timestamps
     issued_at = Column(DateTime, default=datetime.utcnow, nullable=False)
@@ -215,7 +223,7 @@ class UserSession(Base):
     revoked_at = Column(DateTime, nullable=True)
     
     # Relationships
-    # FIX: Explicitly define the foreign key to resolve potential ambiguities
+    # FIX: Explicitly define the foreign key to resolve potential ambiguities with other FKs to User
     user = relationship("User", back_populates="sessions", foreign_keys=[user_id])
     
     def is_valid(self) -> bool:
