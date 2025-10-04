@@ -167,10 +167,12 @@ class UserRole(Base):
     
     # Relationships
     # Explicitly tell SQLAlchemy this relationship is via user_id
-    user = relationship(
-        "User",
-        back_populates="roles",
-        foreign_keys=[user_id]
+    roles = relationship(
+    "UserRole",
+    back_populates="user",
+    cascade="all, delete-orphan",
+    foreign_keys=[UserRole.user_id],  
+    )
     )
     
     # Optional: relationship to the user who granted the role
