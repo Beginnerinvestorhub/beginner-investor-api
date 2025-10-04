@@ -12,7 +12,7 @@ from .portfolio import (
     PortfolioStatus,
     PortfolioTransactionType
 )  # noqa: F401
-from .subscription import Subscription, SubscriptionPlan  # noqa: F401
+from .subscription import UserSubscription, SubscriptionPlan  # noqa: F401
 
 # This will be populated by the model modules
 __all__ = [
