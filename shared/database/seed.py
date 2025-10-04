@@ -10,7 +10,7 @@ from datetime import datetime, timedelta
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from shared.database.connection import SessionLocal, test_connection, create_tables
-from shared.database.models import User, Portfolio, Subscription, SubscriptionPlan
+from shared.database.models import User, Portfolio, UserSubscription, SubscriptionPlan
 
 def seed_subscription_plans(db_session):
     """Create initial subscription plans."""
