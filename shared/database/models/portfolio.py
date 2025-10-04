@@ -8,9 +8,10 @@ from sqlalchemy import (
     Index,
     ForeignKeyConstraint,
 )
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB,ENUM
 from sqlalchemy.orm import relationship
 from .base import Base
+ 
 
 
 
