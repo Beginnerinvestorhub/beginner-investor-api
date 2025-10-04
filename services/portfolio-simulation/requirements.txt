@@ -2,7 +2,7 @@ numpy==1.24.4
 pandas==1.5.3
 fastapi==0.110.0
 uvicorn[standard]==0.27.1
-python-multipart==0.0.6
+python-multipart==0.0.18
 pydantic==2.6.4
 pydantic-settings==2.2.1
 python-jose[cryptography]==3.3.0
@@ -16,7 +16,7 @@ httpx==0.26.0
 celery==5.3.0
 pytest==7.4.0
 pytest-asyncio==0.21.0
-black==23.0.0
+black==24.3.0
 isort==5.12.0
 mypy==1.8.0
 flake8==6.0.0
