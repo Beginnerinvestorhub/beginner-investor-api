@@ -173,7 +173,7 @@ class UserRole(Base):
     cascade="all, delete-orphan",
     foreign_keys=[UserRole.user_id],  
     )
-    )
+    
     
     # Optional: relationship to the user who granted the role
     granted_by_user = relationship(
