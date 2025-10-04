@@ -10,7 +10,7 @@ from sqlalchemy.pool import QueuePool
 
 from ..config import get_database_config
 
-<<<<<<< HEAD
+
 # Get database configuration from centralized config
 db_config = get_database_config()
 DATABASE_URL = db_config['url']
