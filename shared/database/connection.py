@@ -44,7 +44,7 @@ def test_connection() -> bool:
     """
     try:
         with SessionLocal() as session:
-            session.execute(Text("SELECT 1"))
+            session.execute(text("SELECT 1"))
             return True
     except Exception as e:
         print(f"Database connection failed: {e}")
