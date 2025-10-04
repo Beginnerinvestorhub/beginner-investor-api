@@ -94,3 +94,32 @@ $RECYCLE.BIN/
 
 # Project specific
 # Add any project-specific ignores below this line
+
+# Environment variables and secrets
+.env
+.env.local
+.env.development
+.env.production
+.env.staging
+.env.render
+.env.template
+*.env
+
+# Service specific environment files
+services/*/env
+services/*/.env
+services/*/.env.local
+services/*/.env.development
+services/*/.env.production
+services/*/.env.staging
+services/*/.env.render
+services/*/.env.template
+
+# Shared module environment files
+shared/*/.env
+shared/*/.env.local
+shared/*/.env.development
+shared/*/.env.production
+shared/*/.env.staging
+shared/*/.env.render
+shared/*/.env.template
