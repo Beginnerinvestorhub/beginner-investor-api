@@ -150,6 +150,8 @@ class User(Base):
 
         return data
 
+# Assuming 'User' is defined above and includes 'sessions' and 'roles' relationships.
+
 class UserRole(Base):
     """
     User role association model for many-to-many relationship between users and roles.
@@ -166,19 +168,19 @@ class UserRole(Base):
     granted_by = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=True) 
     
     # Relationships
-    # Explicitly tell SQLAlchemy this relationship is via user_id
-    roles = relationship(
-    "UserRole",
-    back_populates="user",
-    cascade="all, delete-orphan",
-    foreign_keys=[UserRole.user_id],  
-    )
-    
-    
-    # Optional: relationship to the user who granted the role
+    # 1. Main user relationship (UserRole belongs to this User)
+    user = relationship(
+     "User", back_populates="roles", 
+     foreign_keys=[user_id]
+    ) 
+
+   # 2. Optional: relationship to the user who granted the role
     granted_by_user = relationship(
         "User",
+        # Explicitly define the foreign key
         foreign_keys=[granted_by],
+        # Specify the primary key to join to in the 'User' class
+        remote_side="User.id", 
         viewonly=True
     )
     
@@ -213,7 +215,8 @@ class UserSession(Base):
     revoked_at = Column(DateTime, nullable=True)
     
     # Relationships
-    user = relationship("User", back_populates="sessions")
+    # FIX: Explicitly define the foreign key to resolve potential ambiguities
+    user = relationship("User", back_populates="sessions", foreign_keys=[user_id])
     
     def is_valid(self) -> bool:
         """Check if the session is still valid."""
@@ -234,4 +237,3 @@ class UserSession(Base):
             "is_revoked": self.is_revoked,
             "revoked_at": self.revoked_at.isoformat() if self.revoked_at else None,
         }
-
