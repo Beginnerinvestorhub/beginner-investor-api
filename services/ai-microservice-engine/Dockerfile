@@ -31,11 +31,12 @@ ENV PATH=/root/.local/bin:$PATH
 
 # Copy app code
 COPY src ./src
+COPY app.py ./
 COPY .env.example ./
 
 # Set ownership and permissions
 RUN chown -R aiuser:aiuser /app
 USER aiuser
 
-EXPOSE 8000
-CMD ["uvicorn", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]
+EXPOSE 8002
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8002"]

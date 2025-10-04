@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timedelta
 from typing import Optional, List
 from uuid import UUID
 
@@ -11,6 +11,7 @@ from sqlalchemy import (
     ForeignKey,
     Text,
     Index,
+    Integer,
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.orm import relationship

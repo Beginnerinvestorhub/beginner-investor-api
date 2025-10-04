@@ -127,7 +127,7 @@ services:
       - key: AI_SERVICE_URL
         value: https://ai-nudge-service.onrender.com
     dockerContext: .
-    dockerfilePath: services/portfolio-simulation-service/Dockerfile
+    dockerfilePath: services/portfolio-simulation/Dockerfile
     autoDeploy: true
 
 databases:

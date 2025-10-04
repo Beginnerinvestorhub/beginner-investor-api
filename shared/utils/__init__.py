@@ -83,7 +83,8 @@ from .async_helpers import (
 from .logging import (
     JSONFormatter,
     setup_logger,
-    log_execution_time
+    log_execution_time,
+    logger
 )
 from .security import (
     generate_salt,
@@ -136,7 +137,7 @@ __all__ = [
     'debounce_async', 'throttle_async',
     
     # Logging
-    'JSONFormatter', 'setup_logger', 'log_execution_time',
+    'JSONFormatter', 'setup_logger', 'log_execution_time', 'logger',
     
     # Security
     'generate_salt', 'hash_password', 'verify_password',
