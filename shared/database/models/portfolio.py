@@ -1,16 +1,26 @@
-from uuid import uuid4
+from datetime import datetime
+from decimal import Decimal
+from typing import List, Optional, Dict, Any
+from uuid import UUID, uuid4
+import enum # <--- Standard Python enum module must be imported
+
 from sqlalchemy import (
     Column,
     String,
+    Boolean,
     DateTime,
+    ForeignKey,
     Numeric,
-    Text,
+    CheckConstraint,
     Index,
-    ForeignKeyConstraint,
+    Text,
+    event,
 )
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB,ENUM
-from sqlalchemy.orm import relationship
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB, ENUM # <--- sqlalchemy ENUM
+from sqlalchemy.orm import relationship, validates
+
 from .base import Base
+
  
 
 
