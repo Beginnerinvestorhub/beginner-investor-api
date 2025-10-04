@@ -1,5 +1,6 @@
-from sqlalchemy import Column, Integer, String, Boolean, DateTime, ForeignKey
-from datetime import datetime
+ 
+# Import missing timedelta and Integer, and clean up unnecessary imports
+from datetime import datetime, timedelta
 from typing import Optional, List
 from uuid import UUID
 
@@ -8,10 +9,10 @@ from sqlalchemy import (
     String,
     Boolean,
     DateTime,
-    JSON,
     ForeignKey,
     Text,
     Index,
+    Integer, # <-- Added missing Integer import
 )
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
 from sqlalchemy.orm import relationship
@@ -42,9 +43,9 @@ class User(Base):
     locale = Column(String(10), default="en-US")
 
     # OAuth and social login
-    oauth_provider = Column(String(20), nullable=True)  # 'google', 'facebook', etc.
+    oauth_provider = Column(String(20), nullable=True)
     oauth_id = Column(String(255), nullable=True, index=True)
-    oauth_data = Column(JSONB, nullable=True)  # Store raw OAuth response
+    oauth_data = Column(JSONB, nullable=True)
 
     # Security
     last_login = Column(DateTime, nullable=True)
@@ -60,9 +61,25 @@ class User(Base):
     locked_until = Column(DateTime, nullable=True)
     failed_login_attempts = Column(Integer, default=0)
 
-    # Relationships
-    portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
-    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
+    # Relationships (Corrected and Consolidated)
+    
+    # FIX 1: Change back_populates to "owner" to match the Portfolio model's relationship name.
+    portfolios = relationship("Portfolio", back_populates="owner", cascade="all, delete-orphan")
+    
+    # FIX 2: Change model string reference from "Subscription" to "UserSubscription" 
+    # and update back_populates to "user" (assuming UserSubscription uses 'user').
+    subscriptions = relationship("UserSubscription", back_populates="user", cascade="all, delete-orphan")
+    
+    # Relationships for UserRole and UserSession
+    roles = relationship("UserRole", back_populates="user", cascade="all, delete-orphan")
+    sessions = relationship("UserSession", back_populates="user", cascade="all, delete-orphan")
+    
+
+    # Indexes
+    __table_args__ = (
+        Index("idx_user_email_lower", "email", postgresql_using="btree",
+              postgresql_ops={"email": "text_pattern_ops"}),
+    )
 
     def __repr__(self) -> str:
         return f"<User(id={self.id}, email={self.email}, is_active={self.is_active})>"
@@ -84,16 +101,6 @@ class User(Base):
         """Reset failed login attempts on successful login."""
         self.failed_login_attempts = 0
         self.locked_until = None
-
-    # Relationships
-    portfolios = relationship("Portfolio", back_populates="user", cascade="all, delete-orphan")
-    subscriptions = relationship("Subscription", back_populates="user", cascade="all, delete-orphan")
-
-    # Indexes
-    __table_args__ = (
-        Index("idx_user_email_lower", "email", postgresql_using="btree",
-              postgresql_ops={"email": "text_pattern_ops"}),
-    )
 
     @property
     def full_name(self) -> str:
@@ -142,9 +149,6 @@ class User(Base):
             })
 
         return data
-
-    def __repr__(self) -> str:
-        return f"<User {self.email}>"
 
 
 class UserRole(Base):
@@ -215,3 +219,4 @@ class UserSession(Base):
             "is_revoked": self.is_revoked,
             "revoked_at": self.revoked_at.isoformat() if self.revoked_at else None,
         }
+
