@@ -2,7 +2,7 @@ from typing import Generator
 from contextlib import contextmanager
 import os
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine,text
 from sqlalchemy.orm import sessionmaker, Session
 from sqlalchemy.pool import QueuePool
 
