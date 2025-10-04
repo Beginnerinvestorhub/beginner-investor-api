@@ -11,7 +11,7 @@ from sqlalchemy import (
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID
 from sqlalchemy.orm import relationship
 from .base import Base
-from .portfolio_models import PortfolioTransactionType  # assuming your enums are there
+
 
 
 class PortfolioTransaction(Base):
@@ -28,7 +28,9 @@ class PortfolioTransaction(Base):
     asset_id = Column(String(50), nullable=True)  # Null for cash-only transactions
 
     transaction_type = Column(
-        ENUM(PortfolioTransactionType, name="portfolio_transaction_type", create_type=True),
+        ENUM(PortfolioTransactionType, 
+             name="portfolio_transaction_type", 
+             create_type=True),
         nullable=False
     )
     transaction_date = Column(DateTime, nullable=False, index=True)
