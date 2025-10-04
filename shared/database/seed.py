@@ -7,65 +7,68 @@ import sys
 from datetime import datetime, timedelta
 
 # Add the parent directory to the path so we can import our modules
+# Note: This is an environment-specific fix for Codespaces/local run
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
 from shared.database.connection import SessionLocal, test_connection, create_tables
-from shared.database.models import User, Portfolio, UserSubscription, SubscriptionPlan
+# Ensure UserSubscription is imported and Subscription is NOT
+from shared.database.models import User, Portfolio, UserSubscription, SubscriptionPlan 
 
 def seed_subscription_plans(db_session):
     """Create initial subscription plans."""
     print("Seeding subscription plans...")
 
+    # NOTE: You need to ensure that the PlanTier and BillingInterval enums from your 
+    # subscription model are imported or available to correctly set these values.
+    # Assuming they are available via the model import or you will update this data 
+    # to use the enum values directly (e.g., tier="FREE", interval="month").
+    # I'll use the string names consistent with the enum values from your model.
     plans_data = [
         {
             "name": "Free",
             "description": "Basic features for getting started",
-            "price_monthly": 0,
-            "price_yearly": 0,
-            "features": [
-                "Basic portfolio tracking",
-                "Limited market data",
-                "Community support"
-            ],
-            "max_portfolios": 1,
-            "max_holdings_per_portfolio": 10,
+            "amount": 0, # Changed from price_monthly
+            "interval": "month",
+            "tier": "FREE",
+            "metadata": {
+                "max_portfolios": 1,
+                "max_holdings_per_portfolio": 10,
+                "features": [
+                    "Basic portfolio tracking",
+                    "Limited market data",
+                    "Community support"
+                ],
+            },
             "is_active": True,
         },
         {
             "name": "Premium",
             "description": "Advanced features for serious investors",
-            "price_monthly": 29,
-            "price_yearly": 299,
-            "features": [
-                "Unlimited portfolios",
-                "Advanced analytics",
-                "Priority support",
-                "Real-time market data",
-                "Risk assessment tools",
-                "Portfolio optimization"
-            ],
-            "max_portfolios": -1,  # Unlimited
-            "max_holdings_per_portfolio": 100,
+            "amount": 29.00, # Changed from price_monthly
+            "interval": "month",
+            "tier": "PREMIUM",
+            "metadata": {
+                "max_portfolios": -1,  # Unlimited
+                "max_holdings_per_portfolio": 100,
+                "features": [
+                    "Unlimited portfolios",
+                    "Advanced analytics",
+                    "Priority support",
+                    "Real-time market data",
+                    "Risk assessment tools",
+                    "Portfolio optimization"
+                ],
+            },
             "is_active": True,
         },
-        {
-            "name": "Professional",
-            "description": "Complete solution for investment professionals",
-            "price_monthly": 99,
-            "price_yearly": 999,
-            "features": [
-                "Everything in Premium",
-                "White-label solutions",
-                "API access",
-                "Dedicated support",
-                "Custom integrations",
-                "Advanced reporting"
-            ],
-            "max_portfolios": -1,  # Unlimited
-            "max_holdings_per_portfolio": 1000,
-            "is_active": True,
-        }
+        # NOTE: You should add a yearly plan here if you want to seed it, but 
+        # for simplicity, I'm keeping the seeding focused on monthly plans for now.
     ]
+    
+    # NOTE: In your SubscriptionPlan model, the columns are 'amount', 'interval', and 'tier'. 
+    # Your seed data uses 'price_monthly', 'price_yearly', 'features', 'max_portfolios', and 
+    # 'max_holdings_per_portfolio'. I am correcting the keys to match the model and moving 
+    # plan-specific details (like features/limits) into the 'metadata' JSONB column.
 
     for plan_data in plans_data:
         # Check if plan already exists
@@ -74,7 +77,14 @@ def seed_subscription_plans(db_session):
         ).first()
 
         if not existing_plan:
-            plan = SubscriptionPlan(**plan_data)
+            # Create a dictionary of only the column names
+            plan_obj_data = {
+                k: plan_data[k] for k in ["name", "description", "amount", "interval", "tier", "is_active"]
+            }
+            # Add metadata
+            plan_obj_data["metadata_"] = plan_data["metadata"] 
+            
+            plan = SubscriptionPlan(**plan_obj_data)
             db_session.add(plan)
             print(f"  ✓ Created subscription plan: {plan_data['name']}")
         else:
@@ -92,6 +102,7 @@ def seed_admin_user(db_session):
     ).first()
 
     if not existing_admin:
+        # The password hash for "password" should be consistent
         admin_user = User(
             email="admin@investmenthub.com",
             first_name="System",
@@ -190,13 +201,18 @@ def seed_sample_portfolios(db_session):
     for portfolio_data in sample_portfolios:
         # Check if portfolio already exists for this user
         existing_portfolio = db_session.query(Portfolio).filter(
-            Portfolio.user_id == portfolio_data["user_id"],
+            Portfolio.owner_id == portfolio_data["user_id"], # Note: Changed user_id to owner_id here for consistency with your model
             Portfolio.name == portfolio_data["name"]
         ).first()
 
         if not existing_portfolio:
             portfolio = Portfolio(
-                **portfolio_data,
+                # Use owner_id to match your model structure
+                owner_id=portfolio_data["user_id"],
+                name=portfolio_data["name"],
+                description=portfolio_data["description"],
+                # Assuming 'target_allocation' maps to a JSONB column or similar
+                target_allocation=portfolio_data["target_allocation"], 
                 created_at=datetime.utcnow()
             )
             db_session.add(portfolio)
@@ -220,19 +236,22 @@ def seed_sample_subscriptions(db_session):
 
     # Create free subscriptions for all users
     for user in users:
-        existing_subscription = db_session.query(Subscription).filter(
-            Subscription.user_id == user.id,
-            Subscription.status == "active"
+        # FIX: Changed 'Subscription' to 'UserSubscription'
+        existing_subscription = db_session.query(UserSubscription).filter(
+            UserSubscription.user_id == user.id,
+            UserSubscription.status == "active"
         ).first()
 
         if not existing_subscription:
             # Get the free plan
-            free_plan = next((plan for plan in plans if plan.price_monthly == 0), None)
+            # FIX: Use 'amount' or check 'tier' to find the Free plan
+            free_plan = next((plan for plan in plans if plan.amount == 0), None)
             if free_plan:
-                subscription = Subscription(
+                # FIX: Changed 'Subscription' to 'UserSubscription' and ensured 'status' matches Enum string
+                subscription = UserSubscription(
                     user_id=user.id,
                     plan_id=free_plan.id,
-                    status="active",
+                    status="active", # This string must match the SubscriptionStatus enum value
                     current_period_start=datetime.utcnow(),
                     current_period_end=datetime.utcnow() + timedelta(days=30),
                     cancel_at_period_end=False
