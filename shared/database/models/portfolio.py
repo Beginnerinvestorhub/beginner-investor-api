@@ -11,13 +11,12 @@ from sqlalchemy import (
     DateTime,
     ForeignKey,
     Numeric,
-    Enum,
     CheckConstraint,
     Index,
     Text,
     event,
 )
-from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB
+from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB, ENUM
 from sqlalchemy.orm import relationship, validates
 
 from .base import Base
@@ -45,8 +44,16 @@ class Portfolio(Base):
     # Basic information
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
-    portfolio_type = Column(Enum(PortfolioType), nullable=False, default=PortfolioType.TAXABLE)
-    status = Column(Enum(PortfolioStatus), nullable=False, default=PortfolioStatus.ACTIVE)
+    portfolio_type = Column(
+        ENUM(*[e.value for e in PortfolioType], name='portfolio_type', create_type=False),
+        nullable=False,
+        default='taxable'
+    )
+    status = Column(
+        ENUM(*[e.value for e in PortfolioStatus], name='portfolio_status', create_type=False),
+        nullable=False,
+        default='active'
+    )
     
     # Ownership and access
     owner_id = Column(PG_UUID(as_uuid=True), ForeignKey("users.id"), nullable=False, index=True)
@@ -107,8 +114,8 @@ class Portfolio(Base):
             "id": str(self.id),
             "name": self.name,
             "description": self.description,
-            "type": self.portfolio_type.value,
-            "status": self.status.value,
+            "type": self.portfolio_type,
+            "status": self.status,
             "owner_id": str(self.owner_id),
             "is_public": self.is_public,
             "total_value": float(self.total_value),
@@ -224,7 +231,10 @@ class PortfolioTransaction(Base):
     
     # Transaction details
     portfolio_id = Column(PG_UUID(as_uuid=True), ForeignKey("portfolios.id"), index=True, nullable=False)
-    transaction_type = Column(Enum(PortfolioTransactionType), nullable=False)
+    transaction_type = Column(
+        ENUM(*[e.value for e in PortfolioTransactionType], name='portfolio_transaction_type', create_type=False),
+        nullable=False
+    )
     transaction_date = Column(DateTime, nullable=False, index=True)
     
     # Asset information
@@ -267,7 +277,7 @@ class PortfolioTransaction(Base):
         return {
             "id": str(self.id),
             "portfolio_id": str(self.portfolio_id),
-            "transaction_type": self.transaction_type.value,
+            "transaction_type": self.transaction_type,
             "transaction_date": self.transaction_date.isoformat(),
             "asset_id": self.asset_id,
             "asset_type": self.asset_type,
