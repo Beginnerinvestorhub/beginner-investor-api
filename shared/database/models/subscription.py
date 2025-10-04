@@ -21,6 +21,7 @@ from sqlalchemy import (
     or_,
     select
 )
+# Note: ENUM is imported from postgresql dialects, which is correct for custom types
 from sqlalchemy.dialects.postgresql import UUID as PG_UUID, JSONB, ENUM
 from sqlalchemy.orm import relationship, validates, Session
 
@@ -64,8 +65,12 @@ class SubscriptionPlan(Base):
     # Plan identification
     name = Column(String(100), nullable=False)
     description = Column(Text, nullable=True)
+    
+    # --- FIX APPLIED HERE ---
     tier = Column(
-        ENUM(*[e.value for e in PlanTier], name='plan_tier', create_type=False),
+        # 1. Pass the Python Enum class (PlanTier)
+        # 2. Set create_type=True to ensure PostgreSQL CREATE TYPE DDL is emitted
+        ENUM(PlanTier, name='plan_tier', create_type=True),
         nullable=False,
         index=True
     )
@@ -74,9 +79,11 @@ class SubscriptionPlan(Base):
     # Pricing
     amount = Column(Numeric(10, 2), nullable=False)
     currency = Column(String(3), default="USD", nullable=False)
+    
+    # --- FIX APPLIED HERE ---
     interval = Column(
-        ENUM(*[e.value for e in BillingInterval], name='billing_interval', create_type=False),
-        default='month',
+        ENUM(BillingInterval, name='billing_interval', create_type=True),
+        default=BillingInterval.MONTH.value, # Use enum value for default
         nullable=False
     )
     interval_count = Column(Integer, default=1, nullable=False)
@@ -114,11 +121,11 @@ class SubscriptionPlan(Base):
             "id": str(self.id),
             "name": self.name,
             "description": self.description,
-            "tier": self.tier,
+            "tier": self.tier.value, # Return the string value
             "is_active": self.is_active,
             "amount": float(self.amount),
             "currency": self.currency,
-            "interval": self.interval,
+            "interval": self.interval.value, # Return the string value
             "interval_count": self.interval_count,
             "trial_period_days": self.trial_period_days,
             "price_display": self.price_display,
@@ -167,10 +174,12 @@ class UserSubscription(Base):
     
     user_id = Column(PG_UUID(as_uuid=True), ForeignKey('users.id', ondelete='CASCADE'), nullable=False, index=True)
     plan_id = Column(PG_UUID(as_uuid=True), ForeignKey('subscription_plans.id', ondelete='RESTRICT'), nullable=False)
+    
+    # --- FIX APPLIED HERE ---
     status = Column(
-        ENUM(*[e.value for e in SubscriptionStatus], name='subscription_status', create_type=False),
+        ENUM(SubscriptionStatus, name='subscription_status', create_type=True),
         nullable=False,
-        default='incomplete',
+        default=SubscriptionStatus.INCOMPLETE.value, # Use enum value for default
         index=True
     )
     
@@ -212,6 +221,10 @@ class UserSubscription(Base):
     def is_active(self) -> bool:
         """Check if the subscription is currently active."""
         now = datetime.utcnow()
+        # Note: If you are on SQLAlchemy 2.0 and using Python Enums, the comparison should be to the Enum members
+        # e.g., self.status == SubscriptionStatus.ACTIVE
+        # However, since you are defining the column with ENUM(class), it should automatically handle this.
+        # Keeping the list comparison for safety, assuming self.status returns the string value.
         return (
             self.status in ['active', 'trialing'] and 
             (self.current_period_end is None or self.current_period_end > now) and
@@ -224,7 +237,7 @@ class UserSubscription(Base):
             "id": str(self.id),
             "user_id": str(self.user_id),
             "plan_id": str(self.plan_id),
-            "status": self.status,
+            "status": self.status.value, # Return the string value
             "current_period_start": self.current_period_start.isoformat() if self.current_period_start else None,
             "current_period_end": self.current_period_end.isoformat() if self.current_period_end else None,
             "cancel_at_period_end": self.cancel_at_period_end,
@@ -256,10 +269,12 @@ class Invoice(Base):
     
     subscription_id = Column(PG_UUID(as_uuid=True), ForeignKey('user_subscriptions.id', ondelete='CASCADE'), nullable=False, index=True)
     number = Column(String(50), unique=True, nullable=False)
+    
+    # --- FIX APPLIED HERE ---
     status = Column(
-        ENUM(*[e.value for e in InvoiceStatus], name='invoice_status', create_type=False),
+        ENUM(InvoiceStatus, name='invoice_status', create_type=True),
         nullable=False,
-        default='draft',
+        default=InvoiceStatus.DRAFT.value, # Use enum value for default
         index=True
     )
     
@@ -295,14 +310,15 @@ class Invoice(Base):
     @property
     def is_paid(self) -> bool:
         """Check if the invoice is fully paid."""
-        return self.status == 'paid' and self.amount_remaining <= 0
+        # Using enum member for comparison
+        return self.status == InvoiceStatus.PAID and self.amount_remaining <= 0
     
     def to_dict(self, include_items: bool = True) -> Dict[str, Any]:
         """Convert the invoice to a dictionary."""
         return {
             "id": str(self.id),
             "number": self.number,
-            "status": self.status,
+            "status": self.status.value, # Return the string value
             "amount_due": float(self.amount_due),
             "amount_paid": float(self.amount_paid),
             "amount_remaining": float(self.amount_remaining),
