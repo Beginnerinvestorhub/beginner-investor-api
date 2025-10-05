@@ -1,5 +1,6 @@
 import { Router } from 'express';
 import { nudgeRateLimiter } from '../middleware/nudgeRateLimiter';
+import { cacheMiddleware, CacheInvalidator } from '../middleware/cache.middleware';
 import { validateNudgeRequest } from '../validators/nudge.validator';
 import { getNudge } from '../controllers/nudge.controller';
 
@@ -147,6 +148,34 @@ const router = Router();
  * type: string
  * format: date-time
  */
-router.post('/', nudgeRateLimiter, validateNudgeRequest, getNudge);
+router.post('/', nudgeRateLimiter, cacheMiddleware({ ttl: 300, includeUserId: true }), validateNudgeRequest, getNudge);
 
-export default router;
+/**
+ * @swagger
+ * /api/nudge/cache/invalidate:
+ * post:
+ * summary: Invalidate nudge cache
+ * description: Clears cached nudge responses for the authenticated user
+ * tags: [Nudge]
+ * security:
+ * - bearerAuth: []
+ * responses:
+ * 200:
+ * description: Cache invalidated successfully
+ * 401:
+ * description: Unauthorized - Missing or invalid authentication
+ */
+router.post('/cache/invalidate', async (req, res) => {
+  try {
+    const userId = req.user?.id;
+    if (!userId) {
+      return res.status(401).json({ error: 'Authentication required' });
+    }
+    
+    await CacheInvalidator.invalidateUserCache(userId, 'api');
+    res.json({ message: 'Cache invalidated successfully' });
+  } catch (error) {
+    console.error('Cache invalidation error:', error);
+    res.status(500).json({ error: 'Failed to invalidate cache' });
+  }
+});

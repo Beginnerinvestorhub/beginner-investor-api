@@ -11,6 +11,12 @@ import { trackAffiliate } from './middleware/affiliate.middleware';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+// Initialize Redis cache and rate limiting systems
+import { initializeSystems } from '../../../shared/cache/init';
+
+// Initialize cache systems
+await initializeSystems();
+
 console.log('✅ ENV Check:', {
   DATABASE_URL: process.env.DATABASE_URL,
   JWT_SECRET: process.env.JWT_SECRET,
