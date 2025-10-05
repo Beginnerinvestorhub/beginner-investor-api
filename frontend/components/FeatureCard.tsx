@@ -8,12 +8,12 @@ export interface FeatureCardProps {
   title: string;
   description: string;
   className?: string;
-  iconColor?: 'indigo' | 'green' | 'blue' | 'purple';
+  color?: 'indigo' | 'green' | 'blue' | 'purple';
   href?: string;
   linkText?: string;
 }
 
-const iconColorClasses: Record<NonNullable<FeatureCardProps['iconColor']>, string> = {
+const iconColorClasses: Record<NonNullable<FeatureCardProps['color']>, string> = {
   indigo: 'text-indigo-500',
   green: 'text-green-500',
   blue: 'text-blue-500',
@@ -25,13 +25,13 @@ export default function FeatureCard({
   title,
   description,
   className = '',
-  iconColor = 'indigo',
+  color = 'indigo',
   href,
   linkText,
 }: FeatureCardProps) {
   const sizedIcon = isValidElement(icon)
     ? cloneElement(icon, {
-        className: `h-6 w-6 ${iconColorClasses[iconColor]}`,
+        className: `h-5 w-5 ${iconColorClasses[color]}`,
         'aria-hidden': true,
       })
     : null;

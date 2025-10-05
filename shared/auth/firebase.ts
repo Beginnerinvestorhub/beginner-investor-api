@@ -12,7 +12,8 @@ declare global {
       user?: {
         uid: string;
         email?: string;
-        [key: string]: any;
+        roles?: string[];
+        [key: string]: string | string[] | undefined;
       };
     }
   }
@@ -91,7 +92,7 @@ export const authenticate = async (
       req.user = {
         uid: decodedToken.uid,
         email: decodedToken.email,
-        ...decodedToken
+        roles: decodedToken.roles as string[] | undefined,
       };
 
       next();

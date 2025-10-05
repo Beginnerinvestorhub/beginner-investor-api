@@ -1,9 +1,35 @@
 import React, { useState } from 'react';
 
 interface RiskAssessmentFormProps {
-  onSubmit: (data: any) => void;
+  onSubmit: (data: RiskAssessmentData) => void;
   loading: boolean;
   error: string | null;
+}
+
+interface RiskAssessmentData {
+  // Step 1: Personal Details
+  age: number;
+  gender: string;
+  marital_status: string;
+  employment_status: string;
+  is_retired: boolean;
+  region: string;
+  is_immigrant: boolean;
+  // Step 2: Financial Profile
+  income: number;
+  assets: number;
+  liabilities: number;
+  expenses: number;
+  credit_score: number;
+  // Step 3: Behavior & Goals
+  investment_experience: number;
+  risk_tolerance: number;
+  market_volatility: number;
+  industry_risk: number;
+  economic_outlook: number;
+  dependents: number;
+  education_level: string;
+  primary_goal: string;
 }
 
 const initialState = {
@@ -40,12 +66,12 @@ const steps = [
 
 export default function RiskAssessmentForm({ onSubmit, loading, error }: RiskAssessmentFormProps) {
   const [step, setStep] = useState(0);
-  const [form, setForm] = useState<any>(initialState);
+  const [form, setForm] = useState<Partial<RiskAssessmentData>>(initialState);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-    setForm((prev: any) => ({
+    setForm((prev: Partial<RiskAssessmentData>) => ({
       ...prev,
       [name]: type === 'checkbox' ? checked : value,
     }));

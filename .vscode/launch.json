@@ -1,84 +1,223 @@
 {
     "version": "0.2.0",
+    /*
+     * This is the main configuration file for the VSCode debugger.
+     * It lists out all the different configurations that can be used to debug
+     * the full stack of the application.
+     */
     "configurations": [
-        
+    
+        /*
+         * This configuration is used to debug the frontend of the application.
+         * It runs the Next.js development server and allows for inspection of the code.
+         */
         {
-            "name": "Debug Frontend (Next.js)",
+            "name": "Debug Frontend (Vercel/Next.js)",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/tools/frontend/node_modules/.bin/next",
+            "program": "${workspaceFolder}/frontend/node_modules/.bin/next",
             "args": ["dev"],
-            "cwd": "${workspaceFolder}/tools/frontend",
+            "cwd": "${workspaceFolder}/frontend",
             "env": {
-                "NODE_OPTIONS": "--inspect"
+                "NODE_OPTIONS": "--inspect-brk"
             },
             "console": "integratedTerminal",
-            "serverReadyAction": {
-                "pattern": "ready - started server on .+, url: (https?://.+)",
-                "uriFormat": "%s",
-                "action": "debugWithChrome"
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/frontend/dist/**/*.js"],
+            "skipFiles": ["**/node_modules/**", "**/dist/**"],
+            "preLaunchTask": {
+                "label": "Debug Frontend (Vercel/Next.js): Pre-Launch",
+                "type": "shell",
+                "command": "echo '== Starting Debug Frontend (Vercel/Next.js) =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
+            },
+            "postDebugTask": {
+                "label": "Debug Frontend (Vercel/Next.js): Post-Debug",
+                "type": "shell",
+                "command": "echo '== Finished Debug Frontend (Vercel/Next.js) =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
             }
-        },
+        /*
+         * This configuration is used to debug the backend API of the application.
+         * It runs the backend API development server and allows for inspection of the code.
+         */
         {
-            "name": "Debug Backend (Node.js)",
+            "name": "Debug Backend API",
             "type": "node",
             "request": "launch",
-            "program": "${workspaceFolder}/tools/backend/src/index.ts",
-            "cwd": "${workspaceFolder}/tools/backend",
+            "program": "${workspaceFolder}/backend-api/src/index.ts",
+            "cwd": "${workspaceFolder}/backend-api",
             "runtimeArgs": ["-r", "ts-node/register"],
             "env": {
-                "NODE_ENV": "development"
+                "NODE_ENV": "development",
+                "PORT": "3000"
             },
             "console": "integratedTerminal",
-            "restart": true,
             "protocol": "inspector",
             "sourceMaps": true,
-            "outFiles": ["${workspaceFolder}/tools/backend/dist/**/*.js"]
+            "outFiles": ["${workspaceFolder}/backend-api/dist/**/*.js"],
+            "skipFiles": ["**/node_modules/**", "**/dist/**"]
         },
+        /*
+         * This configuration is used to debug the market data ingestion service of the application.
+         * It runs the market data ingestion development server and allows for inspection of the code.
+         */
         {
-            "name": "Debug Python AI Service",
+            "name": "Debug Market Data Ingestion",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/market-data-ingestion/src/index.ts",
+            "cwd": "${workspaceFolder}/market-data-ingestion",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3002"
+            },
+            "console": "integratedTerminal",
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/market-data-ingestion/dist/**/*.js"],
+            "skipFiles": ["**/node_modules/**", "**/dist/**"],
+            "preLaunchTask": {
+                "label": "Debug Market Data Ingestion: Pre-Launch",
+                "type": "shell",
+                "command": "echo '== Starting Debug Market Data Ingestion =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
+            },
+            "postDebugTask": {
+                "label": "Debug Market Data Ingestion: Post-Debug",
+                "type": "shell",
+                "command": "echo '== Finished Debug Market Data Ingestion =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
+            }
+        /*
+         * This configuration is used to debug the AI microservice engine of the application.
+         * It runs the AI microservice engine development server and allows for inspection of the code.
+         */
+        {
+            "name": "Debug AI Microservice Engine",
+            "type": "node",
+            "request": "launch",
+            "program": "${workspaceFolder}/ai-microservice-engine/src/index.ts",
+            "cwd": "${workspaceFolder}/ai-microservice-engine",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3003",
+                "NODE_OPTIONS": "--inspect-brk"
+            },
+            "console": "integratedTerminal",
+            "protocol": "inspector",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/ai-microservice-engine/dist/**/*.js"],
+            "skipFiles": ["**/node_modules/**", "**/dist/**"]
+        },
+        /*
+         * This configuration is used to debug the Python risk engine of the application.
+         * It runs the Python risk engine development server and allows for inspection of the code.
+         */
+        {
+            "name": "Debug Python Risk Engine",
             "type": "python",
             "request": "launch",
-            "program": "${workspaceFolder}/tools/ai_microservice/start.py",
-            "cwd": "${workspaceFolder}/tools/ai_microservice",
-            "python": "${workspaceFolder}/tools/ai_microservice/.venv/Scripts/python.exe",
+            "program": "${workspaceFolder}/pythonrisk-engine/src/main.py",
+            "cwd": "${workspaceFolder}/pythonrisk-engine",
+            "python": "${workspaceFolder}/pythonrisk-engine/.venv/bin/python",
             "env": {
-                "PYTHONPATH": "${workspaceFolder}/tools/ai_microservice"
+                "PYTHONPATH": "${workspaceFolder}/python-risk-engine",
+                "PORT": "3001",
+                "LOGGING_LEVEL": "DEBUG"
             },
             "console": "integratedTerminal",
             "justMyCode": false
         },
+        /*
+         * This configuration is used to debug the portfolio simulation service of the application.
+         * It runs the portfolio simulation development server and allows for inspection of the code.
+         */
         {
-            "name": "Attach to Frontend",
+            "name": "Portfolio Simulation Service",
             "type": "node",
-            "request": "attach",
-            "port": 9229,
-            "restart": true,
-            "localRoot": "${workspaceFolder}/tools/frontend",
-            "remoteRoot": "${workspaceFolder}/tools/frontend"
+            "request": "launch",
+            "program": "${workspaceFolder}/portfolio-simulation/src/index.ts",
+            "cwd": "${workspaceFolder}/portfolio-simulation",
+            "runtimeArgs": ["-r", "ts-node/register"],
+            "env": {
+                "NODE_ENV": "development",
+                "PORT": "3004"
+            },
+            "console": "integratedTerminal",
+            "protocol": "auto",
+            "sourceMaps": true,
+            "outFiles": ["${workspaceFolder}/portfolio-simulation/dist/**/*.js"],
+            "skipFiles": ["**/node_modules/**", "**/dist/**"]
         },
-        {
-            "name": "Attach to Backend",
-            "type": "node",
-            "request": "attach",
-            "port": 9230,
-            "restart": true,
-            "localRoot": "${workspaceFolder}/tools/backend",
-            "remoteRoot": "${workspaceFolder}/tools/backend"
-        }
-    ],
     "compounds": [
         {
             "name": "Debug Full Stack",
             "configurations": [
-                "Debug Frontend (Next.js)",
-                "Debug Backend (Node.js)",
-                "Debug Python AI Service"
+                "Debug Frontend (Vercel/Next.js)",
+                "Debug Backend API ",
+                "Debug Market Data Ingestion",
+                "Debug AI Microservice Engine",
+                "Debug Python Risk Engine",
+                "Debug Portfolio Simulation"
             ],
             "presentation": {
                 "hidden": false,
                 "group": "Full Stack",
                 "order": 1
+            },
+            "preLaunchTask": {
+                "label": "Debug Full Stack: Pre-Launch",
+                "type": "shell",
+                "command": "echo '== Starting Debug Full Stack =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
+            },
+            "postDebugTask": {
+                "label": "Debug Full Stack: Post-Debug",
+                "type": "shell",
+                "command": "echo '== Finished Debug Full Stack =='; echo '== Current working directory: ${workspaceFolder}'",
+                "presentation": {
+                    "reveal": "silent"
+                }
+            }
+        },
+        {
+            "name": "Debug Backend Services Only",
+            "configurations": [
+                "Debug Backend API ",
+                "Debug Market Data Ingestion",
+                "Debug AI Microservice Engine",
+                "Debug Python Risk Engine",
+                "Debug Portfolio Simulation"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Backend",
+                "order": 2
+            }
+        },
+        {
+            "name": "Debug API + Portfolio",
+            "configurations": [
+                "Debug Backend API ",
+                "Debug Portfolio Simulation Service"
+            ],
+            "presentation": {
+                "hidden": false,
+                "group": "Core Services",
+                "order": 3
             }
         }
     ]

@@ -16,7 +16,7 @@ interface LearningState {
 
 export const useLearningStore = create<LearningState>()(
   persist(
-    (set, get) => ({
+    (set) => ({
       onboardingCompleted: false,
       currentModule: null,
       completedModules: [],

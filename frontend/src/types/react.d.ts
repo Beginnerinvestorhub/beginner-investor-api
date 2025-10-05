@@ -3,7 +3,7 @@ import * as React from 'react';
 declare global {
   namespace JSX {
     interface IntrinsicElements {
-      [elemName: string]: any;
+      [elemName: string]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
     }
   }
 }
@@ -21,9 +21,9 @@ declare module 'react' {
   type FC<P = {}> = FunctionComponent<P>;
   
   interface FunctionComponent<P = {}> {
-    (props: PropsWithChildren<P>, context?: any): ReactElement<any, any> | null;
-    propTypes?: WeakValidationMap<P> | undefined;
-    contextTypes?: ValidationMap<any> | undefined;
+    (props: React.PropsWithChildren<P>, context?: unknown): React.ReactElement<React.PropsWithChildren<P>, React.ComponentType<React.PropsWithChildren<P>>> | null;
+    propTypes?: React.WeakValidationMap<P> | undefined;
+    contextTypes?: React.ValidationMap<unknown> | undefined;
     defaultProps?: Partial<P> | undefined;
     displayName?: string | undefined;
   }
@@ -34,17 +34,17 @@ declare module 'react' {
   type ReactChild = ReactElement | ReactText;
   type ReactFragment = {} | Iterable<ReactNode>;
   
-  interface ReactElement<P = any, T extends string | JSXElementConstructor<any> = string | JSXElementConstructor<any>> {
+  interface ReactElement<P = unknown, T extends string | React.JSXElementConstructor<unknown> = string | React.JSXElementConstructor<unknown>> {
     type: T;
     props: P;
-    key: Key | null;
+    key: React.Key | null;
   }
   
   type Key = string | number;
   
-  interface PropsWithChildren<P = unknown> {
+  interface PropsWithChildren {
     children?: ReactNode | undefined;
-    [key: string]: any;
+    [key: string]: React.ReactNode | string | number | boolean | null | undefined;
   }
   
   interface CSSProperties extends CSS.Properties<string | number> {}
@@ -52,9 +52,9 @@ declare module 'react' {
 
 // Add global JSX namespace
 declare namespace JSX {
-  interface Element extends React.ReactElement<any, any> {}
+  interface Element extends React.ReactElement<unknown, React.ComponentType<unknown>> {}
   interface ElementClass {
-    props: any;
+    props: React.ReactNode | string | number | boolean | null | undefined;
   }
   interface ElementAttributesProperty {
     props: {};
@@ -65,6 +65,6 @@ declare namespace JSX {
   interface IntrinsicAttributes extends React.Attributes {}
   interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> {}
   interface IntrinsicElements {
-    [elemName: string]: any;
+    [elemName: string]: React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
   }
 }

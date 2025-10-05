@@ -1,15 +1,19 @@
-<<<<<<< HEAD
-# Updated to use psycopg (PostgreSQL adapter with better Windows support)
-psycopg[binary]>=3.1.0
-# Legacy psycopg2-binary kept as fallback for compatibility
-# psycopg-binary>=3.1,<4.0
-=======
-psycopg-binary>=3.1,<4.0
->>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
+# PostgreSQL adapter - Use ONLY ONE of these options
+psycopg[binary]>=3.1.0,<4.0.0
+
+# Database ORM & Migrations
 sqlalchemy>=2.0,<3.0
 alembic>=1.12,<2.0
+
+# Environment & Config
 python-dotenv>=1.0,<2.0
+
+# Security
 bcrypt>=4.0,<5.0
-firebase-admin>=6.0,<8.0
-tenacity>=8.0.0,<9.0.0
 passlib[bcrypt]>=1.7.0,<2.0.0
+
+# Firebase
+
+
+# Utilities
+tenacity>=8.0.0,<9.0.0

@@ -40,6 +40,12 @@ type ApiRouteConfig = {
 
 
 
+// Validate ../../pages/_app.tsx
+{
+  const handler = {} as typeof import("../../pages/_app.js")
+  handler satisfies PagesPageConfig
+}
+
 // Validate ../../pages/admin.tsx
 {
   const handler = {} as typeof import("../../pages/admin.js")
@@ -128,6 +134,12 @@ type ApiRouteConfig = {
 {
   const handler = {} as typeof import("../../pages/tools.js")
   handler satisfies PagesPageConfig
+}
+
+// Validate ../../pages/api/auth/[...nextauth].ts
+{
+  const handler = {} as typeof import("../../pages/api/auth/[...nextauth].js")
+  handler satisfies ApiRouteConfig
 }
 
 // Validate ../../pages/api/nudge/route.ts

@@ -71,16 +71,19 @@ export default function Home() {
         <div className="absolute inset-0 bg-grid-pattern opacity-5"></div>
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           {/* Confirmed text-center is applied to the container, ensuring title centering */}
-          <div className="text-center"> 
-            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
-              <span className="text-indigo-600">Demystify Investing,</span>
-              <br />Build Your Wealth <span className="text-blue-600">Confidently</span> {/* Switched one color to blue-600 for variety */}
+          <div className="text-center">
+            <h1 className="text-5xl md:text-7xl font-extrabold text-gray-900 mb-2">
+              <span className="text-indigo-600 block">Demystify Investing,</span>
             </h1>
+            <h1 className="text-4xl md:text-6xl font-extrabold text-gray-900 mb-6">
+              <span className="text-blue-600">Build Your Wealth Confidently</span>
+            </h1>
+
             <p className="text-xl md:text-2xl text-gray-600 mb-8 max-w-3xl mx-auto leading-relaxed">
-              Beginner Investor Hub guides you through interactive lessons, gamified challenges, 
+              Beginner Investor Hub guides you through interactive lessons, gamified challenges,
               and risk-free virtual investing. Your personalized path to financial freedom starts here.
             </p>
-            
+
             {/* CTA Buttons - Adding more pronounced shadow/lift for pop */}
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center mb-12">
               <Link href="/signup" className="px-8 py-4 bg-indigo-600 text-white text-lg font-semibold rounded-xl hover:bg-indigo-700 transform hover:scale-105 transition-all duration-200 shadow-xl hover:shadow-2xl flex items-center">
@@ -136,7 +139,7 @@ export default function Home() {
                 href={feature.href}
                 linkText={feature.linkText}
                 // Assuming FeatureCard is updated to use this prop
-                iconColor={feature.color} 
+                color={feature.color} 
               />
             ))}
           </div>

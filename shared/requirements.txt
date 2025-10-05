@@ -10,18 +10,19 @@ pydantic-settings==2.1.0
 # Database
 sqlalchemy==2.0.23
 alembic==1.12.1
-psycopg2-binary==2.9.7
+# Correct way - this installs psycopg with binary extras
+psycopg[binary]>=3.1.0,<4.0
 
 # Redis
 redis==5.0.1
 
 # Firebase
-firebase-admin==6.2.0
 
 # Authentication & Security
 python-jose[cryptography]==3.3.0
 passlib[bcrypt]==1.7.4
 python-multipart==0.0.6
+PyJWT==2.8.0
 
 # Configuration & Environment
 python-dotenv==1.0.0

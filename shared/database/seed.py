@@ -8,9 +8,9 @@ from typing import Optional, Dict, Any
 # Note: This is an environment-specific fix for Codespaces/local run
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
-from shared.database.connection import SessionLocal, test_connection, create_tables
+from shared.database.connection import SessionLocal, test_connection,create_tables
 # Ensure UserSubscription is imported and Subscription is NOT
-from shared.database.models import User, Portfolio, UserSubscription, SubscriptionPlan 
+from shared.database.models import User, Portfolio, UserSubscription,SubscriptionPlan 
 
 # Configure logging
 logging.basicConfig(
@@ -106,13 +106,10 @@ def seed_subscription_plans(db_session, config: SeederConfig, dry_run: bool = Fa
         ).first()
 
         if not existing_plan:
-<<<<<<< HEAD
             if dry_run:
                 logger.info(f"  [DRY RUN] Would create subscription plan: {plan_data['name']}")
                 continue
                 
-            plan = SubscriptionPlan(**plan_data)
-=======
             # Create a dictionary of only the column names
             plan_obj_data = {
                 k: plan_data[k] for k in ["name", "description", "amount", "interval", "tier", "is_active"]
@@ -121,7 +118,6 @@ def seed_subscription_plans(db_session, config: SeederConfig, dry_run: bool = Fa
             plan_obj_data["metadata_"] = plan_data["metadata"] 
             
             plan = SubscriptionPlan(**plan_obj_data)
->>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
             db_session.add(plan)
             logger.info(f"  ✓ Created subscription plan: {plan_data['name']}")
         else:
@@ -140,14 +136,13 @@ def seed_admin_user(db_session, config: SeederConfig, dry_run: bool = False):
     ).first()
 
     if not existing_admin:
-<<<<<<< HEAD
         if dry_run:
             logger.info(f"  [DRY RUN] Would create admin user: {config.admin_email}")
             return
             
-=======
+
         # The password hash for "password" should be consistent
->>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
+       
         admin_user = User(
             email=config.admin_email,
             first_name="System",

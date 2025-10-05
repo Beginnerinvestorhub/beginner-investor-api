@@ -118,7 +118,6 @@ const nextConfig = withBundleAnalyzer(
       optimizeCss: true,
       optimizePackageImports: [
         '@headlessui/react',
-        '@heroicons/react',
         'chart.js',
         'react-chartjs-2',
       ],
@@ -126,6 +125,7 @@ const nextConfig = withBundleAnalyzer(
 
     // Output configuration
     output: 'standalone',
+    outputFileTracingRoot: __dirname,
 
     // Compiler optimizations
     compiler: {
