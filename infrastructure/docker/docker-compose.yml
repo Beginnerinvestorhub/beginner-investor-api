@@ -40,7 +40,7 @@ services:
   # Core Services (Always Running)
   backend-api:
     build:
-      context: ../../services/backend-api-service
+      context: ../../services/backend-api
       dockerfile: Dockerfile
       target: runner
     container_name: fintech_backend_api
@@ -80,7 +80,7 @@ services:
 
   market-data:
     build:
-      context: ../../services/market-data-ingestion-service
+      context: ../../services/marketdata-ingestion
       dockerfile: Dockerfile
       target: runner
     container_name: fintech_market_data
@@ -180,7 +180,7 @@ services:
   # Application Services
   portfolio-simulation:
     build:
-      context: ../../services/portfolio-simulation-service
+      context: ../../services/portfolio-simulation
       dockerfile: Dockerfile
       target: runner
     container_name: fintech_portfolio_simulation

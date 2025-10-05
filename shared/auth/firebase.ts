@@ -3,6 +3,7 @@ import { initializeApp, cert, App, getApp, getApps } from 'firebase-admin/app';
 import { getAuth, DecodedIdToken } from 'firebase-admin/auth';
 import { logger } from '../utils/logger';
 import { redisManager } from '../redis';
+import { getFirebaseConfig } from '../config';
 
 // Extend Express Request type to include user
 declare global {
@@ -22,19 +23,15 @@ class FirebaseAdmin {
   private app: App;
 
   private constructor() {
-    const firebaseConfig = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    };
+    const firebaseConfig = getFirebaseConfig();
 
     try {
-      this.app = getApps().length === 0 
+      this.app = getApps().length === 0
         ? initializeApp({
             credential: cert({
-              projectId: firebaseConfig.projectId,
-              clientEmail: firebaseConfig.clientEmail,
-              privateKey: firebaseConfig.privateKey,
+              projectId: firebaseConfig.project_id,
+              clientEmail: firebaseConfig.client_email,
+              privateKey: firebaseConfig.private_key,
             }),
           })
         : getApp();
@@ -74,29 +71,29 @@ const firebaseAdmin = FirebaseAdmin.getInstance();
  * Middleware to verify Firebase token
  */
 export const authenticate = async (
-  req: Request, 
-  res: Response, 
+  req: Request,
+  res: Response,
   next: NextFunction
 ) => {
   try {
     const authHeader = req.headers.authorization;
-    
+
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
       return res.status(401).json({ error: 'Unauthorized: No token provided' });
     }
 
     const token = authHeader.split(' ')[1];
-    
+
     try {
       const decodedToken = await firebaseAdmin.verifyToken(token);
-      
+
       // Add user to request object
       req.user = {
         uid: decodedToken.uid,
         email: decodedToken.email,
         ...decodedToken
       };
-      
+
       next();
     } catch (error) {
       logger.error('Authentication error:', error);
@@ -126,8 +123,8 @@ export const authorize = (roles: string[] = []) => {
     const hasRole = roles.some(role => userRoles.includes(role));
 
     if (!hasRole) {
-      return res.status(403).json({ 
-        error: 'Forbidden: Insufficient permissions' 
+      return res.status(403).json({
+        error: 'Forbidden: Insufficient permissions'
       });
     }
 
@@ -140,13 +137,13 @@ export const authorize = (roles: string[] = []) => {
  */
 export const serviceAuth = (req: Request, res: Response, next: NextFunction) => {
   const serviceToken = req.headers['x-service-token'];
-  
+
   if (serviceToken === process.env.INTERNAL_SERVICE_SECRET) {
     return next();
   }
-  
-  return res.status(403).json({ 
-    error: 'Forbidden: Invalid service token' 
+
+  return res.status(403).json({
+    error: 'Forbidden: Invalid service token'
   });
 };
 

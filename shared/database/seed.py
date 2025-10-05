@@ -1,10 +1,8 @@
-"""
-Database seeding script for the investment hub application.
-This script populates the database with initial data required for the application to function.
-"""
 import os
 import sys
+import logging
 from datetime import datetime, timedelta
+from typing import Optional, Dict, Any
 
 # Add the parent directory to the path so we can import our modules
 # Note: This is an environment-specific fix for Codespaces/local run
@@ -14,9 +12,40 @@ from shared.database.connection import SessionLocal, test_connection, create_tab
 # Ensure UserSubscription is imported and Subscription is NOT
 from shared.database.models import User, Portfolio, UserSubscription, SubscriptionPlan 
 
-def seed_subscription_plans(db_session):
+# Configure logging
+logging.basicConfig(
+    level=logging.INFO,
+    format='%(asctime)s - %(levelname)s - %(message)s'
+)
+logger = logging.getLogger(__name__)
+
+class SeederConfig:
+    """Configuration for the seeding process."""
+    
+    def __init__(self):
+        self.admin_email = os.getenv('SEED_ADMIN_EMAIL', 'admin@investmenthub.com')
+        self.admin_password = os.getenv('SEED_ADMIN_PASSWORD', 'changeme123!')
+        self.sample_user_password = os.getenv('SEED_SAMPLE_PASSWORD', 'changeme123!')
+        self.dry_run = os.getenv('SEED_DRY_RUN', 'false').lower() == 'true'
+        self.log_level = os.getenv('SEED_LOG_LEVEL', 'INFO').upper()
+        
+        # Configure logger level
+        logger.setLevel(getattr(logging, self.log_level, logging.INFO))
+    
+    def should_seed(self, entity_name: str) -> bool:
+        """Check if a specific entity should be seeded based on environment variables."""
+        env_var = f'SEED_{entity_name.upper()}'
+        return os.getenv(env_var, 'true').lower() == 'true'
+
+def get_password_hash(password: str) -> str:
+    """Generate password hash for the given password."""
+    from passlib.context import CryptContext
+    pwd_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+    return pwd_context.hash(password)
+
+def seed_subscription_plans(db_session, config: SeederConfig, dry_run: bool = False):
     """Create initial subscription plans."""
-    print("Seeding subscription plans...")
+    logger.info("Seeding subscription plans...")
 
     # NOTE: You need to ensure that the PlanTier and BillingInterval enums from your 
     # subscription model are imported or available to correctly set these values.
@@ -77,6 +106,13 @@ def seed_subscription_plans(db_session):
         ).first()
 
         if not existing_plan:
+<<<<<<< HEAD
+            if dry_run:
+                logger.info(f"  [DRY RUN] Would create subscription plan: {plan_data['name']}")
+                continue
+                
+            plan = SubscriptionPlan(**plan_data)
+=======
             # Create a dictionary of only the column names
             plan_obj_data = {
                 k: plan_data[k] for k in ["name", "description", "amount", "interval", "tier", "is_active"]
@@ -85,43 +121,53 @@ def seed_subscription_plans(db_session):
             plan_obj_data["metadata_"] = plan_data["metadata"] 
             
             plan = SubscriptionPlan(**plan_obj_data)
+>>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
             db_session.add(plan)
-            print(f"  ✓ Created subscription plan: {plan_data['name']}")
+            logger.info(f"  ✓ Created subscription plan: {plan_data['name']}")
         else:
-            print(f"  - Subscription plan already exists: {plan_data['name']}")
+            logger.info(f"  - Subscription plan already exists: {plan_data['name']}")
 
-    db_session.commit()
+    if not dry_run:
+        db_session.commit()
 
-def seed_admin_user(db_session):
+def seed_admin_user(db_session, config: SeederConfig, dry_run: bool = False):
     """Create initial admin user."""
-    print("Seeding admin user...")
+    logger.info("Seeding admin user...")
 
     # Check if admin user already exists
     existing_admin = db_session.query(User).filter(
-        User.email == "admin@investmenthub.com"
+        User.email == config.admin_email
     ).first()
 
     if not existing_admin:
+<<<<<<< HEAD
+        if dry_run:
+            logger.info(f"  [DRY RUN] Would create admin user: {config.admin_email}")
+            return
+            
+=======
         # The password hash for "password" should be consistent
+>>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
         admin_user = User(
-            email="admin@investmenthub.com",
+            email=config.admin_email,
             first_name="System",
             last_name="Administrator",
             is_active=True,
             is_superuser=True,
             email_verified=True,
-            hashed_password="$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeehkK/7C2.SvCjJg",  # "password"
+            hashed_password=get_password_hash(config.admin_password),
         )
         db_session.add(admin_user)
-        print("  ✓ Created admin user: admin@investmenthub.com")
+        logger.info(f"  ✓ Created admin user: {config.admin_email}")
     else:
-        print("  - Admin user already exists")
+        logger.info(f"  - Admin user already exists: {config.admin_email}")
 
-    db_session.commit()
+    if not dry_run:
+        db_session.commit()
 
-def seed_sample_users(db_session):
+def seed_sample_users(db_session, config: SeederConfig, dry_run: bool = False):
     """Create sample users for testing."""
-    print("Seeding sample users...")
+    logger.info("Seeding sample users...")
 
     sample_users = [
         {
@@ -130,7 +176,7 @@ def seed_sample_users(db_session):
             "last_name": "Doe",
             "is_active": True,
             "email_verified": True,
-            "hashed_password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeehkK/7C2.SvCjJg",  # "password"
+            "hashed_password": get_password_hash(config.sample_user_password),
         },
         {
             "email": "jane.smith@example.com",
@@ -138,7 +184,7 @@ def seed_sample_users(db_session):
             "last_name": "Smith",
             "is_active": True,
             "email_verified": True,
-            "hashed_password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeehkK/7C2.SvCjJg",  # "password"
+            "hashed_password": get_password_hash(config.sample_user_password),
         },
         {
             "email": "investor@example.com",
@@ -146,7 +192,7 @@ def seed_sample_users(db_session):
             "last_name": "Investor",
             "is_active": True,
             "email_verified": True,
-            "hashed_password": "$2b$12$LQv3c1yqBWVHxkd0LHAkCOYz6TtxMQJqhN8/LeehkK/7C2.SvCjJg",  # "password"
+            "hashed_password": get_password_hash(config.sample_user_password),
         }
     ]
 
@@ -156,23 +202,28 @@ def seed_sample_users(db_session):
         ).first()
 
         if not existing_user:
+            if dry_run:
+                logger.info(f"  [DRY RUN] Would create sample user: {user_data['email']}")
+                continue
+                
             user = User(**user_data)
             db_session.add(user)
-            print(f"  ✓ Created sample user: {user_data['email']}")
+            logger.info(f"  ✓ Created sample user: {user_data['email']}")
         else:
-            print(f"  - Sample user already exists: {user_data['email']}")
+            logger.info(f"  - Sample user already exists: {user_data['email']}")
 
-    db_session.commit()
+    if not dry_run:
+        db_session.commit()
 
-def seed_sample_portfolios(db_session):
+def seed_sample_portfolios(db_session, config: SeederConfig, dry_run: bool = False):
     """Create sample portfolios for testing."""
-    print("Seeding sample portfolios...")
+    logger.info("Seeding sample portfolios...")
 
     # Get users for portfolio creation
     users = db_session.query(User).filter(User.email_verified == True).all()
 
     if not users:
-        print("  ⚠ No verified users found for portfolio creation")
+        logger.warning("  ⚠ No verified users found for portfolio creation")
         return
 
     sample_portfolios = [
@@ -206,6 +257,10 @@ def seed_sample_portfolios(db_session):
         ).first()
 
         if not existing_portfolio:
+            if dry_run:
+                logger.info(f"  [DRY RUN] Would create portfolio: {portfolio_data['name']}")
+                continue
+                
             portfolio = Portfolio(
                 # Use owner_id to match your model structure
                 owner_id=portfolio_data["user_id"],
@@ -216,22 +271,23 @@ def seed_sample_portfolios(db_session):
                 created_at=datetime.utcnow()
             )
             db_session.add(portfolio)
-            print(f"  ✓ Created portfolio: {portfolio_data['name']}")
+            logger.info(f"  ✓ Created portfolio: {portfolio_data['name']}")
         else:
-            print(f"  - Portfolio already exists: {portfolio_data['name']}")
+            logger.info(f"  - Portfolio already exists: {portfolio_data['name']}")
 
-    db_session.commit()
+    if not dry_run:
+        db_session.commit()
 
-def seed_sample_subscriptions(db_session):
+def seed_sample_subscriptions(db_session, config: SeederConfig, dry_run: bool = False):
     """Create sample subscriptions for testing."""
-    print("Seeding sample subscriptions...")
+    logger.info("Seeding sample subscriptions...")
 
     # Get users and plans
     users = db_session.query(User).filter(User.email_verified == True).all()
     plans = db_session.query(SubscriptionPlan).filter(SubscriptionPlan.is_active == True).all()
 
     if not users or not plans:
-        print("  ⚠ No users or plans found for subscription creation")
+        logger.warning("  ⚠ No users or plans found for subscription creation")
         return
 
     # Create free subscriptions for all users
@@ -243,6 +299,10 @@ def seed_sample_subscriptions(db_session):
         ).first()
 
         if not existing_subscription:
+            if dry_run:
+                logger.info(f"  [DRY RUN] Would create free subscription for: {user.email}")
+                continue
+                
             # Get the free plan
             # FIX: Use 'amount' or check 'tier' to find the Free plan
             free_plan = next((plan for plan in plans if plan.amount == 0), None)
@@ -257,53 +317,90 @@ def seed_sample_subscriptions(db_session):
                     cancel_at_period_end=False
                 )
                 db_session.add(subscription)
-                print(f"  ✓ Created free subscription for: {user.email}")
+                logger.info(f"  ✓ Created free subscription for: {user.email}")
         else:
-            print(f"  - Active subscription already exists for: {user.email}")
+            logger.info(f"  - Active subscription already exists for: {user.email}")
 
-    db_session.commit()
+    if not dry_run:
+        db_session.commit()
 
 def main():
     """Main seeding function."""
-    print("🚀 Starting database seeding...")
+    import argparse
+
+    parser = argparse.ArgumentParser(description='Database seeding script')
+    parser.add_argument('--dry-run', action='store_true', help='Show what would be seeded without making changes')
+    parser.add_argument('--only', nargs='+', choices=['plans', 'admin', 'users', 'portfolios', 'subscriptions'],
+                       help='Only seed specific entities')
+    parser.add_argument('--skip', nargs='+', choices=['plans', 'admin', 'users', 'portfolios', 'subscriptions'],
+                       help='Skip seeding specific entities')
+    parser.add_argument('--log-level', choices=['DEBUG', 'INFO', 'WARNING', 'ERROR'], default='INFO',
+                       help='Set logging level')
+
+    args = parser.parse_args()
+
+    # Override config with command line arguments
+    config = SeederConfig()
+    if args.dry_run:
+        config.dry_run = True
+    if args.log_level:
+        config.log_level = args.log_level
+        logger.setLevel(getattr(logging, args.log_level, logging.INFO))
+
+    logger.info("🚀 Starting database seeding...")
 
     # Test database connection
     if not test_connection():
-        print("❌ Cannot connect to database. Please check your DATABASE_URL.")
+        logger.error("❌ Cannot connect to database. Please check your DATABASE_URL.")
         return 1
 
     # Create tables if they don't exist
     try:
         create_tables()
-        print("✓ Database tables created/verified")
+        logger.info("✓ Database tables created/verified")
     except Exception as e:
-        print(f"❌ Error creating tables: {e}")
+        logger.error(f"❌ Error creating tables: {e}")
         return 1
 
     try:
         with SessionLocal() as db:
-            # Run all seeding functions
-            seed_subscription_plans(db)
-            seed_admin_user(db)
-            seed_sample_users(db)
-            seed_sample_portfolios(db)
-            seed_sample_subscriptions(db)
+            # Determine what to seed based on arguments
+            entities_to_seed = {
+                'plans': config.should_seed('plans') and (not args.only or 'plans' in args.only) and (not args.skip or 'plans' not in args.skip),
+                'admin': config.should_seed('admin') and (not args.only or 'admin' in args.only) and (not args.skip or 'admin' not in args.skip),
+                'users': config.should_seed('users') and (not args.only or 'users' in args.only) and (not args.skip or 'users' not in args.skip),
+                'portfolios': config.should_seed('portfolios') and (not args.only or 'portfolios' in args.only) and (not args.skip or 'portfolios' not in args.skip),
+                'subscriptions': config.should_seed('subscriptions') and (not args.only or 'subscriptions' in args.only) and (not args.skip or 'subscriptions' not in args.skip),
+            }
 
-        print("✅ Database seeding completed successfully!")
-        print("\n📋 Summary:")
-        print("  • Subscription plans created")
-        print("  • Admin user created (admin@investmenthub.com)")
-        print("  • Sample users created for testing")
-        print("  • Sample portfolios created")
-        print("  • Sample subscriptions created")
-        print("\n🔐 Admin credentials:")
-        print("  Email: admin@investmenthub.com")
-        print("  Password: password")
+            # Run seeding functions based on configuration
+            if entities_to_seed['plans']:
+                seed_subscription_plans(db, config, config.dry_run)
+            if entities_to_seed['admin']:
+                seed_admin_user(db, config, config.dry_run)
+            if entities_to_seed['users']:
+                seed_sample_users(db, config, config.dry_run)
+            if entities_to_seed['portfolios']:
+                seed_sample_portfolios(db, config, config.dry_run)
+            if entities_to_seed['subscriptions']:
+                seed_sample_subscriptions(db, config, config.dry_run)
+
+        if config.dry_run:
+            logger.info("✅ Dry run completed! No changes were made to the database.")
+        else:
+            logger.info("✅ Database seeding completed successfully!")
+            logger.info("\n📋 Summary:")
+            logger.info("  • Subscription plans created")
+            logger.info(f"  • Admin user created ({config.admin_email})")
+            logger.info("  • Sample users created for testing")
+            logger.info("  • Sample portfolios created")
+            logger.info("  • Sample subscriptions created")
+            logger.info(f"\n🔐 Admin credentials: {config.admin_email} / [configured password]")
 
         return 0
 
     except Exception as e:
-        print(f"❌ Error during seeding: {e}")
+        logger.error(f"❌ Error during seeding: {e}")
         return 1
 
 if __name__ == "__main__":

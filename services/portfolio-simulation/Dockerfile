@@ -1,40 +1,42 @@
 # syntax=docker/dockerfile:1.4
 
-# Stage 1: Builder
-FROM node:20-alpine AS builder
+# Use Python 3.11 slim image
+FROM python:3.11-slim
+
+# Set working directory
 WORKDIR /app
 
-# Install build tools and pnpm
-RUN apk add --no-cache python3 make g++ curl \
-  && corepack enable \
-  && corepack prepare pnpm@latest --activate
+# Install system dependencies
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    gcc \
+    && rm -rf /var/lib/apt/lists/*
 
-# Copy package files and install dependencies
-COPY package.json pnpm-lock.yaml ./
-RUN pnpm install --frozen-lockfile
+# Copy requirements file
+COPY requirements.txt .
 
-# Copy source files and build the app
-COPY tsconfig*.json ./
-COPY src ./src
-RUN pnpm run build
+# Install Python dependencies
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Stage 2: Runner
-FROM node:20-alpine AS runner
-WORKDIR /app
+# Copy application code
+COPY src/ ./src/
+COPY app.py .
+COPY .env* ./
 
 # Create non-root user
-RUN addgroup -S nodejs && adduser -S portuser -G nodejs
-
-# Copy built app and runtime dependencies
-COPY --from=builder /app/dist ./dist
-COPY --from=builder /app/package.json ./
-COPY --from=builder /app/pnpm-lock.yaml ./
-COPY --from=builder /app/node_modules ./node_modules
-COPY --from=builder /app/.pnpm ./.pnpm
+RUN useradd --create-home --shell /bin/bash portuser
 
 # Set ownership
-RUN chown -R portuser:nodejs /app
+RUN chown -R portuser:portuser /app
 
+# Switch to non-root user
 USER portuser
-EXPOSE 3004
-CMD ["node", "dist/index.js"]
+
+# Expose port
+EXPOSE 8004
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:8004/health')" || exit 1
+
+# Run the application
+CMD ["python", "app.py"]

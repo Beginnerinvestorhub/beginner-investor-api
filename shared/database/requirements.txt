@@ -1,4 +1,11 @@
+<<<<<<< HEAD
+# Updated to use psycopg (PostgreSQL adapter with better Windows support)
+psycopg[binary]>=3.1.0
+# Legacy psycopg2-binary kept as fallback for compatibility
+# psycopg-binary>=3.1,<4.0
+=======
 psycopg-binary>=3.1,<4.0
+>>>>>>> 94d29dab5d0cdd4270ed4b59294550e80e0283e7
 sqlalchemy>=2.0,<3.0
 alembic>=1.12,<2.0
 python-dotenv>=1.0,<2.0

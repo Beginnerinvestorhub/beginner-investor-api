@@ -1,0 +1,121 @@
+# Shared base Dockerfile for all microservices
+# Use this as a base image for Node.js and Python services
+
+FROM node:18-alpine AS node-base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    python3 \
+    python3-dev \
+    py3-pip \
+    build-base \
+    postgresql-client \
+    redis \
+    curl \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Copy package files
+COPY package*.json ./
+
+# Install dependencies
+RUN npm ci --only=production && npm cache clean --force
+
+# Create non-root user
+RUN addgroup -g 1001 -S nodejs && adduser -S nodejs -u 1001
+
+# Switch to non-root user
+USER nodejs
+
+# Health check for Node.js services
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Multi-stage build for Python services
+FROM python:3.12-alpine AS python-base
+
+# Install system dependencies
+RUN apk add --no-cache \
+    nodejs \
+    npm \
+    postgresql-client \
+    redis \
+    curl \
+    build-base \
+    libffi-dev \
+    openssl-dev \
+    && rm -rf /var/cache/apk/*
+
+# Set working directory
+WORKDIR /app
+
+# Create non-root user
+RUN addgroup -g 1001 -S python && adduser -S python -u 1001
+
+# Switch to non-root user
+USER python
+
+# Health check for Python services
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD curl -f http://localhost:8000/health || exit 1
+
+# Multi-stage build for production Node.js applications
+FROM node-base AS node-production
+
+# Copy application code
+COPY --chown=nodejs:nodejs . .
+
+# Build application (if needed)
+RUN npm run build
+
+# Expose port
+EXPOSE 8000
+
+# Start the application
+CMD ["npm", "start"]
+
+# Multi-stage build for production Python applications
+FROM python-base AS python-production
+
+# Copy requirements and install Python dependencies
+COPY --chown=python:python requirements*.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Copy application code
+COPY --chown=python:python . .
+
+# Create necessary directories
+RUN mkdir -p logs temp
+
+# Expose port
+EXPOSE 8000
+
+# Start the application
+CMD ["python", "main.py"]
+
+# Development stage with hot reload
+FROM node-base AS node-development
+
+# Install development dependencies
+RUN npm install
+
+# Copy application code
+COPY --chown=nodejs:nodejs . .
+
+# Start in development mode
+CMD ["npm", "run", "dev"]
+
+# Development stage for Python
+FROM python-base AS python-development
+
+# Install development dependencies
+COPY --chown=python:python requirements*.txt ./
+RUN pip install --no-cache-dir -r requirements.txt -r requirements-dev.txt
+
+# Copy application code
+COPY --chown=python:python . .
+
+# Start in development mode with hot reload
+CMD ["python", "main.py"]
