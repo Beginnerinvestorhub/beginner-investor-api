@@ -24,8 +24,8 @@ interface FeatureCardProps extends ComponentProps<typeof FeatureCard> {
 
 const features: FeatureCardProps[] = [
   {
-    // Reduced icon size to h-6 w-6 to look less "huge" and added a base color
-    icon: <LightBulbIcon className="h-6 w-6 text-indigo-600" />,
+    // Reduced icon size to h-4 w-4 to look less "huge" and added a base color
+    icon: <LightBulbIcon className="h-4 w-4 text-indigo-600" />,
     title: 'Personalized Learning Paths',
     description: 'Tailored just for you. Our AI adapts to your goals and learning style.',
     href: '/learn/my-path',

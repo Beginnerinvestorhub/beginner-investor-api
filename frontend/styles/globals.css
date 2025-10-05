@@ -2,19 +2,204 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * NYSE Design Tokens
+ * Integrated into global styles for consistent branding
+ */
+
+:root {
+  /* Colors */
+  --nyse-color-primary: #003d7a;      /* NYSE Blue */
+  --nyse-color-secondary: #0055a5;
+  --nyse-color-accent: #00a0e3;       /* Bright Accent */
+  --nyse-color-dark: #1a1a1a;         /* Heading/Strong Text */
+  --nyse-color-text: #333333;         /* Body Text */
+  --nyse-color-text-light: #666666;
+  --nyse-color-background: #ffffff;
+  --nyse-color-background-alt: #f5f5f5;
+  --nyse-color-border: #e0e0e0;
+
+  /* Fonts */
+  --nyse-font-serif: "Nysé", Georgia, "Times New Roman", serif;
+  --nyse-font-sans: "Akko Pro Medium", "Trebuchet MS", Arial, Helvetica, sans-serif;
+  --nyse-font-mono: "Courier New", Courier, monospace;
+
+  /* Spacing (Rem units for better scaling) */
+  --nyse-spacing-xs: 0.25rem;   /* 4px */
+  --nyse-spacing-sm: 0.5rem;    /* 8px */
+  --nyse-spacing-md: 1rem;      /* 16px */
+  --nyse-spacing-lg: 1.5rem;    /* 24px */
+  --nyse-spacing-xl: 2rem;      /* 32px */
+  --nyse-spacing-xxl: 3rem;     /* 48px */
+}
+
+/*
+ * NYSE Design Base Styles
+ * These styles affect base HTML elements globally.
+ */
+
+/* 1. Global Reset & Body */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 html,
 body {
   padding: 0;
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, Segoe UI, Roboto, Oxygen,
-    Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue, sans-serif;
+  font-family: var(--nyse-font-sans);
+  font-size: 16px; /* Default body size */
+  line-height: 1.6;
+  color: var(--nyse-color-text);
+  background-color: var(--nyse-color-background);
+  -webkit-font-smoothing: antialiased;
 }
 
+/* 2. Typography */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--nyse-font-serif);
+  font-weight: 700;
+  line-height: 1.2;
+  margin-top: 0;
+  margin-bottom: var(--nyse-spacing-md);
+  color: var(--nyse-color-dark);
+}
+
+h1 { font-size: clamp(2.5rem, 5vw, 4.5rem); margin-bottom: var(--nyse-spacing-xl); }
+h2 { font-size: clamp(2rem, 4vw, 3.5rem); margin-bottom: var(--nyse-spacing-lg); }
+h3 { font-size: clamp(1.75rem, 3vw, 2.5rem); }
+h4 { font-size: clamp(1.5rem, 2.5vw, 2rem); }
+h5 { font-size: clamp(1.25rem, 2vw, 1.75rem); }
+h6 { font-size: clamp(1.125rem, 1.5vw, 1.5rem); }
+
+p {
+  margin-top: 0;
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+/* 3. Links */
 a {
-  color: inherit;
+  color: var(--nyse-color-primary);
   text-decoration: none;
+  transition: color 0.3s ease;
 }
 
-* {
-  box-sizing: border-box;
+a:hover {
+  color: var(--nyse-color-accent);
+  text-decoration: underline;
+}
+
+/* 4. Tables */
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: var(--nyse-spacing-xl);
+}
+
+th {
+  background-color: var(--nyse-color-primary);
+  color: var(--nyse-color-background);
+  font-weight: 600;
+  text-align: left;
+  padding: var(--nyse-spacing-md);
+  border: 1px solid var(--nyse-color-border);
+}
+
+td {
+  padding: var(--nyse-spacing-sm) var(--nyse-spacing-md);
+  border: 1px solid var(--nyse-color-border);
+}
+
+tr:nth-child(even) {
+  background-color: var(--nyse-color-background-alt);
+}
+
+/* 5. Form Elements */
+input, textarea, select {
+  font-family: var(--nyse-font-sans);
+  font-size: 16px;
+  padding: var(--nyse-spacing-sm) var(--nyse-spacing-md);
+  border: 1px solid var(--nyse-color-border);
+  border-radius: 4px;
+  background-color: var(--nyse-color-background);
+  color: var(--nyse-color-text);
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+input:focus, textarea:focus, select:focus {
+  outline: none;
+  border-color: var(--nyse-color-primary);
+  box-shadow: 0 0 0 3px rgba(0, 61, 122, 0.1);
+}
+
+/* 6. Buttons */
+button {
+  font-family: var(--nyse-font-sans);
+  font-size: 16px;
+  font-weight: 600;
+  padding: var(--nyse-spacing-sm) var(--nyse-spacing-lg);
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease, transform 0.2s ease;
+}
+
+button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+/* 7. Lists */
+ul, ol {
+  margin-top: 0;
+  margin-bottom: var(--nyse-spacing-md);
+  padding-left: var(--nyse-spacing-xl);
+}
+
+li {
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+/* 8. Code */
+code {
+  font-family: var(--nyse-font-mono);
+  background-color: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-xs) var(--nyse-spacing-sm);
+  border-radius: 3px;
+  font-size: 0.9em;
+}
+
+pre {
+  background-color: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-md);
+  border-radius: 4px;
+  overflow-x: auto;
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+pre code {
+  background: none;
+  padding: 0;
+}
+
+/* 9. Images */
+img {
+  max-width: 100%;
+  height: auto;
+  display: block;
+}
+
+/* 10. Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+/* Focus styles for keyboard navigation */
+:focus-visible {
+  outline: 2px solid var(--nyse-color-primary);
+  outline-offset: 2px;
 }
