@@ -1,259 +1,640 @@
+
 import Head from 'next/head';
 import { useAuth } from '../hooks/useAuth';
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
-import MainAppEmbed from '../components/MainAppEmbed';
-import StripeCheckoutButton from '../components/StripeCheckoutButton';
-import MarketDataWidget from '../components/MarketDataWidget';
-import { useGamificationAPI } from '../hooks/useGamificationAPI';
-import UserStatsCard from '../components/gamification/UserStatsCard';
-import AchievementNotification from '../components/gamification/AchievementNotification';
-import { useOnboardingCompleted } from '../src/store/learningStore';
-import PersonalizedLearningDashboard from '../components/learning/PersonalizedLearningDashboard';
-
-const STRIPE_PRICE_ID = process.env.NEXT_PUBLIC_STRIPE_PRICE_ID || 'price_12345'; // Fallback for development
-
-// Define a type for your notification item
-type NotificationItem = {
-  type: 'badge' | 'achievement' | 'points';
-  data: any; 
-  id: number;
-};
 
 export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
-  const onboardingCompleted = useOnboardingCompleted();
-  
-  // --- New State for Notification Queue ---
-  const [notificationQueue, setNotificationQueue] = useState<NotificationItem[]>([]);
-  const [currentNotification, setCurrentNotification] = useState<NotificationItem | null>(null);
-  
-  const [activeTab, setActiveTab] = useState<'learning' | 'tools' | 'market'>('learning');
+  const [isRedirecting, setIsRedirecting] = useState(false);
+  const [activeTab, setActiveTab] = useState<'overview' | 'tools' | 'learning'>('overview');
 
-  const {
-    userProgress,
-    badges,
-    achievements,
-    // notifications, // Assuming your hook will provide new notifications here later
-    isLoading: gamificationLoading,
-    error: gamificationError,
-    trackEvent,
-    // dismissNotification,
-  } = useGamificationAPI();
-
-  // Function to remove the currently displayed notification
-  const dismissNotification = useCallback(() => {
-    setCurrentNotification(null);
-  }, []);
-
-  // --- EFFECT 1: Track daily login ---
   useEffect(() => {
-    if (user) {
-      trackEvent('DAILY_LOGIN');
+    if (!loading && !user) {
+      setIsRedirecting(true);
+      router.replace('/login');
     }
-  }, [user, trackEvent]);
+  }, [user, loading, router]);
 
-  // --- EFFECT 2: Process Notification Queue ---
-  useEffect(() => {
-    // Only proceed if there is no notification currently displayed AND the queue is not empty
-    if (!currentNotification && notificationQueue.length > 0) {
-      // Pull the first notification from the queue
-      const nextNotification = notificationQueue[0];
-      
-      // Set it as the current one to display
-      setCurrentNotification(nextNotification);
-      
-      // Remove it from the queue
-      setNotificationQueue(prevQueue => prevQueue.slice(1));
-
-      // Automatically dismiss the notification after a delay (e.g., 5 seconds)
-      const timer = setTimeout(() => {
-        dismissNotification();
-      }, 5000); 
-
-      return () => clearTimeout(timer); // Cleanup timer if component unmounts or effect reruns
-    }
-  }, [currentNotification, notificationQueue, dismissNotification]);
-
-  // --- SIMULATION EFFECT (Replace with real API hook logic later) ---
-  // If your useGamificationAPI was updated to return `newNotifications`, 
-  // you would use that array here instead of this dummy logic.
-  useEffect(() => {
-    if (user && userProgress && !gamificationLoading && notificationQueue.length === 0) {
-      // Dummy logic to add a notification 5 seconds after mount
-      const dummyTimer = setTimeout(() => {
-        setNotificationQueue(prev => [
-            ...prev,
-            { 
-                type: 'achievement', 
-                data: { title: 'First Steps', description: 'Completed your first daily login!', icon: '🏆' }, 
-                id: Date.now() 
-            }
-        ]);
-      }, 5000);
-
-      return () => clearTimeout(dummyTimer);
-    }
-  }, [user, userProgress, gamificationLoading, notificationQueue.length]);
-
-  // Show gamification error if any
-  useEffect(() => {
-    if (gamificationError) {
-      console.warn('Gamification error:', gamificationError);
-    }
-  }, [gamificationError]);
-
-  // Redirect logic for authentication and onboarding
-  useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace('/login');
-      } else if (!onboardingCompleted) {
-        router.replace('/onboarding');
-      }
-    }
-  }, [user, loading, onboardingCompleted, router]);
-
-  if (loading) {
+  if (loading || isRedirecting) {
     return (
-      <div className="flex items-center justify-center h-screen text-indigo-700 text-lg font-semibold">
-        Loading your dashboard...
-      </div>
+      <>
+        <Head>
+          <title>Loading Dashboard | Beginner Investor Hub</title>
+          <meta name="robots" content="noindex, nofollow" />
+        </Head>
+        <div className="nyse-loading-container">
+          <div className="nyse-spinner"></div>
+          <p className="nyse-loading-text">
+            {isRedirecting ? 'Redirecting...' : 'Loading your dashboard...'}
+          </p>
+        </div>
+
+        <style jsx>{`
+          .nyse-loading-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            background: var(--nyse-color-background-alt);
+          }
+
+          .nyse-spinner {
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--nyse-color-border);
+            border-top: 4px solid var(--nyse-color-primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 1.5rem;
+          }
+
+          @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+          }
+
+          .nyse-loading-text {
+            font-family: var(--nyse-font-sans);
+            color: var(--nyse-color-text);
+            font-size: 1rem;
+            font-weight: 600;
+          }
+        `}</style>
+      </>
     );
   }
 
-  // Don't render if redirecting
-  if (!user || !onboardingCompleted) {
+  if (!user) {
     return null;
   }
 
   return (
-    <div className="page-wrapper min-h-screen bg-gradient-to-br from-white to-indigo-50 flex flex-col">
+    <>
       <Head>
-        <title>My Journey - Dashboard | Beginner Investor Hub</title>
-        <meta name="description" content="Your personalized investment learning journey and dashboard." />
+        <title>My Dashboard | Beginner Investor Hub</title>
+        <meta name="description" content="Your personalized investment dashboard and learning journey." />
+        <meta name="robots" content="noindex, nofollow" />
       </Head>
 
-      <main className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Welcome back, {user.displayName || 'Investor'}!
-          </h1>
-          <p className="text-lg text-gray-600">
-            Continue your personalized investment learning journey
-          </p>
-        </div>
+      <div className="dashboard-page">
+        <div className="nyse-container">
+          {/* Welcome Header */}
+          <div className="dashboard-header">
+            <div className="welcome-section">
+              <h1 className="welcome-title">
+                Welcome back, {user.displayName || 'Investor'}! 👋
+              </h1>
+              <p className="welcome-subtitle">
+                Ready to continue your investment learning journey?
+              </p>
+            </div>
 
-        {/* Gamification Progress - Compact Display */}
-        {userProgress && !gamificationLoading && (
-          <div className="mb-8">
-            {/* CLEANUP NOTE: The type casting issue here is still present. 
-               You should update the type definition for `userProgress` 
-               or the `UserStatsCard` component to align with the data structure. */}
-            <UserStatsCard 
-              userProgress={{
-                ...userProgress,
-                badges: (badges as any) || [],
-                achievements: (achievements as any) || [],
-                streaks: {
-                  loginStreak: 0,
-                  learningStreak: 0
-                },
-                stats: {
-                  toolsUsed: [],
-                  assessmentsCompleted: 0,
-                  portfoliosCreated: 0,
-                  educationModulesCompleted: 0,
-                  totalTimeSpent: 0,
-                  averageSessionTime: 0,
-                  favoriteTools: []
-                }
-              }} 
-              compact={true}
-              className=""
-            />
-          </div>
-        )}
-
-        {/* Navigation Tabs (Content remains the same) */}
-        <div className="mb-8">
-          <nav className="flex space-x-8 border-b border-gray-200">
-            <button
-              onClick={() => setActiveTab('learning')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'learning'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              My Learning Path
-            </button>
-            <button
-              onClick={() => setActiveTab('tools')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'tools'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Investment Tools
-            </button>
-            <button
-              onClick={() => setActiveTab('market')}
-              className={`py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
-                activeTab === 'market'
-                  ? 'border-indigo-500 text-indigo-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
-              }`}
-            >
-              Market Overview
-            </button>
-          </nav>
-        </div>
-
-        {/* Tab Content (Content remains the same) */}
-        <div className="mb-8">
-          {activeTab === 'learning' && (
-            <PersonalizedLearningDashboard />
-          )}
-          
-          {activeTab === 'tools' && (
-            <div className="space-y-6">
-              <MainAppEmbed />
-              
-              {/* Stripe Checkout */}
-              <div className="flex justify-center">
-                <StripeCheckoutButton priceId={STRIPE_PRICE_ID} />
+            {/* Quick Stats */}
+            <div className="quick-stats">
+              <div className="stat-card">
+                <div className="stat-icon">🎯</div>
+                <div className="stat-content">
+                  <div className="stat-number">{user.level || 1}</div>
+                  <div className="stat-label">Level</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">⭐</div>
+                <div className="stat-content">
+                  <div className="stat-number">{user.points || 0}</div>
+                  <div className="stat-label">Points</div>
+                </div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-icon">🔥</div>
+                <div className="stat-content">
+                  <div className="stat-number">{user.streak || 0}</div>
+                  <div className="stat-label">Day Streak</div>
+                </div>
               </div>
             </div>
-          )}
-          
-          {activeTab === 'market' && (
-            <section className="bg-white rounded-lg shadow-sm border p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Market Overview
-              </h2>
-              <MarketDataWidget
-                alphaVantageKey={process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY || ''}
-                iexCloudKey={process.env.NEXT_PUBLIC_IEX_CLOUD_API_KEY || ''}
-                symbol="AAPL"
-                coinId="bitcoin"
-              />
-            </section>
-          )}
+          </div>
+
+          {/* Navigation Tabs */}
+          <div className="dashboard-nav">
+            <nav className="nav-tabs">
+              <button
+                className={`nav-tab ${activeTab === 'overview' ? 'active' : ''}`}
+                onClick={() => setActiveTab('overview')}
+              >
+                📊 Overview
+              </button>
+              <button
+                className={`nav-tab ${activeTab === 'tools' ? 'active' : ''}`}
+                onClick={() => setActiveTab('tools')}
+              >
+                🛠️ Tools
+              </button>
+              <button
+                className={`nav-tab ${activeTab === 'learning' ? 'active' : ''}`}
+                onClick={() => setActiveTab('learning')}
+              >
+                📚 Learning
+              </button>
+            </nav>
+          </div>
+
+          {/* Tab Content */}
+          <div className="dashboard-content">
+            {activeTab === 'overview' && (
+              <div className="tab-panel">
+                <div className="overview-grid">
+                  {/* Recent Activity */}
+                  <div className="activity-card">
+                    <h3 className="card-title">Recent Activity</h3>
+                    <div className="activity-list">
+                      <div className="activity-item">
+                        <div className="activity-icon">✅</div>
+                        <div className="activity-content">
+                          <div className="activity-text">Completed "Risk Assessment" module</div>
+                          <div className="activity-time">2 hours ago</div>
+                        </div>
+                      </div>
+                      <div className="activity-item">
+                        <div className="activity-icon">📈</div>
+                        <div className="activity-content">
+                          <div className="activity-text">Updated portfolio simulation</div>
+                          <div className="activity-time">1 day ago</div>
+                        </div>
+                      </div>
+                      <div className="activity-item">
+                        <div className="activity-icon">🏆</div>
+                        <div className="activity-content">
+                          <div className="activity-text">Earned "First Investment" badge</div>
+                          <div className="activity-time">3 days ago</div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Progress Overview */}
+                  <div className="progress-card">
+                    <h3 className="card-title">Learning Progress</h3>
+                    <div className="progress-overview">
+                      <div className="progress-item">
+                        <div className="progress-label">Modules Completed</div>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: '65%' }}></div>
+                        </div>
+                        <div className="progress-text">13/20</div>
+                      </div>
+                      <div className="progress-item">
+                        <div className="progress-label">Tools Mastered</div>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: '40%' }}></div>
+                        </div>
+                        <div className="progress-text">4/10</div>
+                      </div>
+                      <div className="progress-item">
+                        <div className="progress-label">Portfolio Simulations</div>
+                        <div className="progress-bar">
+                          <div className="progress-fill" style={{ width: '80%' }}></div>
+                        </div>
+                        <div className="progress-text">8/10</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'tools' && (
+              <div className="tab-panel">
+                <div className="tools-grid">
+                  <div className="tool-card">
+                    <div className="tool-icon">📊</div>
+                    <h3 className="tool-title">Portfolio Monitor</h3>
+                    <p className="tool-description">Track your virtual investments</p>
+                    <button className="tool-button">Open Tool</button>
+                  </div>
+
+                  <div className="tool-card">
+                    <div className="tool-icon">⚖️</div>
+                    <h3 className="tool-title">Risk Assessment</h3>
+                    <p className="tool-description">Evaluate your risk tolerance</p>
+                    <button className="tool-button">Open Tool</button>
+                  </div>
+
+                  <div className="tool-card">
+                    <div className="tool-icon">🎯</div>
+                    <h3 className="tool-title">ESG Screener</h3>
+                    <p className="tool-description">Find sustainable investments</p>
+                    <button className="tool-button">Open Tool</button>
+                  </div>
+
+                  <div className="tool-card">
+                    <div className="tool-icon">💰</div>
+                    <h3 className="tool-title">Fractional Calculator</h3>
+                    <p className="tool-description">Calculate fractional share values</p>
+                    <button className="tool-button">Open Tool</button>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'learning' && (
+              <div className="tab-panel">
+                <div className="learning-path">
+                  <h3 className="card-title">Your Learning Path</h3>
+                  <div className="learning-modules">
+                    <div className="module-item completed">
+                      <div className="module-icon">✅</div>
+                      <div className="module-content">
+                        <h4>Investment Basics</h4>
+                        <p>Learn fundamental investment concepts</p>
+                      </div>
+                    </div>
+
+                    <div className="module-item current">
+                      <div className="module-icon">🔄</div>
+                      <div className="module-content">
+                        <h4>Portfolio Management</h4>
+                        <p>Master portfolio construction and rebalancing</p>
+                      </div>
+                    </div>
+
+                    <div className="module-item locked">
+                      <div className="module-icon">🔒</div>
+                      <div className="module-content">
+                        <h4>Advanced Strategies</h4>
+                        <p>Explore advanced investment techniques</p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
-      </main>
-      
-      {/* Achievement Notifications - Now driven by currentNotification */}
-      {currentNotification && (
-        <AchievementNotification
-          {...(currentNotification.type === 'badge' ? { badge: currentNotification.data } : {})}
-          {...(currentNotification.type === 'achievement' ? { achievement: currentNotification.data } : {})}
-          {...(currentNotification.type === 'points' ? { points: currentNotification.data } : {})}
-          onClose={dismissNotification}
-        />
-      )}
-    </div>
+      </div>
+
+      <style jsx>{`
+        .dashboard-page {
+          min-height: 100vh;
+          background: var(--nyse-color-background-alt);
+        }
+
+        .dashboard-header {
+          background: var(--nyse-color-background);
+          padding: var(--nyse-spacing-xxl);
+          margin-bottom: var(--nyse-spacing-xl);
+          border-radius: 12px;
+          border: 1px solid var(--nyse-color-border);
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          gap: var(--nyse-spacing-xl);
+        }
+
+        .welcome-section {
+          flex: 1;
+        }
+
+        .welcome-title {
+          font-family: var(--nyse-font-serif);
+          font-size: clamp(1.5rem, 3vw, 2rem);
+          color: var(--nyse-color-dark);
+          margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .welcome-subtitle {
+          color: var(--nyse-color-text-light);
+          font-size: 1.1rem;
+          margin: 0;
+        }
+
+        .quick-stats {
+          display: flex;
+          gap: var(--nyse-spacing-md);
+        }
+
+        .stat-card {
+          background: var(--nyse-color-background-alt);
+          padding: var(--nyse-spacing-lg);
+          border-radius: 8px;
+          text-align: center;
+          min-width: 80px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .stat-icon {
+          font-size: 1.5rem;
+          margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .stat-number {
+          font-family: var(--nyse-font-serif);
+          font-size: 1.5rem;
+          font-weight: 700;
+          color: var(--nyse-color-primary);
+          margin-bottom: var(--nyse-spacing-xs);
+        }
+
+        .stat-label {
+          font-size: 0.8rem;
+          color: var(--nyse-color-text-light);
+          text-transform: uppercase;
+          letter-spacing: 0.5px;
+        }
+
+        .dashboard-nav {
+          margin-bottom: var(--nyse-spacing-xl);
+        }
+
+        .nav-tabs {
+          display: flex;
+          gap: var(--nyse-spacing-sm);
+          background: var(--nyse-color-background);
+          padding: var(--nyse-spacing-sm);
+          border-radius: 8px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .nav-tab {
+          flex: 1;
+          padding: var(--nyse-spacing-md) var(--nyse-spacing-lg);
+          background: transparent;
+          border: none;
+          border-radius: 6px;
+          cursor: pointer;
+          font-family: var(--nyse-font-sans);
+          font-size: 1rem;
+          font-weight: 600;
+          color: var(--nyse-color-text);
+          transition: all 0.3s ease;
+        }
+
+        .nav-tab:hover {
+          background: var(--nyse-color-background-alt);
+          color: var(--nyse-color-primary);
+        }
+
+        .nav-tab.active {
+          background: var(--nyse-color-primary);
+          color: white;
+        }
+
+        .dashboard-content {
+          background: var(--nyse-color-background);
+          padding: var(--nyse-spacing-xxl);
+          border-radius: 12px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .tab-panel {
+          animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+          from { opacity: 0; transform: translateY(10px); }
+          to { opacity: 1; transform: translateY(0); }
+        }
+
+        .overview-grid {
+          display: grid;
+          grid-template-columns: 1fr 1fr;
+          gap: var(--nyse-spacing-xl);
+        }
+
+        .activity-card,
+        .progress-card {
+          background: var(--nyse-color-background-alt);
+          padding: var(--nyse-spacing-xl);
+          border-radius: 8px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .card-title {
+          font-family: var(--nyse-font-serif);
+          font-size: 1.25rem;
+          color: var(--nyse-color-primary);
+          margin-bottom: var(--nyse-spacing-lg);
+        }
+
+        .activity-list {
+          display: flex;
+          flex-direction: column;
+          gap: var(--nyse-spacing-md);
+        }
+
+        .activity-item {
+          display: flex;
+          gap: var(--nyse-spacing-md);
+          align-items: center;
+          padding: var(--nyse-spacing-md);
+          background: var(--nyse-color-background);
+          border-radius: 6px;
+          border-left: 3px solid var(--nyse-color-accent);
+        }
+
+        .activity-icon {
+          font-size: 1.25rem;
+        }
+
+        .activity-content {
+          flex: 1;
+        }
+
+        .activity-text {
+          font-size: 0.95rem;
+          color: var(--nyse-color-dark);
+          margin-bottom: var(--nyse-spacing-xs);
+        }
+
+        .activity-time {
+          font-size: 0.8rem;
+          color: var(--nyse-color-text-light);
+        }
+
+        .progress-overview {
+          display: flex;
+          flex-direction: column;
+          gap: var(--nyse-spacing-lg);
+        }
+
+        .progress-item {
+          display: flex;
+          flex-direction: column;
+          gap: var(--nyse-spacing-sm);
+        }
+
+        .progress-label {
+          font-size: 0.9rem;
+          color: var(--nyse-color-text);
+          font-weight: 600;
+        }
+
+        .progress-bar {
+          width: 100%;
+          height: 8px;
+          background: var(--nyse-color-background-alt);
+          border-radius: 4px;
+          overflow: hidden;
+        }
+
+        .progress-fill {
+          height: 100%;
+          background: linear-gradient(90deg, var(--nyse-color-primary) 0%, var(--nyse-color-accent) 100%);
+          transition: width 0.5s ease;
+        }
+
+        .progress-text {
+          font-size: 0.85rem;
+          color: var(--nyse-color-text-light);
+          text-align: right;
+        }
+
+        .tools-grid {
+          display: grid;
+          grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+          gap: var(--nyse-spacing-lg);
+        }
+
+        .tool-card {
+          background: var(--nyse-color-background-alt);
+          padding: var(--nyse-spacing-xl);
+          border-radius: 8px;
+          border: 1px solid var(--nyse-color-border);
+          text-align: center;
+          transition: all 0.3s ease;
+        }
+
+        .tool-card:hover {
+          transform: translateY(-2px);
+          box-shadow: 0 4px 12px rgba(0, 61, 122, 0.1);
+          border-color: var(--nyse-color-primary);
+        }
+
+        .tool-icon {
+          font-size: 3rem;
+          margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .tool-title {
+          font-family: var(--nyse-font-serif);
+          font-size: 1.25rem;
+          color: var(--nyse-color-dark);
+          margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .tool-description {
+          color: var(--nyse-color-text-light);
+          font-size: 0.95rem;
+          margin-bottom: var(--nyse-spacing-lg);
+        }
+
+        .tool-button {
+          background: var(--nyse-color-primary);
+          color: white;
+          border: none;
+          padding: var(--nyse-spacing-sm) var(--nyse-spacing-lg);
+          border-radius: 4px;
+          font-family: var(--nyse-font-sans);
+          font-weight: 600;
+          cursor: pointer;
+          transition: all 0.3s ease;
+        }
+
+        .tool-button:hover {
+          background: var(--nyse-color-secondary);
+          transform: translateY(-1px);
+        }
+
+        .learning-path {
+          background: var(--nyse-color-background-alt);
+          padding: var(--nyse-spacing-xl);
+          border-radius: 8px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .learning-modules {
+          display: flex;
+          flex-direction: column;
+          gap: var(--nyse-spacing-md);
+        }
+
+        .module-item {
+          display: flex;
+          gap: var(--nyse-spacing-md);
+          align-items: center;
+          padding: var(--nyse-spacing-lg);
+          background: var(--nyse-color-background);
+          border-radius: 8px;
+          border: 1px solid var(--nyse-color-border);
+        }
+
+        .module-item.completed {
+          border-left: 4px solid #4caf50;
+        }
+
+        .module-item.current {
+          border-left: 4px solid var(--nyse-color-primary);
+          background: linear-gradient(135deg, rgba(0, 61, 122, 0.05) 0%, rgba(0, 160, 227, 0.05) 100%);
+        }
+
+        .module-item.locked {
+          opacity: 0.6;
+        }
+
+        .module-icon {
+          font-size: 1.5rem;
+        }
+
+        .module-content h4 {
+          font-family: var(--nyse-font-serif);
+          font-size: 1.1rem;
+          color: var(--nyse-color-dark);
+          margin-bottom: var(--nyse-spacing-xs);
+        }
+
+        .module-content p {
+          color: var(--nyse-color-text-light);
+          font-size: 0.9rem;
+          margin: 0;
+        }
+
+        @media (max-width: 968px) {
+          .dashboard-header {
+            flex-direction: column;
+            align-items: stretch;
+            text-align: center;
+          }
+
+          .quick-stats {
+            justify-content: center;
+          }
+
+          .overview-grid {
+            grid-template-columns: 1fr;
+          }
+        }
+
+        @media (max-width: 768px) {
+          .nav-tabs {
+            flex-direction: column;
+          }
+
+          .tools-grid {
+            grid-template-columns: 1fr;
+          }
+
+          .dashboard-header {
+            padding: var(--nyse-spacing-xl);
+          }
+
+          .dashboard-content {
+            padding: var(--nyse-spacing-lg);
+          }
+        }
+      `}</style>
+    </>
   );
 }

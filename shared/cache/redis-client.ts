@@ -75,7 +75,7 @@ class RedisClient {
       console.log('✅ Redis client ready');
     });
 
-    this.instance.on('error', (err) => {
+    this.instance.on('error', (err: Error) => {
       console.error('❌ Redis client error:', err);
     });
 

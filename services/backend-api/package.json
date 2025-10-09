@@ -84,14 +84,25 @@
     "typescript": "^5.9.2"
   },
   "engines": {
-    "node": ">=20.0.0"
+    "node": ">=24.3.0"
   },
   "pnpm": {
     "peerDependencyRules": {
-      "ignoreMissing": ["eslint", "prettier"]
+      "ignoreMissing": [
+        "eslint",
+        "prettier"
+      ]
     }
   },
   "prisma": {
     "seed": "ts-node prisma/seed.ts"
-  }
+  },
+  "directories": {
+    "doc": "docs",
+    "lib": "lib"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs"
 }

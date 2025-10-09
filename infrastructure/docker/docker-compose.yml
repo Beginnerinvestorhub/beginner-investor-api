@@ -51,8 +51,9 @@ services:
       NODE_ENV: ${NODE_ENV:-production}
       PORT: 3000
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
-      FIREBASE_SERVICE_ACCOUNT: ${FIREBASE_SERVICE_ACCOUNT}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:/run/secrets/db_password@database:5432/${DB_NAME:-fintech_db}
+      JWT_SECRET_FILE: /run/secrets/jwt_secret
+      FIREBASE_SERVICE_ACCOUNT_FILE: /run/secrets/firebase_service_account
       MARKET_DATA_SERVICE_URL: http://market-data:8001
       AI_SERVICE_URL: http://ai-engine:8002
       RISK_ENGINE_URL: http://risk-engine:8003
@@ -64,19 +65,10 @@ services:
         condition: service_healthy
       market-data:
         condition: service_started
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
-      interval: 30s
-      timeout: 3s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 512M
-        reservations:
-          cpus: '0.5'
-          memory: 256M
+    secrets:
+      - db_password
+      - jwt_secret
+      - firebase_service_account
 
   market-data:
     build:
@@ -90,28 +82,19 @@ services:
     environment:
       PYTHONPATH: /app
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
-      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY}
-      FINNHUB_API_KEY: ${FINNHUB_API_KEY}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:/run/secrets/db_password@database:5432/${DB_NAME:-fintech_db}
+      ALPHA_VANTAGE_API_KEY_FILE: /run/secrets/alpha_vantage_api_key
+      FINNHUB_API_KEY_FILE: /run/secrets/finnhub_api_key
       DATA_INGESTION_INTERVAL: ${DATA_INGESTION_INTERVAL:-300}
     depends_on:
       redis:
         condition: service_healthy
       database:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8001/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '0.5'
-          memory: 256M
-        reservations:
-          cpus: '0.25'
-          memory: 128M
+    secrets:
+      - db_password
+      - alpha_vantage_api_key
+      - finnhub_api_key
 
   # Engine Services (On-Demand)
   ai-engine:
@@ -125,26 +108,16 @@ services:
       - "8002:8002"
     environment:
       PYTHONPATH: /app
-      OPENAI_API_KEY: ${OPENAI_API_KEY}
+      OPENAI_API_KEY_FILE: /run/secrets/openai_api_key
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:/run/secrets/db_password@database:5432/${DB_NAME:-fintech_db}
       AI_MODEL: ${AI_MODEL:-gpt-4}
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8002/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1.0'
-          memory: 1G
-        reservations:
-          cpus: '0.5'
-          memory: 512M
+    secrets:
+      - db_password
+      - openai_api_key
 
   risk-engine:
     build:
@@ -158,24 +131,13 @@ services:
     environment:
       PYTHONPATH: /app
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:/run/secrets/db_password@database:5432/${DB_NAME:-fintech_db}
       RISK_CALCULATION_WORKERS: ${RISK_CALCULATION_WORKERS:-4}
     depends_on:
       redis:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8003/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '2.0'
-          memory: 2G
-        reservations:
-          cpus: '1.0'
-          memory: 1G
+    secrets:
+      - db_password
 
   # Application Services
   portfolio-simulation:
@@ -190,7 +152,7 @@ services:
     environment:
       PYTHONPATH: /app
       REDIS_URL: redis://redis:6379
-      DATABASE_URL: postgresql://${DB_USER:-postgres}:${DB_PASSWORD}@database:5432/${DB_NAME:-fintech_db}
+      DATABASE_URL: postgresql://${DB_USER:-postgres}:/run/secrets/db_password@database:5432/${DB_NAME:-fintech_db}
       RISK_ENGINE_URL: http://risk-engine:8003
       MARKET_DATA_URL: http://market-data:8001
       SIMULATION_WORKERS: ${SIMULATION_WORKERS:-2}
@@ -201,19 +163,22 @@ services:
         condition: service_healthy
       market-data:
         condition: service_healthy
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:8004/health"]
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          cpus: '1.5'
-          memory: 2G
-        reservations:
-          cpus: '0.75'
-          memory: 1G
+    secrets:
+      - db_password
+
+secrets:
+  db_password:
+    file: ./secrets/db_password.txt
+  jwt_secret:
+    file: ./secrets/jwt_secret.txt
+  openai_api_key:
+    file: ./secrets/openai_api_key.txt
+  alpha_vantage_api_key:
+    file: ./secrets/alpha_vantage_api_key.txt
+  finnhub_api_key:
+    file: ./secrets/finnhub_api_key.txt
+  firebase_service_account:
+    file: ./secrets/firebase_service_account.json
 
 networks:
   default:

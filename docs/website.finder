@@ -1,0 +1,92 @@
+import requests
+from urllib.parse import urljoin
+import xml.etree.ElementTree as ET
+
+def find_website_pages(base_url):
+    """
+    Attempts to discover pages by checking robots.txt and sitemap.xml.
+    
+    Args:
+        base_url (str): The base URL of the website (e.g., 'https://example.com').
+    """
+    
+    # Ensure the URL ends with a slash for proper joining
+    if not base_url.endswith('/'):
+        base_url += '/'
+
+    print(f"🕵️ Starting page discovery for: {base_url}")
+    
+    # --- Check for robots.txt ---
+    print("\n--- Checking robots.txt ---")
+    robots_url = urljoin(base_url, 'robots.txt')
+    try:
+        response = requests.get(robots_url, timeout=5)
+        if response.status_code == 200:
+            print(f"✅ Found robots.txt at: {robots_url}")
+            # This is a very basic parse; full parsing is more complex
+            print("Content (partial view):")
+            for line in response.text.splitlines()[:5]: # Show first 5 lines
+                print(f"  {line.strip()}")
+                
+            # Look for a Sitemap link within robots.txt
+            sitemap_found = False
+            for line in response.text.splitlines():
+                if line.lower().startswith('sitemap:'):
+                    sitemap_url = line.split(':', 1)[-1].strip()
+                    print(f"\n💡 Sitemap URL found in robots.txt: {sitemap_url}")
+                    parse_sitemap(sitemap_url)
+                    sitemap_found = True
+                    break
+            
+            if not sitemap_found:
+                # If sitemap wasn't in robots.txt, check the default location
+                print("\n--- Checking default sitemap.xml location ---")
+                parse_sitemap(urljoin(base_url, 'sitemap.xml'))
+        else:
+            print(f"❌ robots.txt not found (Status Code: {response.status_code})")
+            # If robots.txt isn't there, check the default sitemap location
+            print("\n--- Checking default sitemap.xml location ---")
+            parse_sitemap(urljoin(base_url, 'sitemap.xml'))
+
+    except requests.RequestException as e:
+        print(f"An error occurred while checking robots.txt: {e}")
+
+
+def parse_sitemap(sitemap_url):
+    """Fetches and attempts to parse an XML sitemap."""
+    try:
+        response = requests.get(sitemap_url, timeout=5)
+        if response.status_code == 200:
+            print(f"✅ Found sitemap.xml at: {sitemap_url}")
+            
+            # Simple XML parsing (assumes a standard <urlset> format)
+            root = ET.fromstring(response.content)
+            
+            # Namespaces are common in sitemaps; use a generic wildcard search
+            # The URL tag for a location is usually 'loc'
+            urls = root.findall('.//{*}loc')
+            
+            if urls:
+                print(f"➡️ **Discovered {len(urls)} URLs!** (Showing first 5):")
+                for i, url_element in enumerate(urls):
+                    if i < 5:
+                        print(f"  - {url_element.text}")
+                    else:
+                        break
+                print("...")
+            else:
+                print("⚠️ Sitemap found, but no <loc> elements could be parsed.")
+
+        else:
+            print(f"❌ Sitemap not found (Status Code: {response.status_code} or error).")
+
+    except ET.ParseError:
+        print("⚠️ Could not parse sitemap content as XML.")
+    except requests.RequestException as e:
+        print(f"An error occurred while checking sitemap.xml: {e}")
+
+
+if __name__ == "__main__':
+    # 👉 **CHANGE THIS URL** to the website you want to check
+    TARGET_URL = 'https://www.python.org/' 
+    find_website_pages(TARGET_URL)

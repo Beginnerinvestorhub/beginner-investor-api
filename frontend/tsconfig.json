@@ -25,9 +25,7 @@
     "types": [
       "node",
       "jest",
-      "@testing-library/jest-dom",
-      "next-auth",
-      "next-auth/jwt"
+      "@testing-library/jest-dom"
     ]
   },
   "include": [

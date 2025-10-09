@@ -92,7 +92,7 @@ export function cacheMiddleware(options: CacheMiddlewareOptions = {}) {
       const originalJson = res.json;
 
       // Override json method to cache response
-      res.json = function(body: any) {
+      res.json = function(body: unknown) {
         // Only cache successful responses (2xx status codes)
         if (res.statusCode >= 200 && res.statusCode < 300) {
           cacheManager.set(cacheKey, body, {
@@ -114,7 +114,7 @@ export function cacheMiddleware(options: CacheMiddlewareOptions = {}) {
       };
 
       next();
-    } catch (error) {
+    } catch (error: unknown) {
       logger.error('Cache middleware error:', error);
       // Continue without caching on error
       next();
@@ -133,7 +133,7 @@ export class CacheInvalidator {
     try {
       await cacheManager.deletePattern(pattern, { namespace });
       logger.info(`Invalidated cache pattern: ${pattern}`);
-    } catch (error) {
+    } catch (error: unknown) {
       logger.error('Failed to invalidate cache pattern:', error);
     }
   }
@@ -161,7 +161,7 @@ export class CacheInvalidator {
     try {
       await cacheManager.flushAll();
       logger.info('Cleared all cache');
-    } catch (error) {
+    } catch (error: unknown) {
       logger.error('Failed to clear cache:', error);
     }
   }

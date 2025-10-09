@@ -11,6 +11,9 @@ import { trackAffiliate } from './middleware/affiliate.middleware';
 import path from 'path';
 dotenv.config({ path: path.resolve(__dirname, '../.env') });
 
+// Initialize Firebase Admin SDK
+import './config/firebase-admin';
+
 // Initialize Redis cache and rate limiting systems
 import { initializeSystems } from '../../../shared/cache/init';
 
@@ -91,7 +94,7 @@ apiRouter.use('/affiliate', affiliateRoutes);
 app.use('/api/v1', apiRouter);
 
 // Error handling middleware
-app.use((err: any, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
+app.use((err: Error, _req: express.Request, res: express.Response, _next: express.NextFunction) => {
   console.error('Error:', err);
   
   const statusCode = err.statusCode || 500;

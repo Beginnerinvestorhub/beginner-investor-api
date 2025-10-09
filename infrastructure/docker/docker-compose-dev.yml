@@ -11,10 +11,10 @@ services:
     environment:
       NODE_ENV: development
       PORT: 3000
-      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      DATABASE_URL: postgres://user:${DB_PASSWORD:-development_db_password_please_change}@db:5432/investment_hub
       REDIS_URL: redis://redis:6379
-      JWT_SECRET: devsecret
-      COOKIE_SECRET: devsecret
+      JWT_SECRET: ${JWT_SECRET:-development_jwt_secret_key_please_change_in_production}
+      COOKIE_SECRET: ${COOKIE_SECRET:-development_cookie_secret_key_please_change_in_production}
       CORS_ORIGIN: http://localhost:3000
     depends_on:
       - db
@@ -29,11 +29,11 @@ services:
     ports:
       - "3002:3002"
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      DATABASE_URL: postgres://user:${DB_PASSWORD:-development_db_password_please_change}@db:5432/investment_hub
       REDIS_URL: redis://redis:6379
-      MARKET_DATA_API_KEY: devkey
-      FINNHUB_API_KEY: devkey
-      ALPHA_VANTAGE_API_KEY: devkey
+      MARKET_DATA_API_KEY: ${MARKET_DATA_API_KEY:-development_market_data_key}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-development_finnhub_key}
+      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY:-development_alpha_vantage_key}
 
   ai-nudge-service:
     build:
@@ -43,9 +43,9 @@ services:
     ports:
       - "3003:3003"
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      DATABASE_URL: postgres://user:${DB_PASSWORD:-development_db_password_please_change}@db:5432/investment_hub
       REDIS_URL: redis://redis:6379
-      OPENAI_API_KEY: devkey
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-development_openai_key}
       AI_MODEL_VERSION: gpt-4
       AI_TEMPERATURE: 0.7
       AI_MAX_TOKENS: 150
@@ -59,7 +59,7 @@ services:
     ports:
       - "3001:3001"
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      DATABASE_URL: postgres://user:${DB_PASSWORD:-development_db_password_please_change}@db:5432/investment_hub
       REDIS_URL: redis://redis:6379
       PORT: 3001
       RISK_CALCULATION_WORKERS: 2
@@ -72,7 +72,7 @@ services:
     ports:
       - "3004:3004"
     environment:
-      DATABASE_URL: postgres://user:password@db:5432/investment_hub
+      DATABASE_URL: postgres://user:${DB_PASSWORD:-development_db_password_please_change}@db:5432/investment_hub
       REDIS_URL: redis://redis:6379
       PORT: 3004
       RISK_ENGINE_URL: http://risk-engine:3001
@@ -88,7 +88,7 @@ services:
     container_name: beginner-investor-db
     environment:
       POSTGRES_USER: user
-      POSTGRES_PASSWORD: password
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-development_db_password_please_change}
       POSTGRES_DB: investment_hub
     ports:
       - "5432:5432"

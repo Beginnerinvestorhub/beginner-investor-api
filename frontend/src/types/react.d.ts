@@ -10,7 +10,7 @@ declare global {
 
 declare module 'react' {
   // Fix for JSX type errors
-  interface HTMLAttributes<T> extends AriaAttributes, DOMAttributes<T> {
+  interface HTMLAttributes<T> extends React.AriaAttributes, React.DOMAttributes<T> {
     // Add any custom HTML attributes here
     class?: string;
     className?: string;
@@ -18,9 +18,9 @@ declare module 'react' {
   }
 
   // Add type for functional components with children
-  type FC<P = {}> = FunctionComponent<P>;
-  
-  interface FunctionComponent<P = {}> {
+  type FC<P = Record<string, never>> = React.FunctionComponent<P>;
+
+  interface FunctionComponent<P = Record<string, never>> {
     (props: React.PropsWithChildren<P>, context?: unknown): React.ReactElement<React.PropsWithChildren<P>, React.ComponentType<React.PropsWithChildren<P>>> | null;
     propTypes?: React.WeakValidationMap<P> | undefined;
     contextTypes?: React.ValidationMap<unknown> | undefined;
@@ -29,24 +29,23 @@ declare module 'react' {
   }
 
   // Add missing types
-  type ReactNode = ReactElement | string | number | ReactFragment | ReactPortal | boolean | null | undefined;
+  type ReactNode = React.ReactElement | string | number | React.ReactFragment | React.ReactPortal | boolean | null | undefined;
   type ReactText = string | number;
-  type ReactChild = ReactElement | ReactText;
-  type ReactFragment = {} | Iterable<ReactNode>;
-  
+  type ReactChild = React.ReactElement | ReactText;
+  type ReactFragment = Record<string, never> | Iterable<React.ReactNode>;
+
   interface ReactElement<P = unknown, T extends string | React.JSXElementConstructor<unknown> = string | React.JSXElementConstructor<unknown>> {
     type: T;
     props: P;
     key: React.Key | null;
   }
-  
+
   type Key = string | number;
-  
-  interface PropsWithChildren {
-    children?: ReactNode | undefined;
-    [key: string]: React.ReactNode | string | number | boolean | null | undefined;
+
+  interface PropsWithChildren<P = Record<string, never>> {
+    children?: React.ReactNode | undefined;
   }
-  
+
   interface CSSProperties extends CSS.Properties<string | number> {}
 }
 
@@ -57,10 +56,10 @@ declare namespace JSX {
     props: React.ReactNode | string | number | boolean | null | undefined;
   }
   interface ElementAttributesProperty {
-    props: {};
+    props: Record<string, never>;
   }
   interface ElementChildrenAttribute {
-    children: {};
+    children: Record<string, never>;
   }
   interface IntrinsicAttributes extends React.Attributes {}
   interface IntrinsicClassAttributes<T> extends React.ClassAttributes<T> {}
