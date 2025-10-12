@@ -1,5 +1,5 @@
 """"""Pydantic schemas for request/response validation."""
-""from .base import (
+""from .base import ("""
     BaseSchema,
     BaseResponse,
     PaginatedResponse,
