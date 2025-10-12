@@ -1,87 +1,81 @@
-"""
-AI module for the Python Engine service.
 
-This module contains the AI model interface and implementations for various AI tasks.
-"""
+"""AI module for the Python Engine service."""
 
-from abc import ABC, abstractmethod
-from typing import Any, Dict, List, Optional, Union
+"""This module contains the AI model interface and implementations for various AI tasks."""
 
-class AIModel(ABC):
+
+"""from abc import ABC, abstractmethod"""
+"""from typing import Any, Dict, List, Optional, Union"""
+
+"""class AIModel(ABC):"""
     """Abstract base class for AI models."""
     
-    @abstractmethod
-    async def predict(self, input_data: Any, **kwargs) -> Any:
-        """Make a prediction using the model.
+  """  @abstractmethod"""
+    """async def predict(self, input_data: Any, **kwargs) -> Any:"""
+        """Make a prediction using the model."""
         
-        Args:
-            input_data: The input data for the prediction
-            **kwargs: Additional model-specific parameters
+        """Args"""
+            """input_data: The input data for the prediction""""
+           " **kwargs: Additional model-specific parameters"""
             
-        Returns:
-            The model's prediction
-        """
-        pass
+        """Returns:
+            """The model's prediction pass
     
-    @abstractmethod
-    async def get_embeddings(self, texts: List[str], **kwargs) -> List[List[float]]:
+   """ @abstractmethod
+   """ async def get_embeddings(self, texts: List[str], **kwargs) -> List[List[float]]:
         """Get embeddings for a list of texts.
         
-        Args:
-            texts: List of input texts
+       """Args:
+            """texts: List of input texts
             **kwargs: Additional model-specific parameters
             
-        Returns:
-            List of embeddings, one for each input text
-        """
-        pass
+       """ Returns:
+            """List of embeddings, one for each input textpass
     
-    @abstractmethod
-    async def generate(self, prompt: str, **kwargs) -> str:
+    """:@abstractmethod
+   """async def generate(self, prompt: str, **kwargs) -> str:
         """Generate text based on a prompt.
         
-        Args:
-            prompt: The input prompt
+        """Args:
+           """prompt: The input prompt
             **kwargs: Additional generation parameters
             
-        Returns:
-            Generated text
-        """
-        pass
+        """Returns:
+            """Generated text pass
 
-class TransformersModel(AIModel):
+""""class TransformersModel(AIModel):
     """Implementation of AIModel using Hugging Face Transformers."""
     
-    def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
+   """ def __init__(self, model_name: str = "sentence-transformers/all-MiniLM-L6-v2"):
         """Initialize the Transformers model.
         
-        Args:
-            model_name: Name or path of the pre-trained model
-        """
-        from transformers import AutoModel, AutoTokenizer, pipeline
-        import torch
+       "": Args:
+           """ model_name: Name or path of the pre-trained model
         
-        self.device = "cuda" if torch.cuda.is_available() else "cpu"
-        self.tokenizer = AutoTokenizer.from_pretrained(model_name)
-        self.model = AutoModel.from_pretrained(model_name).to(self.device)
-        self.generator = pipeline("text-generation", model=model_name, device=0 if self.device == "cuda" else -1)
+        """from transformers import AutoModel, AutoTokenizer, pipeline
+       """ import torch
+        
+       """delf.device = "cuda" if torch.cuda.is_available() else "cpu"
+    """ self.tokenizer = AutoTokenizer.from_pretrained(model_name)
+       """ self.model = AutoModel.from_pretrained(model_name).to(self.device)
+       "" self.generator = pipeline("text-generation", model=model_name, device=0 if self.device == "cuda" else -1)
     
-    async def predict(self, input_data: Union[str, Dict[str, Any]], **kwargs) -> Dict[str, Any]:
+    """async def predict(self, input_data: Union[str, Dict[str, Any]], **kwargs) -> Dict[str, Any]:
         """Make a prediction using the model."""
-        if isinstance(input_data, str):
+        """if isinstance(input_data, str):
             # For text classification or other tasks
-            result = self.generator(input_data, **kwargs)
-            return {"result": result}
-        else:
+          """  result = self.generator(input_data, **kwargs)
+         ""   return {"result": result}
+        """else:
             # For other types of input
-            raise NotImplementedError("Custom input types not implemented yet")
+           "": raise NotImplementedError("Custom input types not implemented yet")
     
-    async def get_embeddings(self, texts: List[str], **kwargs) -> List[List[float]]:
+    """async def get_embeddings(self, texts: List[str], **kwargs) -> List[List[float]]:
         """Get embeddings for a list of texts."""
-        import torch
+       "": import torch
         
         # Tokenize the input texts
-        encoded_input = self.tokenizer(
+       "" encoded_input = self.tokenizer(
             texts, 
             padding=True, 
             truncation=True, 
