@@ -1,10 +1,10 @@
-""
-API v1 endpoints package.
 
-This package contains all the API endpoints for version 1 of the API.
-"""
+"""API v1 endpoints package."""
 
-# Import endpoints to make them available when importing from the package
-from . import health
+"""This package contains all the API endpoints for version 1 of the API."""
 
-__all__ = ["health"]
+
+# Import endpoints to make them available when importing from the package"""
+"""from . import health"""
+
+"""__all__ = ["health"]"""
