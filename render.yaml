@@ -2,8 +2,9 @@ services:
   # Backend API Service
   - type: web
     name: backend-api
-    runtime: docker
-    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    runtime: image
+    image:
+      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/backend-api:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -16,27 +17,26 @@ services:
           name: beginner-investor-db
           property: connectionString
       - key: REDIS_URL
-        value: redis://<REDIS_HOST>:6379
+        fromSecret: redis-connection-string
       - key: JWT_SECRET
         generateValue: true
       - key: COOKIE_SECRET
         generateValue: true
       - key: CORS_ORIGIN
         value: https://your-frontend.vercel.app
-    dockerContext: .
-    dockerfilePath: services/backend-api/Dockerfile
     autoDeploy: true
 
   # Market Data Ingestion Service
   - type: web
     name: marketdata-ingestion
-    runtime: docker
-    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    runtime: image
+    image:
+      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/marketdata-ingestion:latest
     plan: starter
     healthCheckPath: /health
     envVars:
       - key: REDIS_URL
-        value: redis://<REDIS_HOST>:6379
+        fromSecret: redis-connection-string
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -49,20 +49,19 @@ services:
         sync: false
       - key: ALPHA_VANTAGE_API_KEY
         sync: false
-    dockerContext: .
-    dockerfilePath: services/marketdata-ingestion/Dockerfile
     autoDeploy: true
 
   # AI Microservice Engine
   - type: web
     name: ai-microservice-engine
-    runtime: docker
-    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    runtime: image
+    image:
+      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/ai-microservice-engine:latest
     plan: starter
     healthCheckPath: /health
     envVars:
       - key: REDIS_URL
-        value: redis://<REDIS_HOST>:6379
+        fromSecret: redis-connection-string
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -79,15 +78,14 @@ services:
         value: "150"
       - key: BEHAVIORAL_NUDGE_ENABLED
         value: "true"
-    dockerContext: .
-    dockerfilePath: services/ai-microservice-engine/Dockerfile
     autoDeploy: true
 
   # Python Risk Engine
   - type: web
     name: python-risk-engine
-    runtime: docker
-    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    runtime: image
+    image:
+      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/python-risk-engine:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -96,25 +94,24 @@ services:
           name: beginner-investor-db
           property: connectionString
       - key: REDIS_URL
-        value: redis://<REDIS_HOST>:6379
+        fromSecret: redis-connection-string
       - key: PORT
         value: 3001
       - key: RISK_CALCULATION_WORKERS
         value: "2"
-    dockerContext: .
-    dockerfilePath: services/python-risk-engine/Dockerfile
     autoDeploy: true
 
   # Portfolio Simulation Service
   - type: web
     name: portfolio-simulation
-    runtime: docker
-    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
+    runtime: image
+    image:
+      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/portfolio-simulation:latest
     plan: starter
     healthCheckPath: /health
     envVars:
       - key: REDIS_URL
-        value: redis://<REDIS_HOST>:6379
+        fromSecret: redis-connection-string
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -127,8 +124,6 @@ services:
         value: https://marketdata-ingestion.onrender.com
       - key: AI_SERVICE_URL
         value: https://ai-microservice-engine.onrender.com
-    dockerContext: .
-    dockerfilePath: services/portfolio-simulation/Dockerfile
     autoDeploy: true
 
 databases:
@@ -141,3 +136,9 @@ databases:
     - source: 0.0.0.0/0
       description: everywhere
   postgresMajorVersion: "17"
+
+# External Redis Configuration (CRITICAL)
+# IMPORTANT: Create a secret named 'redis-connection-string' in your Render dashboard
+# This should contain your external Redis Cloud connection string (e.g., redis://username:password@host:port)
+# You can also use individual environment variables if preferred:
+# REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, etc.

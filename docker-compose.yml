@@ -1,0 +1,190 @@
+version: '3.8'
+
+services:
+  # PostgreSQL Database
+  postgres:
+    image: postgres:17-alpine
+    container_name: beginner-investor-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: investment_hub
+      POSTGRES_USER: investment_hub_user
+      POSTGRES_PASSWORD: ${DATABASE_PASSWORD:-investment_hub_password}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql:ro
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U investment_hub_user -d investment_hub"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Redis Cache
+  redis:
+    image: redis:7-alpine
+    container_name: beginner-investor-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes
+    volumes:
+      - redis_data:/data
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - app-network
+
+  # Backend API Service
+  backend-api:
+    build:
+      context: ./services/backend-api
+      dockerfile: Dockerfile
+    container_name: beginner-investor-backend
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    environment:
+      NODE_ENV: development
+      PORT: 3000
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key}
+      COOKIE_SECRET: ${COOKIE_SECRET:-your-cookie-secret}
+      CORS_ORIGIN: http://localhost:3000
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/backend-api:/app
+      - /app/node_modules
+    networks:
+      - app-network
+
+  # Market Data Ingestion Service
+  marketdata-ingestion:
+    build:
+      context: ./services/marketdata-ingestion
+      dockerfile: Dockerfile
+    container_name: beginner-investor-marketdata
+    restart: unless-stopped
+    ports:
+      - "3002:3002"
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      PORT: 3002
+      MARKET_DATA_API_KEY: ${MARKET_DATA_API_KEY:-your-market-data-api-key}
+      FINNHUB_API_KEY: ${FINNHUB_API_KEY:-your-finnhub-api-key}
+      ALPHA_VANTAGE_API_KEY: ${ALPHA_VANTAGE_API_KEY:-your-alpha-vantage-api-key}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/marketdata-ingestion:/app
+    networks:
+      - app-network
+
+  # AI Microservice Engine
+  ai-microservice-engine:
+    build:
+      context: ./services/ai-microservice-engine
+      dockerfile: Dockerfile
+    container_name: beginner-investor-ai
+    restart: unless-stopped
+    ports:
+      - "3003:3003"
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      PORT: 3003
+      OPENAI_API_KEY: ${OPENAI_API_KEY:-your-openai-api-key}
+      AI_MODEL_VERSION: gpt-4
+      AI_TEMPERATURE: "0.7"
+      AI_MAX_TOKENS: "150"
+      BEHAVIORAL_NUDGE_ENABLED: "true"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/ai-microservice-engine:/app
+    networks:
+      - app-network
+
+  # Python Risk Engine
+  python-risk-engine:
+    build:
+      context: ./services/python-risk-engine
+      dockerfile: Dockerfile
+    container_name: beginner-investor-risk
+    restart: unless-stopped
+    ports:
+      - "3001:3001"
+    environment:
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      PORT: 3001
+      RISK_CALCULATION_WORKERS: "2"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/python-risk-engine:/app
+    networks:
+      - app-network
+
+  # Portfolio Simulation Service
+  portfolio-simulation:
+    build:
+      context: ./services/portfolio-simulation
+      dockerfile: Dockerfile
+    container_name: beginner-investor-portfolio
+    restart: unless-stopped
+    ports:
+      - "3004:3004"
+    environment:
+      REDIS_URL: redis://redis:6379
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      PORT: 3004
+      RISK_ENGINE_URL: http://python-risk-engine:3001
+      MARKET_DATA_URL: http://marketdata-ingestion:3002
+      AI_SERVICE_URL: http://ai-microservice-engine:3003
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      python-risk-engine:
+        condition: service_started
+      marketdata-ingestion:
+        condition: service_started
+      ai-microservice-engine:
+        condition: service_started
+    volumes:
+      - ./services/portfolio-simulation:/app
+    networks:
+      - app-network
+
+volumes:
+  postgres_data:
+    driver: local
+  redis_data:
+    driver: local
+
+networks:
+  app-network:
+    driver: bridge

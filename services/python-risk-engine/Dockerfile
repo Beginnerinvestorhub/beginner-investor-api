@@ -1,56 +1,50 @@
 # syntax=docker/dockerfile:1.4
 
-FROM python:3.12-slim-bullseye AS base
+# Stage 1: Builder
+FROM python:3.11-alpine AS builder
+
+# Install build dependencies
+RUN apk add --no-cache \
+    build-base \
+    postgresql-dev \
+    libffi-dev \
+    && rm -rf /var/cache/apk/*
+
 WORKDIR /app
 
-# Environment setup
-ENV PYTHONDONTWRITEBYTECODE=1 \
-    PYTHONUNBUFFERED=1 \
-    PYTHONPATH=/app
+# Copy requirements and install Python dependencies
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
 
-# Install system dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl gnupg build-essential libffi-dev libpq-dev \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+# Stage 2: Runtime
+FROM python:3.11-alpine AS runtime
 
-# Install Node.js + pnpm
-RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y nodejs \
-    && corepack enable \
-    && corepack prepare pnpm@latest --activate
+# Install runtime dependencies
+RUN apk add --no-cache \
+    postgresql-client \
+    libpq \
+    && rm -rf /var/cache/apk/*
+
+WORKDIR /app
 
 # Create non-root user
-RUN addgroup --system appgroup && adduser --system appuser --ingroup appgroup
+RUN addgroup --system risk && adduser --system --ingroup risk risk
 
-# -----------------------------
-# Stage 1: Python dependencies
-# -----------------------------
-COPY pyproject.toml poetry.lock ./
-RUN pip install --no-cache-dir poetry \
-    && poetry config virtualenvs.create false \
-    && poetry install --no-interaction --no-ansi
-
-# -----------------------------
-# Stage 2: Node risk engine
-# -----------------------------
-COPY risk-engine/package.json risk-engine/pnpm-lock.yaml ./risk-engine/
-WORKDIR /app/risk-engine
-RUN pnpm install --frozen-lockfile \
-    && pnpm run build  # if applicable
-
-# -----------------------------
-# Stage 3: Final setup
-# -----------------------------
-WORKDIR /app
-COPY . .
+# Copy application code
+COPY src ./src
+COPY app.py ./
 
 # Set ownership
-RUN chown -R appuser:appgroup /app
-USER appuser
+RUN chown -R risk:risk /app
 
-EXPOSE 8003
+USER risk
 
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
-  CMD curl -f http://localhost:8003/health || exit 1
+# Expose port
+EXPOSE 3001
 
-CMD ["uvicorn", "src.app:app", "--host", "0.0.0.0", "--port", "8003"]
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+    CMD python -c "import requests; requests.get('http://localhost:3001/health')" || exit 1
+
+# Run the application
+CMD ["python", "app.py"]

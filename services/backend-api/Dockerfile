@@ -1,7 +1,7 @@
 # syntax=docker/dockerfile:1.4
 
 # Base image with pnpm setup
-FROM node:20-slim@sha256:d38efce970505168e50665d2350ae7d102204235d7072a1076afbdf227c1ea17 AS base
+FROM node:20-alpine AS base
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME:$PATH"
 RUN corepack enable
@@ -24,7 +24,7 @@ COPY src ./src
 RUN pnpm run build
 
 # Stage 3: Final runtime image
-FROM node:20-slim@sha256:d38efce970505168e50665d2350ae7d102204235d7072a1076afbdf227c1ea17 AS runner
+FROM node:20-alpine AS runner
 
 # Create non-root user
 RUN addgroup --system nodejs && adduser --system --ingroup nodejs nextjs
@@ -36,6 +36,15 @@ COPY --from=prod-deps /app/node_modules ./node_modules
 COPY --from=build /app/dist ./dist
 COPY package.json pnpm-lock.yaml ./
 
+# Set proper ownership
+RUN chown -R nextjs:nodejs /app
+
 USER nextjs
+
 EXPOSE 3000
+
+# Health check
+HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
+
 CMD ["node", "dist/index.js"]
