@@ -1,0 +1,26 @@
+name: "CodeQL Configuration"
+
+disable-default-queries: false
+
+queries:
+  - uses: security-and-quality
+  - uses: security-experimental
+
+paths-ignore:
+  - node_modules
+  - "**/*.min.js"
+  - "**/*.min.css"
+  - "**/dist/**"
+  - "**/build/**"
+  - "**/.next/**"
+  - "**/coverage/**"
+  - "**/__pycache__/**"
+  - "**/*.pyc"
+
+paths:
+  - services/backend-api/src
+  - services/ai-microservice-engine
+  - services/marketdata-ingestion
+  - services/python-risk-engine
+  - services/portfolio-simulation
+  - shared

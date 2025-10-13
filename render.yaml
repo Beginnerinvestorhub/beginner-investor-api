@@ -22,6 +22,10 @@ services:
         generateValue: true
       - key: COOKIE_SECRET
         generateValue: true
+      - key: SERVICE_AUTH_SECRET
+        generateValue: true
+      - key: DATABASE_ENCRYPTION_KEY
+        generateValue: true
       - key: CORS_ORIGIN
         value: https://your-frontend.vercel.app
     autoDeploy: true
@@ -138,7 +142,12 @@ databases:
   postgresMajorVersion: "17"
 
 # External Redis Configuration (CRITICAL)
-# IMPORTANT: Create a secret named 'redis-connection-string' in your Render dashboard
-# This should contain your external Redis Cloud connection string (e.g., redis://username:password@host:port)
-# You can also use individual environment variables if preferred:
-# REDIS_HOST, REDIS_PORT, REDIS_PASSWORD, etc.
+# IMPORTANT: Create secrets in your Render dashboard:
+#
+# 1. redis-connection-string: Your external Redis Cloud connection string
+#    Example: redis://username:password@host:port
+#
+# 2. For additional security, you can also set individual Redis components:
+#    REDIS_HOST, REDIS_PORT, REDIS_PASSWORD (alternative to connection string)
+#
+# The services will use these secrets for Redis connectivity.

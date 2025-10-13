@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { createHmac } from 'crypto';
+import { createHmac, randomBytes } from 'crypto';
 import { logger } from '../utils/logger';
 
 /**
@@ -16,7 +16,24 @@ class ServiceAuth {
   private maxTimeDiff = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {
-    this.secret = process.env.SERVICE_AUTH_SECRET || 'default-secret';
+    // Get secret from environment - required in production
+    this.secret = process.env.SERVICE_AUTH_SECRET;
+
+    if (!this.secret) {
+      if (process.env.NODE_ENV === 'development') {
+        // Generate a temporary secret for development only
+        this.secret = randomBytes(64).toString('hex');
+        logger.warn('⚠️  Generated temporary service auth secret for development use only');
+        logger.warn('🔧 Set SERVICE_AUTH_SECRET environment variable for production');
+      } else {
+        throw new Error('SERVICE_AUTH_SECRET is required in production environment');
+      }
+    }
+
+    // Validate secret strength
+    if (this.secret.length < 64) {
+      logger.warn('⚠️  SERVICE_AUTH_SECRET is shorter than recommended 128 characters');
+    }
   }
 
   public static getInstance(): ServiceAuth {
@@ -103,22 +120,13 @@ class ServiceAuth {
   }
 
   /**
-   * Middleware to sign outgoing service requests
+   * Get the current service auth secret (for debugging only)
    */
-  public signOutgoingRequest(req: Request, res: Response, next: NextFunction) {
-    const originalSend = res.send;
-
-    // Override the response send method to sign the response
-    res.send = (body?: any): Response => {
-      if (body) {
-        const { signature, timestamp } = this.signRequest(body);
-        res.setHeader(this.headerName, signature);
-        res.setHeader(this.timestampHeader, timestamp);
-      }
-      return originalSend.call(res, body);
+  public getSecretInfo(): { length: number; isProduction: boolean } {
+    return {
+      length: this.secret.length,
+      isProduction: process.env.NODE_ENV === 'production'
     };
-
-    next();
   }
 }
 

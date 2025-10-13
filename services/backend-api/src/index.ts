@@ -10,6 +10,28 @@ import path from "path";
 // Load environment variables FIRST
 dotenv.config({ path: path.resolve(__dirname, "../../../.env") });
 
+// Validate secrets on startup
+import { SecretValidator } from "../../../shared/utils/secret-generator";
+
+// Validate secrets early in startup
+const secretValidation = SecretValidator.validateEnvironmentSecrets();
+if (!secretValidation.isValid) {
+  console.error("🚨 SECRET VALIDATION FAILED:");
+  secretValidation.missing.forEach(key => {
+    console.error(`❌ Missing required secret: ${key}`);
+  });
+  secretValidation.weak.forEach(({ key, issues }) => {
+    console.error(`⚠️  Weak secret ${key}:`, issues.join(', '));
+  });
+
+  if (process.env.NODE_ENV === 'production') {
+    console.error("🔥 REFUSING TO START IN PRODUCTION WITH INVALID SECRETS");
+    process.exit(1);
+  }
+
+  console.warn("⚠️  Continuing in development mode with weak/invalid secrets");
+}
+
 // Import middleware
 import { trackAffiliate } from "./middleware/affiliate.middleware";
 import {
