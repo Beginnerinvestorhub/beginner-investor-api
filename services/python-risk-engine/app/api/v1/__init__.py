@@ -1,10 +1,10 @@
-""
-API v1 package for the Python Engine service.
 
-This package contains version 1 of the API, including all endpoints and routers.
-"""
+""API v1 package for the Python Engine service."""
 
-# Import the API router to make it available when importing from the package
-from .api import api_router
+"""This package contains version 1 of the API, including all endpoints and routers."""
 
-__all__ = ["api_router"]
+
+# Import the API router to make it available when importing from the package"""
+"""from .api import api_router"""
+
+"""__all__ = ["api_router"]"""
