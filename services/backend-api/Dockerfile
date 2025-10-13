@@ -2,23 +2,21 @@
 
 # Base image with pnpm setup
 FROM node:20-alpine AS base
-ENV PNPM_HOME="/pnpm"
-ENV PATH="$PNPM_HOME:$PATH"
-RUN corepack enable
+
+# Install pnpm globally as fallback
+RUN npm install -g pnpm@latest
 
 WORKDIR /app
 
-# Stage 1: Install production dependencies with cache
+# Stage 1: Install production dependencies
 FROM base AS prod-deps
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-  pnpm install --frozen-lockfile --prod
+RUN pnpm install --frozen-lockfile --prod
 
 # Stage 2: Full build with dev dependencies
 FROM base AS build
 COPY package.json pnpm-lock.yaml ./
-RUN --mount=type=cache,id=pnpm,target=/pnpm/store \
-  pnpm install --frozen-lockfile
+RUN pnpm install --frozen-lockfile
 COPY tsconfig*.json ./
 COPY src ./src
 RUN pnpm run build
