@@ -16,21 +16,21 @@ jobs:
     strategy:
       matrix:
         service:
-          - name: backend-api-service
-            port: 8000
-            context: ./backend-api-service
-          - name: behavioral-nudge-engine
-            port: 8001
-            context: ./behavioral-nudge-engine
-          - name: market-data-ingestion-service
-            port: 8002
-            context: ./market-data-ingestion-service
-          - name: portfolio-simulation-service
-            port: 8003
-            context: ./portfolio-simulation-service
+          - name: backend-api
+            port: 3000
+            context: ./services/backend-api
+          - name: ai-microservice-engine
+            port: 3003
+            context: ./services/ai-microservice-engine
+          - name: marketdata-ingestion
+            port: 3002
+            context: ./services/marketdata-ingestion
           - name: python-risk-engine
-            port: 8004
-            context: ./python-risk-engine
+            port: 3001
+            context: ./services/python-risk-engine
+          - name: portfolio-simulation
+            port: 3004
+            context: ./services/portfolio-simulation
 
     steps:
     - name: Checkout code
@@ -62,6 +62,7 @@ jobs:
       with:
         context: ${{ matrix.service.context }}
         file: ${{ matrix.service.context }}/Dockerfile
+        platforms: linux/amd64,linux/arm64
         push: true
         tags: ${{ steps.meta.outputs.tags }}
         labels: ${{ steps.meta.outputs.labels }}
