@@ -19,7 +19,9 @@ export default function Leaderboard() {
   const fetchLeaderboard = useCallback(async () => {
     try {
       setLoading(true);
-      const { data } = await axios.get(`/api/gamification/leaderboard?timeframe=${timeframe}`);
+      const { data } = await axios.get(
+        `/api/gamification/leaderboard?timeframe=${timeframe}`
+      );
       setEntries(data);
     } catch (error) {
       console.error('Failed to fetch leaderboard:', error);
@@ -42,7 +44,9 @@ export default function Leaderboard() {
         <h2 className="text-2xl font-bold text-gray-800">Leaderboard</h2>
         <select
           value={timeframe}
-          onChange={(e) => setTimeframe(e.target.value as 'week' | 'month' | 'all')}
+          onChange={e =>
+            setTimeframe(e.target.value as 'week' | 'month' | 'all')
+          }
           className="px-3 py-1 border border-gray-300 rounded-md text-sm"
         >
           <option value="week">This Week</option>
@@ -67,10 +71,10 @@ export default function Leaderboard() {
                   index === 0
                     ? 'bg-yellow-400 text-yellow-900'
                     : index === 1
-                    ? 'bg-gray-300 text-gray-700'
-                    : index === 2
-                    ? 'bg-orange-400 text-orange-900'
-                    : 'bg-gray-200 text-gray-600'
+                      ? 'bg-gray-300 text-gray-700'
+                      : index === 2
+                        ? 'bg-orange-400 text-orange-900'
+                        : 'bg-gray-200 text-gray-600'
                 }`}
               >
                 {entry.rank}
@@ -78,13 +82,17 @@ export default function Leaderboard() {
               <div>
                 <p className="font-semibold text-gray-800">
                   {entry.displayName || `User ${entry.userId.slice(0, 8)}`}
-                  {entry.userId === user?.uid && <span className="text-indigo-600 ml-1">(You)</span>}
+                  {entry.userId === user?.uid && (
+                    <span className="text-indigo-600 ml-1">(You)</span>
+                  )}
                 </p>
                 <p className="text-sm text-gray-500">Level {entry.level}</p>
               </div>
             </div>
             <div className="text-right">
-              <p className="font-bold text-indigo-600">{entry.points.toLocaleString()} pts</p>
+              <p className="font-bold text-indigo-600">
+                {entry.points.toLocaleString()} pts
+              </p>
             </div>
           </div>
         ))}

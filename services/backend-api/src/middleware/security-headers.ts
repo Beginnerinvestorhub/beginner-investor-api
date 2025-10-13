@@ -1,6 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import helmet from 'helmet';
-import { env } from '../config/env.schema';
+import { Request, Response, NextFunction } from "express";
+import helmet from "helmet";
+import { env } from "../config/env.schema";
 
 /**
  * Security headers middleware configuration
@@ -50,12 +50,12 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
               scriptSrc: [
                 "'self'",
                 "'unsafe-inline'",
-                "'unsafe-eval'" // Only for development, should be removed in production
+                "'unsafe-eval'", // Only for development, should be removed in production
               ],
               styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", 'data:', 'https:'],
+              imgSrc: ["'self'", "data:", "https:"],
               connectSrc: ["'self'"],
-              fontSrc: ["'self'", 'data:'],
+              fontSrc: ["'self'", "data:"],
               objectSrc: ["'none'"],
               mediaSrc: ["'self'"],
               frameSrc: ["'self'"],
@@ -85,7 +85,7 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
       // Frame options
       frameguard: enableFrameGuard
         ? {
-            action: 'deny',
+            action: "deny",
           }
         : false,
 
@@ -96,9 +96,7 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
       ieNoOpen: enableIENoOpen,
 
       // Referrer Policy
-      referrerPolicy: enableReferrerPolicy
-        ? { policy: 'same-origin' }
-        : false,
+      referrerPolicy: enableReferrerPolicy ? { policy: "same-origin" } : false,
 
       // DNS Prefetch Control
       dnsPrefetchControl: enableDnsPrefetchControl
@@ -110,7 +108,7 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
       // Permitted Cross-Domain Policies
       permittedCrossDomainPolicies: permittedCrossDomainPolicies
         ? {
-            permittedPolicies: 'none',
+            permittedPolicies: "none",
           }
         : false,
 
@@ -119,62 +117,62 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
         ? {
             maxAge: 86400, // 1 day
             enforce: true,
-            reportUri: '/report-ct-violation',
+            reportUri: "/report-ct-violation",
           }
         : false,
-    })
+    }),
   );
 
   // Additional security headers not covered by helmet
   middlewares.push((_req: Request, res: Response, next: NextFunction) => {
     // X-Content-Type-Options
-    res.setHeader('X-Content-Type-Options', 'nosniff');
+    res.setHeader("X-Content-Type-Options", "nosniff");
 
     // X-Frame-Options (redundant with frameguard but added for extra protection)
-    res.setHeader('X-Frame-Options', 'DENY');
+    res.setHeader("X-Frame-Options", "DENY");
 
     // X-Download-Options
-    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader("X-Download-Options", "noopen");
 
     // X-Permitted-Cross-Domain-Policies
-    res.setHeader('X-Permitted-Cross-Domain-Policies', 'none');
+    res.setHeader("X-Permitted-Cross-Domain-Policies", "none");
 
     // X-DNS-Prefetch-Control
-    res.setHeader('X-DNS-Prefetch-Control', 'off');
+    res.setHeader("X-DNS-Prefetch-Control", "off");
 
     // X-Download-Options
-    res.setHeader('X-Download-Options', 'noopen');
+    res.setHeader("X-Download-Options", "noopen");
 
     // X-XSS-Protection (legacy, but still useful for older browsers)
-    res.setHeader('X-XSS-Protection', '1; mode=block');
+    res.setHeader("X-XSS-Protection", "1; mode=block");
 
     // Permissions Policy (formerly Feature Policy)
     res.setHeader(
-      'Permissions-Policy',
+      "Permissions-Policy",
       [
-        'camera=()',
-        'microphone=()',
-        'geolocation=()',
-        'payment=()',
-        'fullscreen=self',
-        'sync-xhr=self',
-      ].join(', ')
+        "camera=()",
+        "microphone=()",
+        "geolocation=()",
+        "payment=()",
+        "fullscreen=self",
+        "sync-xhr=self",
+      ].join(", "),
     );
 
     // Cross-Origin Opener Policy
-    res.setHeader('Cross-Origin-Opener-Policy', 'same-origin');
+    res.setHeader("Cross-Origin-Opener-Policy", "same-origin");
 
     // Cross-Origin-Resource-Policy
-    res.setHeader('Cross-Origin-Resource-Policy', 'same-site');
+    res.setHeader("Cross-Origin-Resource-Policy", "same-site");
 
     // Cross-Origin-Embedder-Policy
-    res.setHeader('Cross-Origin-Embedder-Policy', 'require-corp');
+    res.setHeader("Cross-Origin-Embedder-Policy", "require-corp");
 
     // Strict-Transport-Security (HSTS) - Redundant with helmet but added for clarity
     if (enableHSTS) {
       res.setHeader(
-        'Strict-Transport-Security',
-        'max-age=31536000; includeSubDomains; preload'
+        "Strict-Transport-Security",
+        "max-age=31536000; includeSubDomains; preload",
       );
     }
 
@@ -190,17 +188,17 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
 export const apiSecurityHeaders = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Skip security headers for API documentation in development
-  if (env.NODE_ENV === 'development' && req.path.startsWith('/api-docs')) {
+  if (env.NODE_ENV === "development" && req.path.startsWith("/api-docs")) {
     return next();
   }
 
   // Apply security headers
   securityHeaders({
-    enableCSP: !req.path.startsWith('/api/'), // Disable CSP for API routes
-    enableHSTS: env.NODE_ENV === 'production',
+    enableCSP: !req.path.startsWith("/api/"), // Disable CSP for API routes
+    enableHSTS: env.NODE_ENV === "production",
   })[0](req, res, next);
 };
 
@@ -210,20 +208,22 @@ export const apiSecurityHeaders = (
 export const staticAssetsSecurityHeaders = (
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Only apply to static assets
-  if (!req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)) {
+  if (
+    !req.path.match(/\.(js|css|png|jpg|jpeg|gif|ico|svg|woff|woff2|ttf|eot)$/)
+  ) {
     return next();
   }
 
   // Cache static assets for 1 year
-  res.setHeader('Cache-Control', 'public, max-age=31536000, immutable');
-  
+  res.setHeader("Cache-Control", "public, max-age=31536000, immutable");
+
   // Apply security headers
   securityHeaders({
     enableCSP: false, // CSP is handled at the application level
-    enableHSTS: env.NODE_ENV === 'production',
+    enableHSTS: env.NODE_ENV === "production",
   })[0](req, res, next);
 };
 

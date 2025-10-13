@@ -1,21 +1,21 @@
-import { PrismaClient, PointTransactionType, BadgeType } from '@prisma/client';
-import { prisma } from '../../config/prisma';
-import { pointsService } from '../../services/gamification/points.service';
-import { badgeService } from '../../services/gamification/badge.service';
-import { streakService } from '../../services/gamification/streak.service';
-import { progressService } from '../../services/gamification/progress.service';
-import { createUser } from '../factories/user.factory';
-import { mockRedisService } from '../setup';
+import { PrismaClient, PointTransactionType, BadgeType } from "@prisma/client";
+import { prisma } from "../../config/prisma";
+import { pointsService } from "../../services/gamification/points.service";
+import { badgeService } from "../../services/gamification/badge.service";
+import { streakService } from "../../services/gamification/streak.service";
+import { progressService } from "../../services/gamification/progress.service";
+import { createUser } from "../factories/user.factory";
+import { mockRedisService } from "../setup";
 
-describe('Gamification Integration', () => {
+describe("Gamification Integration", () => {
   let testUser: { id: string };
-  const testUserId = 'test-user-123';
+  const testUserId = "test-user-123";
 
   beforeAll(async () => {
     // Create a test user
     testUser = await prisma.user.upsert({
       where: { id: testUserId },
-      create: { id: testUserId, email: 'test@example.com', name: 'Test User' },
+      create: { id: testUserId, email: "test@example.com", name: "Test User" },
       update: {},
     });
   });
@@ -27,7 +27,7 @@ describe('Gamification Integration', () => {
     await prisma.streak.deleteMany({ where: { userId: testUserId } });
     await prisma.userProgress.deleteMany({ where: { userId: testUserId } });
     await prisma.user.deleteMany({ where: { id: testUserId } });
-    
+
     // Disconnect Prisma
     await prisma.$disconnect();
   });
@@ -37,8 +37,8 @@ describe('Gamification Integration', () => {
     jest.clearAllMocks();
   });
 
-  describe('Points and Level Progression', () => {
-    it('should award points and level up user', async () => {
+  describe("Points and Level Progression", () => {
+    it("should award points and level up user", async () => {
       // Initial progress should be at level 1 with 0 XP
       let progress = await progressService.getUserProgress(testUserId);
       expect(progress.level).toBe(1);
@@ -50,7 +50,7 @@ describe('Gamification Integration', () => {
         userId: testUserId,
         points: xpToAdd,
         type: PointTransactionType.LEARNING,
-        description: 'Completed a course',
+        description: "Completed a course",
       });
 
       // Check updated progress
@@ -65,13 +65,13 @@ describe('Gamification Integration', () => {
     });
   });
 
-  describe('Badge Awarding', () => {
-    it('should award badges based on achievements', async () => {
+  describe("Badge Awarding", () => {
+    it("should award badges based on achievements", async () => {
       // Award a badge for first login
       const badge = await badgeService.awardBadge({
         userId: testUserId,
         type: BadgeType.FIRST_LOGIN,
-        description: 'First login',
+        description: "First login",
       });
 
       expect(badge).toBeDefined();
@@ -79,15 +79,15 @@ describe('Gamification Integration', () => {
 
       // Check that the badge was awarded
       const badges = await badgeService.getUserBadges(testUserId);
-      expect(badges.some(b => b.type === BadgeType.FIRST_LOGIN)).toBe(true);
+      expect(badges.some((b) => b.type === BadgeType.FIRST_LOGIN)).toBe(true);
     });
 
-    it('should not award duplicate badges by default', async () => {
+    it("should not award duplicate badges by default", async () => {
       // Try to award the same badge again
       const duplicateBadge = await badgeService.awardBadge({
         userId: testUserId,
         type: BadgeType.FIRST_LOGIN,
-        description: 'First login (duplicate)',
+        description: "First login (duplicate)",
       });
 
       // Should return null since the badge was already awarded
@@ -95,8 +95,8 @@ describe('Gamification Integration', () => {
     });
   });
 
-  describe('Streak Tracking', () => {
-    it('should track consecutive daily logins', async () => {
+  describe("Streak Tracking", () => {
+    it("should track consecutive daily logins", async () => {
       // Record first login (today)
       const today = new Date();
       const streak1 = await streakService.recordActivity(testUserId);
@@ -105,12 +105,12 @@ describe('Gamification Integration', () => {
 
       // Mock Redis to simulate a cache miss for the next test
       mockRedisService.get.mockResolvedValueOnce(null);
-      
+
       // Record activity for the next day
       const tomorrow = new Date(today);
       tomorrow.setDate(tomorrow.getDate() + 1);
       jest.useFakeTimers().setSystemTime(tomorrow);
-      
+
       const streak2 = await streakService.recordActivity(testUserId);
       expect(streak2.currentStreak).toBe(2);
       expect(streak2.longestStreak).toBe(2);
@@ -119,7 +119,7 @@ describe('Gamification Integration', () => {
       const twoDaysLater = new Date(tomorrow);
       twoDaysLater.setDate(twoDaysLater.getDate() + 2);
       jest.setSystemTime(twoDaysLater);
-      
+
       mockRedisService.get.mockResolvedValueOnce(null);
       const streak3 = await streakService.recordActivity(testUserId);
       expect(streak3.currentStreak).toBe(1); // Reset to 1
@@ -130,24 +130,26 @@ describe('Gamification Integration', () => {
     });
   });
 
-  describe('Leaderboards', () => {
-    it('should return user rankings', async () => {
+  describe("Leaderboards", () => {
+    it("should return user rankings", async () => {
       // Add some test data
       await pointsService.awardPoints({
         userId: testUserId,
         points: 200,
         type: PointTransactionType.LEARNING,
-        description: 'Test points for leaderboard',
+        description: "Test points for leaderboard",
       });
 
       // Mock Redis cache miss
       mockRedisService.get.mockResolvedValueOnce(null);
-      
+
       // Get leaderboard
       const leaderboard = await progressService.getLeaderboard(10);
-      
+
       // User should be on the leaderboard
-      const userOnLeaderboard = leaderboard.some(entry => entry.userId === testUserId);
+      const userOnLeaderboard = leaderboard.some(
+        (entry) => entry.userId === testUserId,
+      );
       expect(userOnLeaderboard).toBe(true);
 
       // Check that the user's rank is set
@@ -156,33 +158,33 @@ describe('Gamification Integration', () => {
     });
   });
 
-  describe('Caching', () => {
-    it('should use cache for subsequent requests', async () => {
+  describe("Caching", () => {
+    it("should use cache for subsequent requests", async () => {
       // First request - should hit the database
       mockRedisService.get.mockResolvedValueOnce(null);
       await pointsService.getUserPoints(testUserId);
-      
+
       // Second request - should use cache
       mockRedisService.get.mockResolvedValueOnce(JSON.stringify(200));
       const points = await pointsService.getUserPoints(testUserId);
-      
+
       // Should return cached value without calling Redis get again
       expect(points).toBe(200);
       expect(mockRedisService.get).toHaveBeenCalledTimes(1);
     });
 
-    it('should invalidate cache on updates', async () => {
+    it("should invalidate cache on updates", async () => {
       // Initial value
       await pointsService.awardPoints({
         userId: testUserId,
         points: 100,
         type: PointTransactionType.LEARNING,
-        description: 'Cache test',
+        description: "Cache test",
       });
 
       // Should invalidate cache
       expect(mockRedisService.del).toHaveBeenCalledWith(
-        expect.stringContaining(`user:points:${testUserId}`)
+        expect.stringContaining(`user:points:${testUserId}`),
       );
     });
   });

@@ -119,7 +119,7 @@ export class DistributedLock {
 
   async acquire(): Promise<boolean> {
     const lockKey = `lock:${this.key}`;
-    const result = await this.redis.set(lockKey, '1', 'EX', this.ttl, 'NX');
+    const result = await this.redis.set(lockKey, '1', { EX: this.ttl, NX: true });
     return result === 'OK';
   }
 

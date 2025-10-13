@@ -1,6 +1,8 @@
 import React, { Suspense, useEffect } from 'react';
 
-const Pie = React.lazy(() => import('react-chartjs-2').then(mod => ({ default: mod.Pie })));
+const Pie = React.lazy(() =>
+  import('react-chartjs-2').then(mod => ({ default: mod.Pie }))
+);
 
 export function useRegisterChartJS() {
   useEffect(() => {
@@ -10,12 +12,13 @@ export function useRegisterChartJS() {
   }, []);
 }
 
-
 interface RiskAllocationPieChartProps {
   allocation: Record<string, number>;
 }
 
-export default function RiskAllocationPieChart({ allocation }: RiskAllocationPieChartProps) {
+export default function RiskAllocationPieChart({
+  allocation,
+}: RiskAllocationPieChartProps) {
   useRegisterChartJS();
   const data = {
     labels: Object.keys(allocation),
@@ -38,7 +41,10 @@ export default function RiskAllocationPieChart({ allocation }: RiskAllocationPie
   return (
     <div className="mb-6">
       <Suspense fallback={<div>Loading chart...</div>}>
-        <Pie data={data} options={{ plugins: { legend: { position: 'bottom' } } }} />
+        <Pie
+          data={data}
+          options={{ plugins: { legend: { position: 'bottom' } } }}
+        />
       </Suspense>
     </div>
   );

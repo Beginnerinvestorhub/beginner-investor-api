@@ -1,4 +1,4 @@
-import { SessionData } from 'express-session';
+import { SessionData } from "express-session";
 
 declare global {
   namespace Express {

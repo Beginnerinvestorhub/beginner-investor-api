@@ -28,7 +28,7 @@ class PageErrorBoundary extends Component<Props, State> {
 
   static getDerivedStateFromError(error: Error): Partial<State> {
     const errorId = `page_error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       hasError: true,
       error,
@@ -37,8 +37,12 @@ class PageErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`PageErrorBoundary (${this.props.pageName || 'Unknown Page'}) caught an error:`, error, errorInfo);
-    
+    console.error(
+      `PageErrorBoundary (${this.props.pageName || 'Unknown Page'}) caught an error:`,
+      error,
+      errorInfo
+    );
+
     this.setState({
       errorInfo,
     });
@@ -103,7 +107,7 @@ class PageErrorBoundary extends Component<Props, State> {
                 {pageName} Unavailable
               </h1>
               <p className="text-gray-600 mb-4">
-                This page encountered an error and couldn&apos;t load properly. 
+                This page encountered an error and couldn&apos;t load properly.
                 You can try refreshing or navigate to another page.
               </p>
               <div className="bg-gray-100 rounded-md p-2 mb-4">
@@ -121,7 +125,7 @@ class PageErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Try Again
               </button>
-              
+
               <button
                 onClick={this.handleReload}
                 className="bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
@@ -139,7 +143,7 @@ class PageErrorBoundary extends Component<Props, State> {
                 <ArrowLeft className="mr-2 h-4 w-4" />
                 Go Back
               </button>
-              
+
               <button
                 onClick={this.handleGoHome}
                 className="bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center text-sm"
@@ -186,7 +190,7 @@ export function withPageErrorBoundary<P extends object>(
   };
 
   WithErrorBoundaryComponent.displayName = `withPageErrorBoundary(${WrappedComponent.displayName || WrappedComponent.name})`;
-  
+
   return WithErrorBoundaryComponent;
 }
 

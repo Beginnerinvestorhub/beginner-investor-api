@@ -103,8 +103,7 @@ class RateLimiter {
         const requests = await client.zRangeByScore(
           key,
           windowStart,
-          now,
-          'WITHSCORES'
+          now
         );
 
         // Remove old requests

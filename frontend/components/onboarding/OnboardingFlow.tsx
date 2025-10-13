@@ -14,7 +14,7 @@ import {
   LightBulbIcon,
   TrophyIcon,
   ChartBarIcon,
-  ClockIcon
+  ClockIcon,
 } from '@heroicons/react/24/outline';
 
 interface OnboardingFlowProps {
@@ -31,7 +31,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     startOnboarding,
     completeOnboardingStep,
     submitOnboardingProfile,
-    clearError
+    clearError,
   } = useLearningStore();
 
   // Form state
@@ -40,7 +40,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     investmentGoals: [] as string[],
     timeHorizon: '',
     learningStyle: '',
-    preferredTopics: [] as string[]
+    preferredTopics: [] as string[],
   });
 
   // Initialize onboarding
@@ -81,22 +81,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const toggleArrayValue = (field: 'investmentGoals' | 'preferredTopics', value: string) => {
+  const toggleArrayValue = (
+    field: 'investmentGoals' | 'preferredTopics',
+    value: string
+  ) => {
     setFormData(prev => ({
       ...prev,
       [field]: prev[field].includes(value)
         ? prev[field].filter(item => item !== value)
-        : [...prev[field], value]
+        : [...prev[field], value],
     }));
   };
 
   const isStepValid = () => {
     switch (onboardingStep) {
-      case 2: return formData.riskProfile !== '';
-      case 3: return formData.investmentGoals.length > 0;
-      case 4: return formData.timeHorizon !== '';
-      case 5: return formData.learningStyle !== '';
-      default: return true;
+      case 2:
+        return formData.riskProfile !== '';
+      case 3:
+        return formData.investmentGoals.length > 0;
+      case 4:
+        return formData.timeHorizon !== '';
+      case 5:
+        return formData.learningStyle !== '';
+      default:
+        return true;
     }
   };
 
@@ -112,24 +120,33 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               Welcome to Your Investment Journey!
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Let's personalize your learning experience to match your goals, risk tolerance, 
-              and learning style. This will take just 2-3 minutes.
+              Let's personalize your learning experience to match your goals,
+              risk tolerance, and learning style. This will take just 2-3
+              minutes.
             </p>
             <div className="grid md:grid-cols-3 gap-6 max-w-4xl mx-auto mb-8">
               <div className="text-center p-4">
                 <TrophyIcon className="h-8 w-8 text-yellow-500 mx-auto mb-2" />
-                <h3 className="font-semibold text-gray-900">Personalized Path</h3>
-                <p className="text-sm text-gray-600">AI-curated lessons based on your profile</p>
+                <h3 className="font-semibold text-gray-900">
+                  Personalized Path
+                </h3>
+                <p className="text-sm text-gray-600">
+                  AI-curated lessons based on your profile
+                </p>
               </div>
               <div className="text-center p-4">
                 <ChartBarIcon className="h-8 w-8 text-green-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900">Track Progress</h3>
-                <p className="text-sm text-gray-600">Visual progress tracking and achievements</p>
+                <p className="text-sm text-gray-600">
+                  Visual progress tracking and achievements
+                </p>
               </div>
               <div className="text-center p-4">
                 <ClockIcon className="h-8 w-8 text-blue-500 mx-auto mb-2" />
                 <h3 className="font-semibold text-gray-900">Smart Nudges</h3>
-                <p className="text-sm text-gray-600">Gentle reminders to keep you on track</p>
+                <p className="text-sm text-gray-600">
+                  Gentle reminders to keep you on track
+                </p>
               </div>
             </div>
           </div>
@@ -149,19 +166,22 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {
                   value: 'conservative',
                   title: 'Conservative',
-                  description: 'I prefer stable, low-risk investments even if returns are lower'
+                  description:
+                    'I prefer stable, low-risk investments even if returns are lower',
                 },
                 {
                   value: 'moderate',
                   title: 'Moderate',
-                  description: 'I want balanced growth with some risk for better returns'
+                  description:
+                    'I want balanced growth with some risk for better returns',
                 },
                 {
                   value: 'aggressive',
                   title: 'Aggressive',
-                  description: 'I\'m comfortable with high risk for potentially high returns'
-                }
-              ].map((option) => (
+                  description:
+                    "I'm comfortable with high risk for potentially high returns",
+                },
+              ].map(option => (
                 <label
                   key={option.value}
                   className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -175,22 +195,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     name="riskProfile"
                     value={option.value}
                     checked={formData.riskProfile === option.value}
-                    onChange={(e) => updateFormData('riskProfile', e.target.value)}
+                    onChange={e =>
+                      updateFormData('riskProfile', e.target.value)
+                    }
                     className="sr-only"
                   />
                   <div className="flex items-center">
-                    <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                      formData.riskProfile === option.value
-                        ? 'border-indigo-500 bg-indigo-500'
-                        : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                        formData.riskProfile === option.value
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {formData.riskProfile === option.value && (
                         <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                      <p className="text-sm text-gray-600">{option.description}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {option.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {option.description}
+                      </p>
                     </div>
                   </div>
                 </label>
@@ -206,7 +234,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               What are your investment goals?
             </h2>
             <p className="text-gray-600 mb-6">
-              Select all that apply. We'll tailor content to help you achieve these goals.
+              Select all that apply. We'll tailor content to help you achieve
+              these goals.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               {[
@@ -217,8 +246,8 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 { value: 'wealth', label: 'Building Wealth' },
                 { value: 'income', label: 'Passive Income' },
                 { value: 'travel', label: 'Travel & Experiences' },
-                { value: 'business', label: 'Starting a Business' }
-              ].map((goal) => (
+                { value: 'business', label: 'Starting a Business' },
+              ].map(goal => (
                 <label
                   key={goal.value}
                   className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -230,20 +259,26 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                   <input
                     type="checkbox"
                     checked={formData.investmentGoals.includes(goal.value)}
-                    onChange={() => toggleArrayValue('investmentGoals', goal.value)}
+                    onChange={() =>
+                      toggleArrayValue('investmentGoals', goal.value)
+                    }
                     className="sr-only"
                   />
                   <div className="flex items-center">
-                    <div className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
-                      formData.investmentGoals.includes(goal.value)
-                        ? 'border-indigo-500 bg-indigo-500'
-                        : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`w-5 h-5 border-2 rounded mr-3 flex items-center justify-center ${
+                        formData.investmentGoals.includes(goal.value)
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {formData.investmentGoals.includes(goal.value) && (
                         <CheckCircleIcon className="h-3 w-3 text-white" />
                       )}
                     </div>
-                    <span className="font-medium text-gray-900">{goal.label}</span>
+                    <span className="font-medium text-gray-900">
+                      {goal.label}
+                    </span>
                   </div>
                 </label>
               ))}
@@ -265,19 +300,20 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {
                   value: 'short_term',
                   title: 'Short-term (1-3 years)',
-                  description: 'I need access to this money soon'
+                  description: 'I need access to this money soon',
                 },
                 {
                   value: 'medium_term',
                   title: 'Medium-term (3-10 years)',
-                  description: 'I can wait several years before needing this money'
+                  description:
+                    'I can wait several years before needing this money',
                 },
                 {
                   value: 'long_term',
                   title: 'Long-term (10+ years)',
-                  description: 'I\'m investing for the distant future'
-                }
-              ].map((option) => (
+                  description: "I'm investing for the distant future",
+                },
+              ].map(option => (
                 <label
                   key={option.value}
                   className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -291,22 +327,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     name="timeHorizon"
                     value={option.value}
                     checked={formData.timeHorizon === option.value}
-                    onChange={(e) => updateFormData('timeHorizon', e.target.value)}
+                    onChange={e =>
+                      updateFormData('timeHorizon', e.target.value)
+                    }
                     className="sr-only"
                   />
                   <div className="flex items-center">
-                    <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                      formData.timeHorizon === option.value
-                        ? 'border-indigo-500 bg-indigo-500'
-                        : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                        formData.timeHorizon === option.value
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {formData.timeHorizon === option.value && (
                         <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                      <p className="text-sm text-gray-600">{option.description}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {option.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {option.description}
+                      </p>
                     </div>
                   </div>
                 </label>
@@ -329,24 +373,28 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                 {
                   value: 'visual',
                   title: 'Visual Learner',
-                  description: 'I learn best with charts, diagrams, and infographics'
+                  description:
+                    'I learn best with charts, diagrams, and infographics',
                 },
                 {
                   value: 'reading',
                   title: 'Reading/Writing',
-                  description: 'I prefer detailed articles and written explanations'
+                  description:
+                    'I prefer detailed articles and written explanations',
                 },
                 {
                   value: 'auditory',
                   title: 'Auditory Learner',
-                  description: 'I learn well through podcasts and audio content'
+                  description:
+                    'I learn well through podcasts and audio content',
                 },
                 {
                   value: 'kinesthetic',
                   title: 'Hands-on Learner',
-                  description: 'I learn by doing - simulations and interactive tools'
-                }
-              ].map((option) => (
+                  description:
+                    'I learn by doing - simulations and interactive tools',
+                },
+              ].map(option => (
                 <label
                   key={option.value}
                   className={`block p-4 border-2 rounded-lg cursor-pointer transition-all ${
@@ -360,22 +408,30 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
                     name="learningStyle"
                     value={option.value}
                     checked={formData.learningStyle === option.value}
-                    onChange={(e) => updateFormData('learningStyle', e.target.value)}
+                    onChange={e =>
+                      updateFormData('learningStyle', e.target.value)
+                    }
                     className="sr-only"
                   />
                   <div className="flex items-center">
-                    <div className={`w-4 h-4 rounded-full border-2 mr-3 ${
-                      formData.learningStyle === option.value
-                        ? 'border-indigo-500 bg-indigo-500'
-                        : 'border-gray-300'
-                    }`}>
+                    <div
+                      className={`w-4 h-4 rounded-full border-2 mr-3 ${
+                        formData.learningStyle === option.value
+                          ? 'border-indigo-500 bg-indigo-500'
+                          : 'border-gray-300'
+                      }`}
+                    >
                       {formData.learningStyle === option.value && (
                         <div className="w-2 h-2 bg-white rounded-full mx-auto mt-0.5"></div>
                       )}
                     </div>
                     <div>
-                      <h3 className="font-semibold text-gray-900">{option.title}</h3>
-                      <p className="text-sm text-gray-600">{option.description}</p>
+                      <h3 className="font-semibold text-gray-900">
+                        {option.title}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {option.description}
+                      </p>
                     </div>
                   </div>
                 </label>
@@ -394,16 +450,27 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               Perfect! Your personalized path is ready.
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              Based on your preferences, we've created a customized learning journey 
-              that will help you achieve your investment goals.
+              Based on your preferences, we've created a customized learning
+              journey that will help you achieve your investment goals.
             </p>
             <div className="bg-indigo-50 rounded-lg p-6 mb-8 max-w-2xl mx-auto">
-              <h3 className="font-semibold text-indigo-900 mb-2">Your Profile Summary:</h3>
+              <h3 className="font-semibold text-indigo-900 mb-2">
+                Your Profile Summary:
+              </h3>
               <div className="text-sm text-indigo-700 space-y-1">
-                <p><strong>Risk Profile:</strong> {formData.riskProfile}</p>
-                <p><strong>Goals:</strong> {formData.investmentGoals.join(', ')}</p>
-                <p><strong>Time Horizon:</strong> {formData.timeHorizon.replace('_', ' ')}</p>
-                <p><strong>Learning Style:</strong> {formData.learningStyle}</p>
+                <p>
+                  <strong>Risk Profile:</strong> {formData.riskProfile}
+                </p>
+                <p>
+                  <strong>Goals:</strong> {formData.investmentGoals.join(', ')}
+                </p>
+                <p>
+                  <strong>Time Horizon:</strong>{' '}
+                  {formData.timeHorizon.replace('_', ' ')}
+                </p>
+                <p>
+                  <strong>Learning Style:</strong> {formData.learningStyle}
+                </p>
               </div>
             </div>
           </div>
@@ -417,7 +484,9 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   if (!user) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-600">Please log in to continue with onboarding.</p>
+        <p className="text-gray-600">
+          Please log in to continue with onboarding.
+        </p>
       </div>
     );
   }

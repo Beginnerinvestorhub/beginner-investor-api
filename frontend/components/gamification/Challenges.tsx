@@ -27,7 +27,9 @@ export default function Challenges() {
 
     try {
       setLoading(true);
-      const { data } = await axios.get(`/api/gamification/challenges/${user.uid}`);
+      const { data } = await axios.get(
+        `/api/gamification/challenges/${user.uid}`
+      );
       setChallenges(data);
     } catch (error) {
       console.error('Failed to fetch challenges:', error);
@@ -43,7 +45,7 @@ export default function Challenges() {
   const claimReward = async (challengeId: string) => {
     try {
       await axios.post(`/api/gamification/challenges/${challengeId}/claim`, {
-        userId: user?.uid
+        userId: user?.uid,
       });
       fetchChallenges(); // Refresh challenges
     } catch (error) {
@@ -64,21 +66,35 @@ export default function Challenges() {
 
       {/* Active Challenges */}
       <div className="mb-8">
-        <h3 className="text-lg font-semibold text-gray-700 mb-4">Active Challenges</h3>
+        <h3 className="text-lg font-semibold text-gray-700 mb-4">
+          Active Challenges
+        </h3>
         <div className="space-y-4">
-          {activeChallenges.map((challenge) => (
-            <div key={challenge.id} className="border border-gray-200 rounded-lg p-4">
+          {activeChallenges.map(challenge => (
+            <div
+              key={challenge.id}
+              className="border border-gray-200 rounded-lg p-4"
+            >
               <div className="flex justify-between items-start mb-2">
                 <div>
-                  <h4 className="font-semibold text-gray-800">{challenge.title}</h4>
-                  <p className="text-sm text-gray-600">{challenge.description}</p>
+                  <h4 className="font-semibold text-gray-800">
+                    {challenge.title}
+                  </h4>
+                  <p className="text-sm text-gray-600">
+                    {challenge.description}
+                  </p>
                 </div>
-                <span className={`px-2 py-1 text-xs rounded-full ${
-                  challenge.type === 'daily' ? 'bg-green-100 text-green-800' :
-                  challenge.type === 'weekly' ? 'bg-blue-100 text-blue-800' :
-                  challenge.type === 'monthly' ? 'bg-purple-100 text-purple-800' :
-                  'bg-yellow-100 text-yellow-800'
-                }`}>
+                <span
+                  className={`px-2 py-1 text-xs rounded-full ${
+                    challenge.type === 'daily'
+                      ? 'bg-green-100 text-green-800'
+                      : challenge.type === 'weekly'
+                        ? 'bg-blue-100 text-blue-800'
+                        : challenge.type === 'monthly'
+                          ? 'bg-purple-100 text-purple-800'
+                          : 'bg-yellow-100 text-yellow-800'
+                  }`}
+                >
                   {challenge.type}
                 </span>
               </div>
@@ -86,15 +102,19 @@ export default function Challenges() {
               {/* Progress Bar */}
               <div className="mb-3">
                 <div className="flex justify-between text-sm text-gray-600 mb-1">
-                  <span>Progress: {challenge.progress}/{challenge.target}</span>
-                  <span>{Math.round((challenge.progress / challenge.target) * 100)}%</span>
+                  <span>
+                    Progress: {challenge.progress}/{challenge.target}
+                  </span>
+                  <span>
+                    {Math.round((challenge.progress / challenge.target) * 100)}%
+                  </span>
                 </div>
                 <div className="w-full bg-gray-200 rounded-full h-2">
                   <div
                     className="bg-indigo-600 h-2 rounded-full transition-all duration-300"
                     // eslint-disable-next-line react/forbid-dom-props
                     style={{
-                      width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%`
+                      width: `${Math.min((challenge.progress / challenge.target) * 100, 100)}%`,
                     }}
                   ></div>
                 </div>
@@ -103,9 +123,14 @@ export default function Challenges() {
               {/* Reward */}
               <div className="flex justify-between items-center">
                 <div className="text-sm text-gray-600">
-                  Reward: <span className="font-semibold text-indigo-600">{challenge.reward.points} points</span>
+                  Reward:{' '}
+                  <span className="font-semibold text-indigo-600">
+                    {challenge.reward.points} points
+                  </span>
                   {challenge.reward.badge && (
-                    <span className="ml-2 text-yellow-600">+ {challenge.reward.badge} badge</span>
+                    <span className="ml-2 text-yellow-600">
+                      + {challenge.reward.badge} badge
+                    </span>
                   )}
                 </div>
                 {challenge.progress >= challenge.target && (
@@ -131,13 +156,20 @@ export default function Challenges() {
       {/* Completed Challenges */}
       {completedChallenges.length > 0 && (
         <div>
-          <h3 className="text-lg font-semibold text-gray-700 mb-4">Recently Completed</h3>
+          <h3 className="text-lg font-semibold text-gray-700 mb-4">
+            Recently Completed
+          </h3>
           <div className="space-y-2">
-            {completedChallenges.slice(0, 3).map((challenge) => (
-              <div key={challenge.id} className="bg-green-50 border border-green-200 rounded-lg p-3">
+            {completedChallenges.slice(0, 3).map(challenge => (
+              <div
+                key={challenge.id}
+                className="bg-green-50 border border-green-200 rounded-lg p-3"
+              >
                 <div className="flex justify-between items-center">
                   <div>
-                    <h4 className="font-medium text-green-800">{challenge.title}</h4>
+                    <h4 className="font-medium text-green-800">
+                      {challenge.title}
+                    </h4>
                     <p className="text-sm text-green-600">Completed!</p>
                   </div>
                   <div className="text-sm text-green-700">

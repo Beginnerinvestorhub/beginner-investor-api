@@ -7,11 +7,20 @@
  * or disable the default devtool with "devtool: false".
  * If you are looking for production-ready output files, see mode: "production" (https://webpack.js.org/configuration/mode/).
  */
-(self["webpackChunk_N_E"] = self["webpackChunk_N_E"] || []).push([["react-refresh"],{},
-/******/ __webpack_require__ => { // webpackRuntimeModules
-/******/ var __webpack_exec__ = (moduleId) => (__webpack_require__(__webpack_require__.s = moduleId))
-/******/ __webpack_require__.O(0, ["vendors"], () => (__webpack_exec__("(pages-dir-browser)/./node_modules/next/dist/compiled/@next/react-refresh-utils/dist/runtime.js")));
-/******/ var __webpack_exports__ = __webpack_require__.O();
-/******/ _N_E = __webpack_exports__;
-/******/ }
+(self['webpackChunk_N_E'] = self['webpackChunk_N_E'] || []).push([
+  ['react-refresh'],
+  {},
+  /******/ __webpack_require__ => {
+    // webpackRuntimeModules
+    /******/ var __webpack_exec__ = moduleId =>
+      __webpack_require__((__webpack_require__.s = moduleId));
+    /******/ __webpack_require__.O(0, ['vendors'], () =>
+      __webpack_exec__(
+        '(pages-dir-browser)/./node_modules/next/dist/compiled/@next/react-refresh-utils/dist/runtime.js'
+      )
+    );
+    /******/ var __webpack_exports__ = __webpack_require__.O();
+    /******/ _N_E = __webpack_exports__;
+    /******/
+  },
 ]);

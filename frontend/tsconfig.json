@@ -8,17 +8,6 @@
       "@/*": ["src/*"],
       "@tests/*": ["__tests__/*"]
     },
-<<<<<<< HEAD
-    "typeRoots": [
-      "./node_modules/@types",
-      "./src/types"
-    ],
-    "types": [
-      "node",
-      "jest",
-      "@testing-library/jest-dom"
-    ]
-=======
     "outDir": "./dist",
     "rootDir": "./src",
     "strict": true,
@@ -33,15 +22,16 @@
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
     "incremental": true,
-    "tsBuildInfoFile": "./dist/.tsbuildinfo"
->>>>>>> 3f15f697a9f9f73d9d68fea4d72b9028c4d5f26d
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+    "typeRoots": ["./node_modules/@types", "./src/types"],
+    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "allowJs": true,
+    "noEmit": true,
+    "moduleResolution": "node",
+    "isolatedModules": true,
+    "jsx": "react-jsx"
   },
-  "include": [
-    "src/**/*",
-    "src/**/*.json",
-    "__tests__/**/*",
-    "prisma/**/*"
-  ],
+  "include": ["src/**/*", "src/**/*.json", "__tests__/**/*", "prisma/**/*"],
   "exclude": [
     "node_modules",
     "dist",

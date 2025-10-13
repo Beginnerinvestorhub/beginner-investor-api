@@ -1,19 +1,26 @@
-import { Request, Response, NextFunction } from 'express';
-import { performance } from 'perf_hooks';
-import logger from '../utils/logger';
-import { env } from '../config/env.schema';
+import { Request, Response, NextFunction } from "express";
+import { performance } from "perf_hooks";
+import logger from "../utils/logger";
+import { env } from "../config/env.schema";
 
 // Track request statistics
-const requestStats: Record<string, {
-  count: number;
-  totalTime: number;
-  maxTime: number;
-  minTime: number;
-  errors: number;
-}> = {};
+const requestStats: Record<
+  string,
+  {
+    count: number;
+    totalTime: number;
+    maxTime: number;
+    minTime: number;
+    errors: number;
+  }
+> = {};
 
 // Performance monitoring middleware
-export const performanceMonitor = (req: Request, res: Response, next: NextFunction) => {
+export const performanceMonitor = (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const start = performance.now();
   const path = req.path;
   const method = req.method;
@@ -32,27 +39,29 @@ export const performanceMonitor = (req: Request, res: Response, next: NextFuncti
 
   // Store the original end function
   const originalEnd = res.end;
-  
+
   // Override the end function to track performance
   res.end = (...args: any[]) => {
     const duration = performance.now() - start;
     const routeStats = requestStats[routeKey];
-    
+
     // Update statistics
     routeStats.count++;
     routeStats.totalTime += duration;
     routeStats.maxTime = Math.max(routeStats.maxTime, duration);
     routeStats.minTime = Math.min(routeStats.minTime, duration);
-    
+
     // Track errors (4xx and 5xx status codes)
     if (res.statusCode >= 400) {
       routeStats.errors++;
     }
 
     // Log slow requests
-    const slowThreshold = env.NODE_ENV === 'production' ? 1000 : 500; // ms
+    const slowThreshold = env.NODE_ENV === "production" ? 1000 : 500; // ms
     if (duration > slowThreshold) {
-      logger.warn(`Slow request detected: ${method} ${path} took ${duration.toFixed(2)}ms`);
+      logger.warn(
+        `Slow request detected: ${method} ${path} took ${duration.toFixed(2)}ms`,
+      );
     }
 
     // Call the original end function with proper type handling
@@ -84,22 +93,25 @@ export const getPerformanceMetrics = () => {
 };
 
 // Log performance metrics periodically
-if (env.NODE_ENV !== 'test') {
-  setInterval(() => {
-    const metrics = getPerformanceMetrics();
-    if (metrics.length > 0) {
-      logger.info('Performance Metrics:', {
-        timestamp: new Date().toISOString(),
-        metrics: metrics.map(m => ({
-          route: m.route,
-          avgTime: m.avgTime.toFixed(2) + 'ms',
-          maxTime: m.maxTime.toFixed(2) + 'ms',
-          errorRate: m.errorRate.toFixed(2) + '%',
-          rps: m.requestsPerSecond.toFixed(2),
-        })),
-      });
-    }
-  }, 5 * 60 * 1000); // Log every 5 minutes
+if (env.NODE_ENV !== "test") {
+  setInterval(
+    () => {
+      const metrics = getPerformanceMetrics();
+      if (metrics.length > 0) {
+        logger.info("Performance Metrics:", {
+          timestamp: new Date().toISOString(),
+          metrics: metrics.map((m) => ({
+            route: m.route,
+            avgTime: m.avgTime.toFixed(2) + "ms",
+            maxTime: m.maxTime.toFixed(2) + "ms",
+            errorRate: m.errorRate.toFixed(2) + "%",
+            rps: m.requestsPerSecond.toFixed(2),
+          })),
+        });
+      }
+    },
+    5 * 60 * 1000,
+  ); // Log every 5 minutes
 }
 
 // Middleware to expose performance metrics via API

@@ -9,16 +9,13 @@ export async function POST(req: Request) {
     const session = await getServerSession(authOptions);
 
     if (!session?.user) {
-      return NextResponse.json(
-        { error: 'Unauthorized' },
-        { status: 401 }
-      );
+      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
     const body = await req.json();
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
-      'Authorization': `Bearer ${session.accessToken || session.user.id}`
+      Authorization: `Bearer ${session.accessToken || session.user.id}`,
     };
 
     const response = await fetch(`${BACKEND_URL}/api/nudge`, {

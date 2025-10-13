@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from 'express';
-import logger from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import logger from "../utils/logger";
 
 // --- TYPE DEFINITIONS ---
 
@@ -19,11 +19,10 @@ interface AiNudgeRequestBody {
 
 // Interface for the Create Nudge request body
 interface CreateNudgeRequestBody {
-    userId: string;
-    message: string;
-    // Define other properties for a new nudge record here
+  userId: string;
+  message: string;
+  // Define other properties for a new nudge record here
 }
-
 
 // --- CONTROLLER FUNCTIONS ---
 
@@ -34,7 +33,7 @@ interface CreateNudgeRequestBody {
 export const getNudges = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     // Priority: 1. User ID from route params, 2. Authenticated User ID
@@ -42,9 +41,10 @@ export const getNudges = async (
 
     if (!userId) {
       // Use the logger for better error tracking
-      logger.warn('Attempted getNudges without User ID.');
+      logger.warn("Attempted getNudges without User ID.");
       res.status(400).json({
-        error: 'User ID is required from path parameters or authentication context.',
+        error:
+          "User ID is required from path parameters or authentication context.",
       });
       return;
     }
@@ -53,12 +53,12 @@ export const getNudges = async (
     // const nudges = await nudgeService.getNudgesForUser(userId);
 
     res.status(200).json({
-      message: 'Nudges retrieved successfully',
+      message: "Nudges retrieved successfully",
       data: [],
       // data: nudges,
     });
   } catch (error) {
-    logger.error('Error in getNudges:', error);
+    logger.error("Error in getNudges:", error);
     next(error);
   }
 };
@@ -72,14 +72,14 @@ export const getNudges = async (
 export const getNudgeById = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
 
     if (!id) {
       res.status(400).json({
-        error: 'Nudge ID is required in the path parameters.',
+        error: "Nudge ID is required in the path parameters.",
       });
       return;
     }
@@ -94,12 +94,12 @@ export const getNudgeById = async (
     // }
 
     res.status(200).json({
-      message: 'Nudge retrieved successfully',
+      message: "Nudge retrieved successfully",
       data: null,
       // data: nudge,
     });
   } catch (error) {
-    logger.error('Error in getNudgeById:', error);
+    logger.error("Error in getNudgeById:", error);
     next(error);
   }
 };
@@ -112,9 +112,9 @@ export const getNudgeById = async (
  */
 export const getNudge = async (
   // Use the specific body interface here for better type checking
-  req: Request<{}, {}, AiNudgeRequestBody> & AuthenticatedRequest, 
+  req: Request<{}, {}, AiNudgeRequestBody> & AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     // The request body has already been validated by middleware (as seen in previous turns)
@@ -124,13 +124,13 @@ export const getNudge = async (
     if (!message) {
       // This check is redundant if you have validation middleware, but harmless.
       res.status(400).json({
-        error: 'Message is required in the request body.',
+        error: "Message is required in the request body.",
       });
       return;
     }
 
     // FIX: Prefix unused variables with an underscore for clarity and to prevent TS warnings
-    const _context = context; 
+    const _context = context;
 
     // TODO: Implement actual AI nudge generation logic
     // const aiResponse = await aiService.generateNudge(message, userId, _context);
@@ -144,7 +144,7 @@ export const getNudge = async (
       recovered: false,
     });
   } catch (error) {
-    logger.error('Error in getNudge (AI Generation):', error);
+    logger.error("Error in getNudge (AI Generation):", error);
     next(error);
   }
 };
@@ -159,15 +159,15 @@ export const createNudge = async (
   // Use the specific body interface here for better type checking
   req: Request<{}, {}, CreateNudgeRequestBody> & AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const nudgeData = req.body;
-    
+
     // Better check: check for a required field instead of just the object presence
-    if (!nudgeData || !nudgeData.userId) { 
+    if (!nudgeData || !nudgeData.userId) {
       res.status(400).json({
-        error: 'Nudge data (including userId) is required.',
+        error: "Nudge data (including userId) is required.",
       });
       return;
     }
@@ -176,12 +176,12 @@ export const createNudge = async (
     // const newNudge = await nudgeService.createNudge(nudgeData);
 
     res.status(201).json({
-      message: 'Nudge created successfully',
+      message: "Nudge created successfully",
       data: nudgeData, // Placeholder for the new nudge object
       // data: newNudge,
     });
   } catch (error) {
-    logger.error('Error in createNudge:', error);
+    logger.error("Error in createNudge:", error);
     next(error);
   }
 };
@@ -195,7 +195,7 @@ export const createNudge = async (
 export const updateNudge = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
@@ -203,7 +203,7 @@ export const updateNudge = async (
 
     if (!id) {
       res.status(400).json({
-        error: 'Nudge ID is required in the path parameters.',
+        error: "Nudge ID is required in the path parameters.",
       });
       return;
     }
@@ -218,12 +218,12 @@ export const updateNudge = async (
     // }
 
     res.status(200).json({
-      message: 'Nudge updated successfully',
+      message: "Nudge updated successfully",
       data: { id, ...updateData },
       // data: updatedNudge,
     });
   } catch (error) {
-    logger.error('Error in updateNudge:', error);
+    logger.error("Error in updateNudge:", error);
     next(error);
   }
 };
@@ -237,14 +237,14 @@ export const updateNudge = async (
 export const deleteNudge = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
 
     if (!id) {
       res.status(400).json({
-        error: 'Nudge ID is required in the path parameters.',
+        error: "Nudge ID is required in the path parameters.",
       });
       return;
     }
@@ -259,10 +259,10 @@ export const deleteNudge = async (
     // }
 
     res.status(200).json({
-      message: 'Nudge deleted successfully',
+      message: "Nudge deleted successfully",
     });
   } catch (error) {
-    logger.error('Error in deleteNudge:', error);
+    logger.error("Error in deleteNudge:", error);
     next(error);
   }
 };
@@ -276,14 +276,14 @@ export const deleteNudge = async (
 export const markNudgeAsViewed = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const { id } = req.params;
 
     if (!id) {
       res.status(400).json({
-        error: 'Nudge ID is required in the path parameters.',
+        error: "Nudge ID is required in the path parameters.",
       });
       return;
     }
@@ -292,10 +292,10 @@ export const markNudgeAsViewed = async (
     // await nudgeService.markAsViewed(id);
 
     res.status(200).json({
-      message: 'Nudge marked as viewed',
+      message: "Nudge marked as viewed",
     });
   } catch (error) {
-    logger.error('Error in markNudgeAsViewed:', error);
+    logger.error("Error in markNudgeAsViewed:", error);
     next(error);
   }
 };
@@ -309,14 +309,15 @@ export const markNudgeAsViewed = async (
 export const getNudgeStats = async (
   req: AuthenticatedRequest,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ): Promise<void> => {
   try {
     const userId = req.params.userId || req.user?.id;
 
     if (!userId) {
       res.status(400).json({
-        error: 'User ID is required from path parameters or authentication context.',
+        error:
+          "User ID is required from path parameters or authentication context.",
       });
       return;
     }
@@ -325,7 +326,7 @@ export const getNudgeStats = async (
     // const stats = await nudgeService.getStatsForUser(userId);
 
     res.status(200).json({
-      message: 'Nudge statistics retrieved successfully',
+      message: "Nudge statistics retrieved successfully",
       data: {
         total: 0,
         viewed: 0,
@@ -335,7 +336,7 @@ export const getNudgeStats = async (
       // data: stats,
     });
   } catch (error) {
-    logger.error('Error in getNudgeStats:', error);
+    logger.error("Error in getNudgeStats:", error);
     next(error);
   }
 };

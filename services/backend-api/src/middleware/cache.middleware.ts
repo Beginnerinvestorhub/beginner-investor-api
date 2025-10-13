@@ -1,7 +1,6 @@
-import { Request, Response, NextFunction } from 'express';
-import { cacheManager } from '../../../shared/cache/init';
-import { CacheKeys } from '../../../shared/cache/cache-keys';
-import logger from '../utils/logger';
+import { Request, Response, NextFunction } from "express";
+import { getCacheManager } from "../../../shared/cache/init.js";
+import logger from "../utils/logger";
 
 /**
  * Cache middleware configuration
@@ -19,33 +18,40 @@ export interface CacheMiddlewareOptions {
 /**
  * Default cache key generator
  */
-function defaultCacheKeyGenerator(req: Request, options: CacheMiddlewareOptions): string {
+function defaultCacheKeyGenerator(
+  req: Request,
+  options: CacheMiddlewareOptions,
+): string {
   const parts = [req.method, req.path];
 
   // Add user ID if authenticated and requested
-  if (options.includeUserId && req.user?.id) {
-    parts.push(`user:${req.user.id}`);
+  if (options.includeUserId && req.user?.uid) {
+    parts.push(`user:${req.user.uid}`);
   }
 
   // Add query parameters if requested
   if (options.includeQuery && req.query) {
     const sortedQuery = Object.keys(req.query)
       .sort()
-      .map(key => `${key}:${req.query[key]}`)
-      .join('|');
+      .map((key) => `${key}:${req.query[key]}`)
+      .join("|");
     if (sortedQuery) {
       parts.push(`query:${sortedQuery}`);
     }
   }
 
   // Add request body if requested (for POST/PUT requests)
-  if (options.includeBody && ['POST', 'PUT', 'PATCH'].includes(req.method) && req.body) {
+  if (
+    options.includeBody &&
+    ["POST", "PUT", "PATCH"].includes(req.method) &&
+    req.body
+  ) {
     // Create a hash of the body to avoid extremely long cache keys
-    const bodyHash = Buffer.from(JSON.stringify(req.body)).toString('base64');
+    const bodyHash = Buffer.from(JSON.stringify(req.body)).toString("base64");
     parts.push(`body:${bodyHash}`);
   }
 
-  return parts.join(':');
+  return parts.join(":");
 }
 
 /**
@@ -55,31 +61,33 @@ export function cacheMiddleware(options: CacheMiddlewareOptions = {}) {
   const {
     ttl = 300, // 5 minutes default
     keyGenerator = defaultCacheKeyGenerator,
-    namespace = 'api',
+    namespace = "api",
     includeUserId = false,
-    excludeHeaders = ['authorization', 'cookie'],
+    excludeHeaders = ["authorization", "cookie"],
     includeQuery = true,
-    includeBody = false
+    includeBody = false,
   } = options;
 
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       // Check if this is a GET request (only cache GET requests by default)
-      if (req.method !== 'GET') {
+      if (req.method !== "GET") {
         return next();
       }
 
       const cacheKey = keyGenerator(req, options);
 
       // Try to get from cache
-      const cachedResponse = await cacheManager.get(cacheKey, { namespace });
+      const cachedResponse = await getCacheManager().get(cacheKey, {
+        namespace,
+      });
 
       if (cachedResponse) {
         logger.debug(`Cache hit for key: ${cacheKey}`);
         // Set cache headers
         res.set({
-          'X-Cache': 'HIT',
-          'X-Cache-TTL': ttl.toString()
+          "X-Cache": "HIT",
+          "X-Cache-TTL": ttl.toString(),
         });
 
         return res.json(cachedResponse);
@@ -92,21 +100,23 @@ export function cacheMiddleware(options: CacheMiddlewareOptions = {}) {
       const originalJson = res.json;
 
       // Override json method to cache response
-      res.json = function(body: unknown) {
+      res.json = function (body: unknown) {
         // Only cache successful responses (2xx status codes)
         if (res.statusCode >= 200 && res.statusCode < 300) {
-          cacheManager.set(cacheKey, body, {
-            ttl,
-            namespace
-          }).catch(error => {
-            logger.error('Failed to cache response:', error);
-          });
+          getCacheManager()
+            .set(cacheKey, body, {
+              ttl,
+              namespace,
+            })
+            .catch((error) => {
+              logger.error("Failed to cache response:", error);
+            });
         }
 
         // Set cache headers for new response
         res.set({
-          'X-Cache': 'MISS',
-          'X-Cache-TTL': ttl.toString()
+          "X-Cache": "MISS",
+          "X-Cache-TTL": ttl.toString(),
         });
 
         // Call original json method
@@ -115,7 +125,7 @@ export function cacheMiddleware(options: CacheMiddlewareOptions = {}) {
 
       next();
     } catch (error: unknown) {
-      logger.error('Cache middleware error:', error);
+      logger.error("Cache middleware error:", error);
       // Continue without caching on error
       next();
     }
@@ -129,19 +139,25 @@ export class CacheInvalidator {
   /**
    * Invalidate cache by pattern
    */
-  static async invalidatePattern(pattern: string, namespace?: string): Promise<void> {
+  static async invalidatePattern(
+    pattern: string,
+    namespace?: string,
+  ): Promise<void> {
     try {
-      await cacheManager.deletePattern(pattern, { namespace });
+      await getCacheManager().deletePattern(pattern, { namespace });
       logger.info(`Invalidated cache pattern: ${pattern}`);
     } catch (error: unknown) {
-      logger.error('Failed to invalidate cache pattern:', error);
+      logger.error("Failed to invalidate cache pattern:", error);
     }
   }
 
   /**
    * Invalidate user-specific cache
    */
-  static async invalidateUserCache(userId: string, namespace?: string): Promise<void> {
+  static async invalidateUserCache(
+    userId: string,
+    namespace?: string,
+  ): Promise<void> {
     const pattern = `*user:${userId}*`;
     await this.invalidatePattern(pattern, namespace);
   }
@@ -149,7 +165,10 @@ export class CacheInvalidator {
   /**
    * Invalidate all cache for a specific endpoint
    */
-  static async invalidateEndpointCache(endpoint: string, namespace?: string): Promise<void> {
+  static async invalidateEndpointCache(
+    endpoint: string,
+    namespace?: string,
+  ): Promise<void> {
     const pattern = `*${endpoint}*`;
     await this.invalidatePattern(pattern, namespace);
   }
@@ -159,10 +178,10 @@ export class CacheInvalidator {
    */
   static async clearAll(namespace?: string): Promise<void> {
     try {
-      await cacheManager.flushAll();
-      logger.info('Cleared all cache');
+      await getCacheManager().flushAll();
+      logger.info("Cleared all cache");
     } catch (error: unknown) {
-      logger.error('Failed to clear cache:', error);
+      logger.error("Failed to clear cache:", error);
     }
   }
 }

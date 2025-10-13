@@ -6,7 +6,11 @@ interface TestimonialCardProps {
   role?: string;
 }
 
-export default function TestimonialCard({ quote, author, role }: TestimonialCardProps) {
+export default function TestimonialCard({
+  quote,
+  author,
+  role,
+}: TestimonialCardProps) {
   return (
     <div className="bg-white rounded-xl shadow-md p-6 m-2 w-full md:w-80 flex flex-col items-center">
       <blockquote className="italic text-indigo-700 mb-4">“{quote}”</blockquote>

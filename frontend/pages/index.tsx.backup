@@ -1,0 +1,1657 @@
+import React, { useEffect } from 'react';
+import { createRoot } from 'react-dom/client';
+import Head from 'next/head';
+
+// Type definitions
+interface Feature {
+  icon: string;
+  title: string;
+  description: string;
+}
+
+interface Step {
+  number: number;
+  title: string;
+  description: string;
+}
+
+interface Achievement {
+  name: string;
+  icon: string;
+  desc: string;
+  unlocked: boolean;
+}
+
+interface LeaderboardItem {
+  rank: number;
+  username: string;
+  points: string;
+  className: string;
+}
+
+interface TechItem {
+  h4: string;
+  p: string;
+}
+
+interface GamificationLevel {
+  level: number;
+  name: string;
+  active: boolean;
+}
+
+interface MarketDataItem {
+  name: string;
+  value: string;
+  status: 'up' | 'down';
+}
+
+// Main App Component
+const App: React.FC = () => {
+  const MERMAID_URL = 'https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.esm.min.mjs';
+
+  // Mermaid Initialization
+  useEffect(() => {
+    const loadMermaid = async () => {
+      try {
+        const mermaid = (await import(MERMAID_URL)).default;
+        
+        mermaid.initialize({
+          startOnLoad: true,
+          theme: 'base',
+          themeVariables: {
+            primaryColor: '#e6f3ff',
+            primaryTextColor: '#003d7a',
+            primaryBorderColor: '#003d7a',
+            lineColor: '#0055a5',
+            secondaryColor: '#e6ffe6',
+            tertiaryColor: '#fff4e6'
+          }
+        });
+        
+        if (mermaid.contentLoaded) {
+          mermaid.contentLoaded();
+        }
+      } catch (error) {
+        console.error("Failed to load or initialize Mermaid:", error);
+      }
+    };
+
+    loadMermaid();
+  }, []);
+
+  // Data
+  const featuresData: Feature[] = [
+    { 
+      icon: '📈', 
+      title: 'Interactive Simulators', 
+      description: "Practice trading with virtual money in real-time market conditions. No risk, all reward." 
+    },
+    { 
+      icon: '📚', 
+      title: 'Bite-sized Lessons', 
+      description: "Learn complex topics like ETFs and options in simple, 5-minute modules." 
+    },
+    { 
+      icon: '🏆', 
+      title: 'Gamified Progress', 
+      description: "Earn points, unlock achievements, and climb the leaderboard as you learn." 
+    },
+  ];
+
+  const howItWorksSteps: Step[] = [
+    { 
+      number: 1, 
+      title: 'Learn the Basics', 
+      description: 'Complete the "Investing 101" track and pass your first quiz.' 
+    },
+    { 
+      number: 2, 
+      title: 'Simulate Trades', 
+      description: 'Make 10 successful virtual trades in the stock simulator.' 
+    },
+    { 
+      number: 3, 
+      title: 'Grow Your Portfolio', 
+      description: 'Establish a diversified virtual portfolio with a positive return.' 
+    },
+    { 
+      number: 4, 
+      title: 'Unlock Pro Tools', 
+      description: 'Gain access to advanced analytics and real-world broker recommendations.' 
+    },
+  ];
+  
+  const achievements: Achievement[] = [
+    { 
+      name: 'First Trade', 
+      icon: '💰', 
+      desc: 'Complete your first virtual transaction.', 
+      unlocked: true 
+    },
+    { 
+      name: 'Diversifier', 
+      icon: '🧺', 
+      desc: 'Hold 5 different asset classes.', 
+      unlocked: true 
+    },
+    { 
+      name: 'Bear Hunter', 
+      icon: '📉', 
+      desc: 'Profit during a simulated market downturn.', 
+      unlocked: false 
+    },
+    { 
+      name: 'Rocket Ship', 
+      icon: '🚀', 
+      desc: 'Achieve a 20% return in a single day.', 
+      unlocked: false 
+    },
+  ];
+
+  const leaderboard: LeaderboardItem[] = [
+    { rank: 1, username: 'WealthWarden', points: '12,450', className: 'rank-1' },
+    { rank: 2, username: 'CapitalKing', points: '11,902', className: 'rank-2' },
+    { rank: 3, username: 'RookieRoller', points: '9,870', className: 'rank-3' },
+    { rank: 4, username: 'YouAreHere', points: '3,100', className: '' },
+  ];
+
+  const techStack: TechItem[] = [
+    { 
+      h4: 'React/TypeScript', 
+      p: 'Modern frontend framework for a fast, scalable, and type-safe UI.' 
+    },
+    { 
+      h4: 'Node.js Backend', 
+      p: 'High-performance API handling for real-time portfolio and user data.' 
+    },
+    { 
+      h4: 'WebSocket Tickers', 
+      p: 'Fast, persistent connections for live market data updates.' 
+    },
+    { 
+      h4: 'PostgreSQL Database', 
+      p: 'Reliable storage for user accounts, achievements, and content.' 
+    },
+  ];
+
+  const gamificationLevels: GamificationLevel[] = [
+    { level: 1, name: 'Apprentice', active: true },
+    { level: 2, name: 'Trader', active: false },
+    { level: 3, name: 'Analyst', active: false },
+    { level: 4, name: 'Investor', active: false },
+    { level: 5, name: 'Guru', active: false },
+  ];
+
+  const marketData: MarketDataItem[] = [
+    { name: 'S&P 500', value: '+1.25%', status: 'up' },
+    { name: 'NASDAQ', value: '+1.98%', status: 'up' },
+    { name: 'DOW', value: '-0.45%', status: 'down' },
+    { name: 'AAPL', value: '+2.33%', status: 'up' },
+    { name: 'TSLA', value: '-1.11%', status: 'down' },
+  ];
+
+  const mermaidChartCode = `
+flowchart LR
+    subgraph Frontend
+        A[User Browser] -- REST/GraphQL --> B(Investing App UI - React/TSX)
+        B -- Renders Diagrams --> C{Mermaid.js}
+    end
+
+    subgraph Backend & Data
+        D(Authentication Service)
+        E(Core Investment API)
+        F[Live Market Ticker Feed]
+        G(Gamification Engine - Node/Python)
+    end
+
+    B -- Auth & Data --> D
+    B -- Investment Actions --> E
+    B -- Live Data Stream --> F
+    B -- Progress Updates --> G
+
+    G -- Achievements/Levels --> B
+    E -- Portfolio Data --> B
+    F -- Ticker Data --> B
+    `;
+
+  return (
+    <div id="root-container">
+      <style dangerouslySetInnerHTML={{ __html: styles }} />
+
+      {/* Market Ticker */}
+      <div className="market-ticker">
+        <div className="ticker-content">
+          {[...marketData, ...marketData].map((item, index) => (
+            <div key={index} className="ticker-item">
+              {item.name}: <span className={`ticker-value ${item.status}`}>{item.value}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Hero Section */}
+      <div className="hero">
+        <div className="gear-container">
+          <div className="gear"></div>
+          <div className="gear"></div>
+          <div className="gear"></div>
+          <div className="gear"></div>
+        </div>
+
+        <nav>
+          <div className="logo">Investor Hub</div>
+          <div className="nav-links">
+            <a href="#features">Features</a>
+            <a href="#how-it-works">Guide</a>
+            <a href="#gamification">Level Up</a>
+            <a href="#content-hub">Content</a>
+          </div>
+        </nav>
+
+        <div className="hero-content">
+          <h1>
+            Master the Market. <span className="accent">Build Your Future.</span>
+          </h1>
+          <p className="hero-subtitle">
+            Your personalized, gamified platform for learning to invest. Start small, learn fast, and
+            watch your capital grow with confidence.
+          </p>
+          <div className="cta-buttons">
+            <a href="#signup" className="nyse-btn nyse-btn-primary">
+              Start Your Journey Today
+            </a>
+            <a href="#tour" className="nyse-btn nyse-btn-secondary">
+              Take the Tour
+            </a>
+          </div>
+        </div>
+      </div>
+
+      {/* Features Section */}
+      <section id="features" className="features">
+        <div className="nyse-container">
+          <div className="section-header">
+            <h2 className="section-title">Why Invest with Us?</h2>
+            <p className="section-subtitle">
+              We break down the barriers to entry, providing the tools and knowledge you need to start confidently.
+            </p>
+          </div>
+          <div className="features-grid">
+            {featuresData.map((feature, index) => (
+              <div key={index} className="nyse-card">
+                <div className="feature-icon">{feature.icon}</div>
+                <h3>{feature.title}</h3>
+                <p>{feature.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* How It Works Section */}
+      <section id="how-it-works" className="how-it-works">
+        <div className="nyse-container">
+          <div className="section-header">
+            <h2 className="section-title">Your Path to Financial Literacy</h2>
+            <p className="section-subtitle">
+              Follow our proven, four-step methodology to go from novice to confident investor.
+            </p>
+          </div>
+          <div className="steps">
+            {howItWorksSteps.map((step, index) => (
+              <div key={index} className="step">
+                <div className="step-number">{step.number}</div>
+                <h3>{step.title}</h3>
+                <p>{step.description}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Social Proof Section */}
+      <section className="social-proof">
+        <div className="wooden-frame">
+          <div className="wooden-inner">
+            <div className="section-header">
+              <h2 className="section-title">Investor Success by the Numbers</h2>
+              <p className="section-subtitle">
+                Don't just take our word for it—see the results our community has achieved.
+              </p>
+            </div>
+            <div className="stats-grid">
+              <div className="stat-card">
+                <div className="stat-number">120K+</div>
+                <div className="stat-label">Active Users</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">4.8</div>
+                <div className="stat-label">App Rating</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">25%</div>
+                <div className="stat-label">Avg Portfolio Growth</div>
+              </div>
+              <div className="stat-card">
+                <div className="stat-number">8</div>
+                <div className="stat-label">Lessons Completed / User</div>
+              </div>
+            </div>
+            <div className="testimonials">
+              <div className="testimonial-card">
+                <p className="testimonial-text">
+                  "I finally understand what an ETF is! The gamified learning made complex topics easy and fun. I feel ready to invest my first real dollar."
+                </p>
+                <p className="testimonial-author">Alex R.</p>
+                <p className="testimonial-role">New User</p>
+              </div>
+              <div className="testimonial-card">
+                <p className="testimonial-text">
+                  "The market simulator is incredibly realistic. It gave me the confidence to move from virtual trading to managing my small, real-world portfolio successfully."
+                </p>
+                <p className="testimonial-author">Samantha K.</p>
+                <p className="testimonial-role">Advanced Apprentice</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Gamification Section */}
+      <section id="gamification" className="gamification">
+        <div className="nyse-container">
+          <div className="section-header">
+            <h2 className="section-title">Level Up Your Knowledge 🏆</h2>
+            <p className="section-subtitle">
+              Track your progress, unlock exclusive achievements, and see how you rank against other investors.
+            </p>
+          </div>
+          <div className="gamification-grid">
+            <div className="achievement-showcase">
+              <h3>My Investing Progress</h3>
+              <div className="progress-track">
+                <div className="level-indicator">
+                  {gamificationLevels.map((level, index) => (
+
+  {/* Gamification Section */}
+  <section id="gamification" className="gamification">
+    <div className="nyse-container">
+      <div className="section-header">
+        <h2 className="section-title">Level Up Your Knowledge 🏆</h2>
+        <p className="section-subtitle">
+          Track your progress, unlock exclusive achievements, and see how you rank against other investors.
+        </p>
+      </div>
+      <div className="gamification-grid">
+        <div className="achievement-showcase">
+          <h3>My Investing Progress</h3>
+          <div className="progress-track">
+            <div className="level-indicator">
+              {gamificationLevels.map((level, index) => (
+                <div key={level.level}>
+                  <div className={`level-circle ${level.active ? 'active' : ''}`}>
+                    <div className="level-number">{level.level}</div>
+                    <div className="level-name">{level.name}</div>
+            <div className="achievements-grid">
+              {achievements.map((a, index) => (
+                <div key={index} className={`achievement-card ${a.unlocked ? 'unlocked' : 'locked'}`}>
+                  <div className="achievement-icon">{a.icon}</div>
+                  <div className="achievement-name">{a.name}</div>
+                  <div className="achievement-desc">{a.desc}</div>
+                </div>
+              ))}
+            </div>
+
+            <div className="leaderboard-preview">
+              <h3>Global Leaderboard Preview</h3>
+              <div className="leaderboard-list">
+                {leaderboard.map((item) => (
+                  <div key={item.rank} className={`leaderboard-item ${item.className}`}>
+                    <span className="rank">#{item.rank}</span>
+                    <span className="username">{item.username}</span>
+                    <span className="points">{item.points} XP</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <div className="rewards-section">
+              <h3>Tiered Rewards</h3>
+              <div className="rewards-grid">
+                <div className="reward-card">
+                  <div className="reward-badge">Level 3 Required</div>
+                  <div className="reward-icon">💡</div>
+                  <h4>Pro Insights Unlock</h4>
+                  <p>Access daily stock analysis reports.</p>
+                </div>
+                <div className="reward-card">
+                  <div className="reward-badge">Level 5 Required</div>
+                  <div className="reward-icon">💎</div>
+                  <h4>Exclusive Webinars</h4>
+                  <p>Join live Q&A sessions with finance experts.</p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Architecture Diagram Section */}
+      <section id="architecture" className="architecture-visual">
+        <div className="nyse-container">
+          <div className="section-header">
+            <h2 className="section-title">Our Financial Technology Architecture</h2>
+            <p className="section-subtitle">A reliable, real-time system is the foundation for smart investing.</p>
+          </div>
+          <div className="mermaid-container">
+            <div className="mermaid">
+              {mermaidChartCode}
+            </div>
+          </div>
+          <div className="tech-grid">
+            {techStack.map((tech, index) => (
+              <div key={index} className="tech-item">
+                <h4>{tech.h4}</h4>
+                <p>{tech.p}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Content Hub Section */}
+      <section id="content-hub" className="content-hub">
+        <div className="nyse-container">
+          <div className="section-header">
+            <h2 className="section-title">The Beginner Investor Content Hub</h2>
+            <p className="section-subtitle">
+              Bite-sized articles, expert interviews, and native broker reviews to guide your real-world choices.
+            </p>
+          </div>
+
+          <div className="featured-article">
+            <div className="article-image">
+              <div className="article-badge">Featured Partner</div>
+              <span className="article-placeholder">🏦</span>
+            </div>
+            <div className="article-content">
+              <div className="article-meta">
+                <span className="article-category">Broker Review</span>
+                <span className="article-date">Published: Oct 2025</span>
+              </div>
+              <h3>The Top 3 Platforms for First-Time Investors in 2025</h3>
+              <p className="article-excerpt">
+                Finding the right brokerage is critical. We've analyzed fees, mobile experience, and learning resources to give you our top recommendations. Start your real portfolio with a platform built for beginners.
+              </p>
+              <a href="#article" className="article-link">
+                Read Full Review &rarr;
+              </a>
+            </div>
+          </div>
+
+          <div className="articles-grid">
+            <div className="article-card">
+              <div className="article-card-image">💰</div>
+              <div className="article-card-content">
+                <h4>What is Compounding and Why Should I Care?</h4>
+                <p>The secret sauce of wealth-building, explained simply.</p>
+                <span className="article-date">Lesson | 3 min read</span>
+              </div>
+            </div>
+            <div className="article-card">
+              <div className="article-card-image">🛡️</div>
+              <div className="article-card-content">
+                <h4>Asset Allocation: The Beginner's Diversification Guide</h4>
+                <p>How to spread your risk without needing a finance degree.</p>
+                <span className="article-date">Strategy | 5 min read</span>
+              </div>
+            </div>
+            <div className="article-card">
+              <div className="article-card-image">📉</div>
+              <div className="article-card-content">
+                <h4>My First Market Downturn: What Not To Do</h4>
+                <p>A guide to maintaining discipline when the market drops.</p>
+                <span className="article-date">Psychology | 4 min read</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Section */}
+      <section className="cta-section">
+        <div className="nyse-container">
+          <h2>Ready to Take Control of Your Finances?</h2>
+          <p>Join thousands of beginners building their capital on the most trusted platform.</p>
+          <a href="#register" className="nyse-btn nyse-btn-primary">
+            Get Started for Free
+          </a>
+        </div>
+      </section>
+
+      {/* Footer */}
+      <footer>
+        <div className="footer-content">
+          <div className="logo">Investor Hub</div>
+          <p className="copyright">
+            © 2025 Investor Hub. All Rights Reserved. Not financial advice. Past performance is not indicative of future results.
+          </p>
+          <div className="footer-links">
+            <a href="#legal">Legal</a>
+            <a href="#privacy">Privacy Policy</a>
+            <a href="#contact">Contact Us</a>
+            <a href="#careers">Careers</a>
+          </div>
+        </div>
+      </footer>
+    </div>
+  );
+};
+
+// App Rendering
+const container = document.getElementById('root');
+if (container) {
+  const root = createRoot(container);
+  root.render(
+    <React.StrictMode>
+      <App />
+    </React.StrictMode>
+  );
+} else {
+  console.error("Root element 'root' not found in the DOM.");
+}
+
+  const styles = `
+        /* NYSE Design Tokens */
+        :root {
+            --nyse-color-primary: #003d7a;
+            --nyse-color-secondary: #0055a5;
+            --nyse-color-accent: #00a0e3;
+            --nyse-color-dark: #1a1a1a;
+            --nyse-color-text: #333333;
+            --nyse-color-text-light: #666666;
+            --nyse-color-background: #ffffff;
+            --nyse-color-background-alt: #f5f5f5;
+            --nyse-color-border: #e0e0e0;
+            
+            --nyse-font-serif: "Nysé", Georgia, "Times New Roman", serif;
+            --nyse-font-sans: "Akko Pro Medium", "Trebuchet MS", Arial, Helvetica, sans-serif;
+            
+            --nyse-spacing-xs: 0.25rem;
+            --nyse-spacing-sm: 0.5rem;
+            --nyse-spacing-md: 1rem;
+            --nyse-spacing-lg: 1.5rem;
+            --nyse-spacing-xl: 2rem;
+            --nyse-spacing-xxl: 3rem;
+        }
+
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: var(--nyse-font-sans);
+            font-size: 16px;
+            line-height: 1.6;
+            color: var(--nyse-color-text);
+            background-color: var(--nyse-color-background);
+            margin: 0;
+            padding: 0;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        h1, h2, h3, h4, h5, h6 {
+            font-family: var(--nyse-font-serif);
+            font-weight: 700;
+            line-height: 1.2;
+            margin-top: 0;
+            color: var(--nyse-color-dark);
+        }
+
+        .hero {
+            position: relative;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 50%, var(--nyse-color-accent) 100%);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .hero::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px),
+                repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(255,255,255,0.02) 2px, rgba(255,255,255,0.02) 4px);
+            pointer-events: none;
+        }
+
+        .gear-container {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            opacity: 0.08;
+            overflow: hidden;
+        }
+
+        .gear {
+            position: absolute;
+            border: 3px solid rgba(255, 255, 255, 0.4);
+            border-radius: 50%;
+            animation: rotate 20s linear infinite;
+        }
+
+        .gear:nth-child(1) {
+            width: 250px;
+            height: 250px;
+            top: 15%;
+            left: 10%;
+            animation-duration: 30s;
+        }
+
+        .gear:nth-child(2) {
+            width: 180px;
+            height: 180px;
+            top: 55%;
+            right: 15%;
+            animation-duration: 22s;
+            animation-direction: reverse;
+        }
+
+        .gear:nth-child(3) {
+            width: 120px;
+            height: 120px;
+            bottom: 20%;
+            left: 35%;
+            animation-duration: 18s;
+        }
+
+        .gear:nth-child(4) {
+            width: 200px;
+            height: 200px;
+            top: 40%;
+            right: 40%;
+            animation-duration: 25s;
+            animation-direction: reverse;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        nav {
+            position: relative;
+            z-index: 100;
+            padding: var(--nyse-spacing-lg) 5%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .logo {
+            font-family: var(--nyse-font-serif);
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: var(--nyse-color-background);
+            letter-spacing: 3px;
+            text-transform: uppercase;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: var(--nyse-spacing-xl);
+        }
+
+        .nav-links a {
+            color: var(--nyse-color-background);
+            text-decoration: none;
+            font-size: 0.95rem;
+            font-weight: 600;
+            transition: color 0.3s;
+            letter-spacing: 0.5px;
+        }
+
+        .nav-links a:hover {
+            color: var(--nyse-color-accent);
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 0 5%;
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .hero h1 {
+            font-size: clamp(2.5rem, 5vw, 4.5rem);
+            color: var(--nyse-color-background);
+            margin-bottom: var(--nyse-spacing-xl);
+            font-weight: 700;
+            letter-spacing: 2px;
+            animation: fadeInUp 1s ease-out;
+        }
+
+        .hero h1 .accent {
+            color: var(--nyse-color-accent);
+        }
+
+        .hero-subtitle {
+            font-size: clamp(1.1rem, 2vw, 1.4rem);
+            color: rgba(255, 255, 255, 0.9);
+            max-width: 750px;
+            margin-bottom: var(--nyse-spacing-xxl);
+            line-height: 1.8;
+            animation: fadeInUp 1s ease-out 0.2s both;
+        }
+
+        .cta-buttons {
+            display: flex;
+            gap: var(--nyse-spacing-lg);
+            animation: fadeInUp 1s ease-out 0.4s both;
+        }
+
+        .nyse-btn {
+            font-family: var(--nyse-font-sans);
+            font-size: 1rem;
+            font-weight: 600;
+            padding: var(--nyse-spacing-md) var(--nyse-spacing-xl);
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+        }
+
+        .nyse-btn-primary {
+            background-color: var(--nyse-color-background);
+            color: var(--nyse-color-primary);
+        }
+
+        .nyse-btn-primary:hover {
+            background-color: var(--nyse-color-accent);
+            color: var(--nyse-color-background);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(0, 160, 227, 0.3);
+        }
+
+        .nyse-btn-secondary {
+            background: transparent;
+            color: var(--nyse-color-background);
+            border: 2px solid var(--nyse-color-background);
+        }
+
+        .nyse-btn-secondary:hover {
+            background: var(--nyse-color-background);
+            color: var(--nyse-color-primary);
+        }
+
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .nyse-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 var(--nyse-spacing-lg);
+        }
+
+        .features {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-background);
+        }
+
+        .section-header {
+            text-align: center;
+            margin-bottom: var(--nyse-spacing-xxl);
+        }
+
+        .section-title {
+            font-size: clamp(2rem, 4vw, 3.5rem);
+            color: var(--nyse-color-dark);
+            margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .section-subtitle {
+            font-size: 1.2rem;
+            color: var(--nyse-color-text-light);
+            max-width: 700px;
+            margin: 0 auto;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--nyse-spacing-xl);
+            margin-top: var(--nyse-spacing-xxl);
+        }
+
+        .nyse-card {
+            background: var(--nyse-color-background);
+            border: 1px solid var(--nyse-color-border);
+            border-left: 4px solid var(--nyse-color-primary);
+            border-radius: 8px;
+            padding: var(--nyse-spacing-xl);
+            transition: all 0.3s ease;
+        }
+
+        .nyse-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0, 61, 122, 0.15);
+            border-left-color: var(--nyse-color-accent);
+        }
+
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: var(--nyse-spacing-lg);
+        }
+
+        .nyse-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: var(--nyse-spacing-md);
+            color: var(--nyse-color-primary);
+        }
+
+        .nyse-card p {
+            color: var(--nyse-color-text);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .how-it-works {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-background-alt);
+        }
+
+        .steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--nyse-spacing-xl);
+            margin-top: var(--nyse-spacing-xxl);
+        }
+
+        .step {
+            text-align: center;
+            padding: var(--nyse-spacing-xl);
+            background: var(--nyse-color-background);
+            border-radius: 8px;
+            border: 1px solid var(--nyse-color-border);
+            transition: all 0.3s ease;
+        }
+
+        .step:hover {
+            box-shadow: 0 5px 20px rgba(0, 61, 122, 0.1);
+        }
+
+        .step-number {
+            width: 70px;
+            height: 70px;
+            background: var(--nyse-color-primary);
+            color: var(--nyse-color-background);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.75rem;
+            font-weight: 700;
+            font-family: var(--nyse-font-serif);
+            margin: 0 auto var(--nyse-spacing-lg);
+            border: 4px solid var(--nyse-color-accent);
+        }
+
+        .step h3 {
+            margin-bottom: var(--nyse-spacing-md);
+            color: var(--nyse-color-dark);
+            font-size: 1.5rem;
+        }
+
+        .step p {
+            color: var(--nyse-color-text);
+            line-height: 1.7;
+            margin: 0;
+        }
+
+        .architecture {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-background);
+        }
+
+        .tech-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: var(--nyse-spacing-lg);
+            margin-top: var(--nyse-spacing-xxl);
+        }
+
+        .tech-item {
+            padding: var(--nyse-spacing-lg);
+            background: var(--nyse-color-background-alt);
+            border-left: 3px solid var(--nyse-color-accent);
+            border-radius: 4px;
+        }
+
+        .tech-item h4 {
+            color: var(--nyse-color-primary);
+            margin-bottom: var(--nyse-spacing-sm);
+            font-size: 1.25rem;
+        }
+
+        .tech-item p {
+            color: var(--nyse-color-text-light);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .cta-section {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-primary);
+            text-align: center;
+            color: var(--nyse-color-background);
+        }
+
+        .cta-section h2 {
+            font-size: clamp(2rem, 4vw, 3rem);
+            color: var(--nyse-color-background);
+            margin-bottom: var(--nyse-spacing-lg);
+        }
+
+        .cta-section p {
+            font-size: 1.25rem;
+            margin-bottom: var(--nyse-spacing-xl);
+            opacity: 0.9;
+        }
+
+        footer {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-dark);
+            color: var(--nyse-color-background);
+        }
+
+        .footer-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .footer-links {
+            display: flex;
+            gap: var(--nyse-spacing-xl);
+            justify-content: center;
+            margin-top: var(--nyse-spacing-lg);
+            flex-wrap: wrap;
+        }
+
+        .footer-links a {
+            color: var(--nyse-color-background);
+            text-decoration: none;
+            transition: color 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .footer-links a:hover {
+            color: var(--nyse-color-accent);
+        }
+
+        .market-ticker {
+            background: var(--nyse-color-dark);
+            color: var(--nyse-color-background);
+            padding: var(--nyse-spacing-sm) 0;
+            overflow: hidden;
+            position: relative;
+            border-bottom: 2px solid var(--nyse-color-accent);
+        }
+
+        .ticker-content {
+            display: flex;
+            animation: scroll 30s linear infinite;
+            white-space: nowrap;
+        }
+
+        .ticker-item {
+            padding: 0 var(--nyse-spacing-xl);
+            font-size: 0.9rem;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .ticker-value {
+            margin-left: var(--nyse-spacing-xs);
+            font-family: var(--nyse-font-serif);
+        }
+
+        .ticker-value.up {
+            color: #00ff88;
+        }
+
+        .ticker-value.down {
+            color: #ff4444;
+        }
+
+        @keyframes scroll {
+            0% {
+                transform: translateX(0);
+            }
+            100% {
+                transform: translateX(-50%);
+            }
+        }
+
+        .social-proof {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: linear-gradient(180deg, #f5f0e8 0%, #e8e0d5 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .social-proof::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                repeating-linear-gradient(90deg, transparent, transparent 20px, rgba(0,0,0,0.02) 20px, rgba(0,0,0,0.02) 21px),
+                repeating-linear-gradient(0deg, transparent, transparent 20px, rgba(0,0,0,0.02) 20px, rgba(0,0,0,0.02) 21px);
+            pointer-events: none;
+        }
+
+        .wooden-frame {
+            position: relative;
+            max-width: 1200px;
+            margin: 0 auto;
+            background: linear-gradient(135deg, #d4a574 0%, #c99157 50%, #d4a574 100%);
+            padding: 3px;
+            box-shadow: 
+                0 10px 30px rgba(0,0,0,0.3),
+                inset 0 1px 0 rgba(255,255,255,0.3),
+                inset 0 -1px 0 rgba(0,0,0,0.3);
+        }
+
+        .wooden-frame::before,
+        .wooden-frame::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle, #8b6f47 0%, #6b5538 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .wooden-frame::before {
+            width: 20px;
+            height: 20px;
+            top: 10px;
+            left: 10px;
+        }
+
+        .wooden-frame::after {
+            width: 20px;
+            height: 20px;
+            top: 10px;
+            right: 10px;
+        }
+
+        .wooden-inner {
+            background: linear-gradient(135deg, #f5e6d3 0%, #e8d4b8 100%);
+            padding: var(--nyse-spacing-xxl);
+            position: relative;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .wooden-inner::before,
+        .wooden-inner::after {
+            content: '';
+            position: absolute;
+            background: radial-gradient(circle, #8b6f47 0%, #6b5538 100%);
+            border-radius: 50%;
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .wooden-inner::before {
+            width: 20px;
+            height: 20px;
+            bottom: 10px;
+            left: 10px;
+        }
+
+        .wooden-inner::after {
+            width: 20px;
+            height: 20px;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--nyse-spacing-xl);
+            margin-bottom: var(--nyse-spacing-xxl);
+        }
+
+        .stat-card {
+            text-align: center;
+            background: rgba(255, 255, 255, 0.6);
+            padding: var(--nyse-spacing-lg);
+            border-radius: 8px;
+            border: 2px solid rgba(139, 111, 71, 0.3);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .stat-number {
+            font-family: var(--nyse-font-serif);
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--nyse-color-primary);
+            line-height: 1;
+            margin-bottom: var(--nyse-spacing-sm);
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.1);
+        }
+
+        .stat-label {
+            font-size: 0.95rem;
+            color: #6b5538;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .testimonials {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--nyse-spacing-lg);
+        }
+
+        .testimonial-card {
+            background: rgba(255, 255, 255, 0.8);
+            padding: var(--nyse-spacing-xl);
+            border-radius: 8px;
+            border: 2px solid rgba(139, 111, 71, 0.3);
+            position: relative;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .testimonial-card::before {
+            content: '"';
+            position: absolute;
+            top: -10px;
+            left: 20px;
+            font-size: 4rem;
+            color: var(--nyse-color-accent);
+            font-family: Georgia, serif;
+            opacity: 0.3;
+        }
+
+        .testimonial-text {
+            font-style: italic;
+            color: var(--nyse-color-text);
+            margin-bottom: var(--nyse-spacing-md);
+            line-height: 1.7;
+        }
+
+        .testimonial-author {
+            font-weight: 600;
+            color: var(--nyse-color-primary);
+        }
+
+        .testimonial-role {
+            font-size: 0.9rem;
+            color: #6b5538;
+        }
+
+        .architecture-visual {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-background);
+        }
+
+        .mermaid-container {
+            background: var(--nyse-color-background-alt);
+            padding: var(--nyse-spacing-xl);
+            border-radius: 8px;
+            border: 1px solid var(--nyse-color-border);
+            overflow-x: auto;
+            margin-top: var(--nyse-spacing-xl);
+        }
+
+        .gamification {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: linear-gradient(180deg, var(--nyse-color-background) 0%, #f0f4f8 100%);
+        }
+
+        .gamification-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: var(--nyse-spacing-xl);
+            margin-top: var(--nyse-spacing-xxl);
+        }
+
+        .achievement-showcase {
+            background: var(--nyse-color-background);
+            padding: var(--nyse-spacing-xl);
+            border-radius: 12px;
+            border: 2px solid var(--nyse-color-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .achievement-showcase h3 {
+            color: var(--nyse-color-primary);
+            margin-bottom: var(--nyse-spacing-lg);
+            text-align: center;
+        }
+
+        .progress-track {
+            padding: var(--nyse-spacing-xl) 0;
+        }
+
+        .level-indicator {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            max-width: 900px;
+            margin: 0 auto;
+        }
+
+        .level-circle {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        .level-circle .level-number {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: var(--nyse-color-background-alt);
+            border: 3px solid var(--nyse-color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+            font-family: var(--nyse-font-serif);
+            color: var(--nyse-color-text-light);
+            margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .level-circle.active .level-number {
+            background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-accent) 100%);
+            border-color: var(--nyse-color-accent);
+            color: white;
+            box-shadow: 0 4px 12px rgba(0, 160, 227, 0.4);
+        }
+
+        .level-name {
+            font-size: 0.85rem;
+            color: var(--nyse-color-text);
+            font-weight: 600;
+        }
+
+        .progress-line {
+            flex: 1;
+            height: 4px;
+            background: var(--nyse-color-border);
+            margin: 0 var(--nyse-spacing-sm);
+            align-self: flex-start;
+            margin-top: 30px;
+        }
+
+        .achievements-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: var(--nyse-spacing-md);
+        }
+
+        .achievement-card {
+            background: var(--nyse-color-background);
+            padding: var(--nyse-spacing-lg);
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid var(--nyse-color-border);
+            transition: all 0.3s ease;
+        }
+
+        .achievement-card.unlocked {
+            border-color: var(--nyse-color-accent);
+            box-shadow: 0 4px 12px rgba(0, 160, 227, 0.2);
+        }
+
+        .achievement-card.locked {
+            opacity: 0.5;
+            filter: grayscale(100%);
+        }
+
+        .achievement-card:hover.unlocked {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 20px rgba(0, 160, 227, 0.3);
+        }
+
+        .achievement-icon {
+            font-size: 2.5rem;
+            margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .achievement-name {
+            font-weight: 700;
+            color: var(--nyse-color-primary);
+            margin-bottom: var(--nyse-spacing-xs);
+        }
+
+        .achievement-desc {
+            font-size: 0.85rem;
+            color: var(--nyse-color-text-light);
+        }
+
+        .leaderboard-preview {
+            background: var(--nyse-color-background);
+            padding: var(--nyse-spacing-xl);
+            border-radius: 12px;
+            border: 2px solid var(--nyse-color-border);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+        }
+
+        .leaderboard-preview h3 {
+            color: var(--nyse-color-primary);
+            margin-bottom: var(--nyse-spacing-lg);
+            text-align: center;
+        }
+
+        .leaderboard-list {
+            display: flex;
+            flex-direction: column;
+            gap: var(--nyse-spacing-sm);
+        }
+
+        .leaderboard-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: var(--nyse-spacing-md);
+            background: var(--nyse-color-background-alt);
+            border-radius: 8px;
+            border-left: 4px solid var(--nyse-color-border);
+        }
+
+        .leaderboard-item.rank-1 {
+            border-left-color: #ffd700;
+            background: linear-gradient(90deg, #fff9e6 0%, var(--nyse-color-background-alt) 100%);
+        }
+
+        .leaderboard-item.rank-2 {
+            border-left-color: #c0c0c0;
+            background: linear-gradient(90deg, #f5f5f5 0%, var(--nyse-color-background-alt) 100%);
+        }
+
+        .leaderboard-item.rank-3 {
+            border-left-color: #cd7f32;
+            background: linear-gradient(90deg, #fff4e6 0%, var(--nyse-color-background-alt) 100%);
+        }
+
+        .leaderboard-item .rank {
+            font-weight: 700;
+            font-family: var(--nyse-font-serif);
+            color: var(--nyse-color-primary);
+            min-width: 40px;
+        }
+
+        .leaderboard-item .username {
+            flex: 1;
+            font-weight: 600;
+            color: var(--nyse-color-text);
+        }
+
+        .leaderboard-item .points {
+            font-weight: 700;
+            color: var(--nyse-color-accent);
+        }
+
+        .rewards-section {
+            margin-top: var(--nyse-spacing-xxl);
+            padding: var(--nyse-spacing-xl);
+            background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+            border-radius: 12px;
+            color: white;
+        }
+
+        .rewards-section h3 {
+            color: white;
+            margin-bottom: var(--nyse-spacing-lg);
+            text-align: center;
+        }
+
+        .rewards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--nyse-spacing-lg);
+        }
+
+        .reward-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: var(--nyse-spacing-xl);
+            border-radius: 12px;
+            text-align: center;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
+        }
+
+        .reward-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: translateY(-5px);
+        }
+
+        .reward-badge {
+            display: inline-block;
+            background: var(--nyse-color-accent);
+            color: white;
+            padding: var(--nyse-spacing-xs) var(--nyse-spacing-md);
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .reward-icon {
+            font-size: 3rem;
+            margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .reward-card h4 {
+            color: white;
+            margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .reward-card p {
+            color: rgba(255, 255, 255, 0.9);
+            font-size: 0.95rem;
+            margin: 0;
+        }
+
+        .content-hub {
+            padding: var(--nyse-spacing-xxl) 5%;
+            background: var(--nyse-color-background);
+        }
+
+        .featured-article {
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: var(--nyse-spacing-xl);
+            margin-bottom: var(--nyse-spacing-xxl);
+            background: var(--nyse-color-background);
+            border: 2px solid var(--nyse-color-primary);
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0, 61, 122, 0.15);
+        }
+
+        .article-image {
+            position: relative;
+            background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 300px;
+        }
+
+        .article-badge {
+            position: absolute;
+            top: var(--nyse-spacing-md);
+            left: var(--nyse-spacing-md);
+            background: var(--nyse-color-accent);
+            color: white;
+            padding: var(--nyse-spacing-xs) var(--nyse-spacing-md);
+            border-radius: 4px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .article-placeholder {
+            font-size: 6rem;
+            opacity: 0.3;
+        }
+
+        .article-content {
+            padding: var(--nyse-spacing-xl);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .article-meta {
+            display: flex;
+            gap: var(--nyse-spacing-md);
+            margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .article-category {
+            background: var(--nyse-color-accent);
+            color: white;
+            padding: var(--nyse-spacing-xs) var(--nyse-spacing-sm);
+            border-radius: 4px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .article-date {
+            color: var(--nyse-color-text-light);
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+        }
+
+        .article-content h3 {
+            font-size: 1.8rem;
+            color: var(--nyse-color-dark);
+            margin-bottom: var(--nyse-spacing-md);
+            line-height: 1.3;
+        }
+
+        .article-excerpt {
+            color: var(--nyse-color-text);
+            line-height: 1.7;
+            margin-bottom: var(--nyse-spacing-lg);
+        }
+
+        .article-link {
+            color: var(--nyse-color-primary);
+            font-weight: 700;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            transition: all 0.3s ease;
+        }
+
+        .article-link:hover {
+            color: var(--nyse-color-accent);
+            transform: translateX(5px);
+        }
+
+        .articles-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+            gap: var(--nyse-spacing-lg);
+            margin-bottom: var(--nyse-spacing-xxl);
+        }
+
+        .article-card {
+            background: var(--nyse-color-background);
+            border: 1px solid var(--nyse-color-border);
+            border-radius: 12px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .article-card:hover {
+            border-color: var(--nyse-color-primary);
+            box-shadow: 0 8px 24px rgba(0, 61, 122, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .article-card-image {
+            height: 200px;
+            background: var(--nyse-color-background-alt);
+            border-bottom: 1px solid var(--nyse-color-border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 4rem;
+            color: var(--nyse-color-primary);
+            opacity: 0.5;
+        }
+
+        .article-card-content {
+            padding: var(--nyse-spacing-lg);
+        }
+
+        .article-card-content h4 {
+            font-size: 1.2rem;
+            color: var(--nyse-color-dark);
+            margin-bottom: var(--nyse-spacing-sm);
+        }
+
+        .article-card-content p {
+            font-size: 0.9rem;
+            color: var(--nyse-color-text-light);
+            margin-bottom: var(--nyse-spacing-md);
+        }
+
+        .copyright {
+            margin: var(--nyse-spacing-md) 0;
+            opacity: 0.8;
+        }
+
+        @media (max-width: 900px) {
+            .featured-article {
+                grid-template-columns: 1fr;
+            }
+
+            .article-image {
+                min-height: 200px;
+            }
+        }
+    `

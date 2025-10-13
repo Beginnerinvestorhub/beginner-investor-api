@@ -1,6 +1,6 @@
-import { PrismaClient } from '@prisma/client';
+import { PrismaClient } from "@prisma/client";
 // Assuming BaseService is a default export
-import BaseService from '../base.service';
+import BaseService from "../base.service";
 
 // --- INTERFACES ---
 
@@ -13,7 +13,7 @@ export interface ReferralData {
 export interface CommissionSummary {
   amount: number;
   currency: string;
-  status: 'pending' | 'approved' | 'paid' | 'rejected';
+  status: "pending" | "approved" | "paid" | "rejected";
   referralId: string;
 }
 
@@ -44,7 +44,7 @@ export class AffiliateService extends BaseService {
         referrer: { connect: { id: data.referrerId } },
         referredEmail: data.referredEmail,
         campaign: data.campaign,
-        status: 'PENDING',
+        status: "PENDING",
       },
     });
   }
@@ -55,7 +55,7 @@ export class AffiliateService extends BaseService {
   async recordConversion(referralId: string) {
     return this.prisma.referral.update({
       where: { id: referralId },
-      data: { status: 'CONVERTED' },
+      data: { status: "CONVERTED" },
     });
   }
 
@@ -63,7 +63,7 @@ export class AffiliateService extends BaseService {
    * Generates a unique affiliate link for a user and campaign.
    */
   async generateAffiliateLink(userId: string, campaign?: string) {
-    const baseUrl = process.env.APP_URL || 'https://beginnerinvestorhub.com';
+    const baseUrl = process.env.APP_URL || "https://beginnerinvestorhub.com";
     const params = new URLSearchParams({
       ref: userId,
       ...(campaign ? { campaign } : {}),
@@ -78,7 +78,7 @@ export class AffiliateService extends BaseService {
   async getReferrals(userId: string) {
     return this.prisma.referral.findMany({
       where: { referrerId: userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
     });
   }
 
@@ -89,7 +89,7 @@ export class AffiliateService extends BaseService {
     const referrals = await this.prisma.referral.findMany({
       where: {
         referrerId: userId,
-        status: 'CONVERTED',
+        status: "CONVERTED",
         commissionPaid: false,
       },
       include: {
@@ -103,8 +103,8 @@ export class AffiliateService extends BaseService {
       .filter((r) => r.subscription && r.subscription.amount > 0)
       .map((referral) => ({
         amount: referral.subscription!.amount * commissionRate,
-        currency: 'USD',
-        status: 'pending',
+        currency: "USD",
+        status: "pending",
         referralId: referral.id,
       }));
 
@@ -117,7 +117,7 @@ export class AffiliateService extends BaseService {
   async trackAffiliateVisit(
     referrerId: string,
     ipAddress: string,
-    userAgent: string
+    userAgent: string,
   ) {
     return this.prisma.affiliateVisit.create({
       data: {

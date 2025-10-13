@@ -1,23 +1,19 @@
-import cors from 'cors';
-import { NextFunction, Request, RequestHandler, Response } from 'express';
-import rateLimit from 'express-rate-limit';
-import helmet from 'helmet';
-import { env } from '../config/env.schema';
+import cors from "cors";
+import { NextFunction, Request, RequestHandler, Response } from "express";
+import rateLimit from "express-rate-limit";
+import helmet from "helmet";
+import { env } from "../config/env.schema";
 
 // Security headers middleware
 const securityHeaders: RequestHandler = (req, res, next) => {
   if (!env.SECURITY_HEADERS_ENABLED) return next();
-  
+
   // Set security headers using helmet
   helmet({
     contentSecurityPolicy: {
       directives: {
         defaultSrc: ["'self'"],
-        scriptSrc: [
-          "'self'",
-          "'unsafe-inline'",
-          "'unsafe-eval'"
-        ],
+        scriptSrc: ["'self'", "'unsafe-inline'", "'unsafe-eval'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", "data:", "https: http:"],
         connectSrc: ["'self'"],
@@ -35,36 +31,40 @@ const securityHeaders: RequestHandler = (req, res, next) => {
     },
     xssFilter: true,
     noSniff: true,
-    referrerPolicy: { policy: 'same-origin' },
+    referrerPolicy: { policy: "same-origin" },
     frameguard: {
-      action: 'deny'
-    }
+      action: "deny",
+    },
   })(req, res, next);
 };
 
 // CORS configuration
 const corsOptions: cors.CorsOptions = {
   origin: (origin, callback) => {
-    if (!origin || env.CORS_ORIGIN === '*' || env.CORS_ORIGIN.split(',').includes(origin)) {
+    if (
+      !origin ||
+      env.CORS_ORIGIN === "*" ||
+      env.CORS_ORIGIN.split(",").includes(origin)
+    ) {
       callback(null, true);
     } else {
-      callback(new Error('Not allowed by CORS'));
+      callback(new Error("Not allowed by CORS"));
     }
   },
   credentials: true,
-  methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
+  methods: ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"],
   allowedHeaders: [
-    'Content-Type',
-    'Authorization',
-    'X-Requested-With',
-    'Accept',
-    'Origin',
-    'X-CSRF-Token'
+    "Content-Type",
+    "Authorization",
+    "X-Requested-With",
+    "Accept",
+    "Origin",
+    "X-CSRF-Token",
   ],
-  exposedHeaders: ['Authorization', 'X-CSRF-Token'],
+  exposedHeaders: ["Authorization", "X-CSRF-Token"],
   maxAge: 600, // 10 minutes
   preflightContinue: false,
-  optionsSuccessStatus: 204
+  optionsSuccessStatus: 204,
 };
 
 // Rate limiting
@@ -74,23 +74,23 @@ const apiLimiter = rateLimit({
   standardHeaders: true,
   legacyHeaders: false,
   message: {
-    status: 'error',
-    message: 'Too many requests, please try again later.'
+    status: "error",
+    message: "Too many requests, please try again later.",
   },
   skip: (req) => {
     // Skip rate limiting for health checks
-    return req.path === '/health';
-  }
+    return req.path === "/health";
+  },
 });
 
 // Security middleware to prevent common vulnerabilities
 export const securityMiddleware = [
   // Set secure headers
   securityHeaders,
-  
+
   // Enable CORS
   cors(corsOptions),
-  
+
   // Apply rate limiting to all API routes
   (req: Request, res: Response, next: NextFunction) => {
     if (req.path.startsWith(env.API_PREFIX)) {
@@ -98,28 +98,28 @@ export const securityMiddleware = [
     }
     next();
   },
-  
+
   // Prevent HTTP Parameter Pollution
   (req: Request, res: Response, next: NextFunction) => {
     // Clean request query, body, and params
     const clean = (obj: any) => {
       if (!obj) return obj;
-      Object.keys(obj).forEach(key => {
+      Object.keys(obj).forEach((key) => {
         if (Array.isArray(obj[key]) && obj[key].length > 0) {
           obj[key] = obj[key][0]; // Take first value
-        } else if (obj[key] !== null && typeof obj[key] === 'object') {
+        } else if (obj[key] !== null && typeof obj[key] === "object") {
           clean(obj[key]); // Recursively clean nested objects
         }
       });
       return obj;
     };
-    
+
     req.query = clean({ ...req.query });
     req.body = clean({ ...req.body });
     req.params = clean({ ...req.params });
-    
+
     next();
-  }
+  },
 ];
 
 // Error handler for security-related issues
@@ -127,34 +127,39 @@ export const securityErrorHandler = (
   err: Error,
   req: Request,
   res: Response,
-  next: NextFunction
+  next: NextFunction,
 ) => {
   // Don't leak stack traces in production
   const errorResponse = {
-    status: 'error',
-    message: 'An error occurred',
-    ...(env.NODE_ENV === 'development' && { error: err.message, stack: err.stack })
+    status: "error",
+    message: "An error occurred",
+    ...(env.NODE_ENV === "development" && {
+      error: err.message,
+      stack: err.stack,
+    }),
   };
 
   // Handle specific security-related errors
-  if (err.name === 'UnauthorizedError') {
-    return res.status(401).json({ ...errorResponse, message: 'Invalid or missing token' });
+  if (err.name === "UnauthorizedError") {
+    return res
+      .status(401)
+      .json({ ...errorResponse, message: "Invalid or missing token" });
   }
-  
-  if (err.name === 'RateLimitExceeded') {
+
+  if (err.name === "RateLimitExceeded") {
     return res.status(429).json({
       ...errorResponse,
-      message: 'Too many requests, please try again later.'
+      message: "Too many requests, please try again later.",
     });
   }
-  
-  if (err.name === 'CorsError') {
+
+  if (err.name === "CorsError") {
     return res.status(403).json({
       ...errorResponse,
-      message: 'Not allowed by CORS'
+      message: "Not allowed by CORS",
     });
   }
-  
+
   // Default to 500 for unhandled errors
   res.status(500).json(errorResponse);
 };

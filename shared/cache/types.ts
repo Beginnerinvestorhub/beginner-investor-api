@@ -54,10 +54,5 @@ export interface CacheHealth {
 }
 
 export default {
-  CacheMetrics,
-  CacheEntry,
-  CacheInvalidationEvent,
-  WarmCacheConfig,
-  CacheStrategy,
-  CacheHealth,
+  // Types are not exported as values, only as type definitions
 };

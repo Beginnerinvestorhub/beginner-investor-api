@@ -3,14 +3,14 @@ import { useApiPost } from '../hooks/useApi';
 
 export default function NewsletterSignup() {
   const [email, setEmail] = useState('');
-  
+
   // Use the new useApiPost hook for cleaner API state management
   const { loading, error, post, reset } = useApiPost('/api/newsletter', {
     onSuccess: () => {
       setEmail(''); // Clear email on success
       // Reset the API state after 3 seconds to clear success message
       setTimeout(() => reset(), 3000);
-    }
+    },
   });
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -25,7 +25,10 @@ export default function NewsletterSignup() {
   const isSuccess = !loading && !error && email === ''; // Success state when email is cleared
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col md:flex-row gap-2 mt-8 max-w-lg mx-auto">
+    <form
+      onSubmit={handleSubmit}
+      className="flex flex-col md:flex-row gap-2 mt-8 max-w-lg mx-auto"
+    >
       <input
         type="email"
         className="flex-1 border border-indigo-300 rounded px-4 py-2"
@@ -42,7 +45,9 @@ export default function NewsletterSignup() {
       >
         {loading ? 'Subscribing...' : 'Subscribe'}
       </button>
-      {isSuccess && <span className="text-green-600 ml-2">Thank you for subscribing!</span>}
+      {isSuccess && (
+        <span className="text-green-600 ml-2">Thank you for subscribing!</span>
+      )}
       {error && <span className="text-red-500 ml-2">{error}</span>}
     </form>
   );

@@ -16,7 +16,8 @@ interface StateProviderContextValue {
   checkHealth: () => void;
 }
 
-const StateProviderContext = React.createContext<StateProviderContextValue | null>(null);
+const StateProviderContext =
+  React.createContext<StateProviderContextValue | null>(null);
 
 export const useStateProvider = () => {
   const context = React.useContext(StateProviderContext);
@@ -35,7 +36,7 @@ export const StateProvider: React.FC<StateProviderProps> = ({ children }) => {
   useEffect(() => {
     try {
       cleanupRef.current = initializeStores();
-      
+
       if (process.env.NODE_ENV === 'development') {
         console.log('🏪 Global state management initialized');
         checkStoreHealth();
@@ -66,16 +67,12 @@ export const StateProvider: React.FC<StateProviderProps> = ({ children }) => {
   // Handle authentication errors
   useEffect(() => {
     if (authError) {
-      showErrorNotification(
-        'Authentication Error',
-        authError,
-        [
-          {
-            label: 'Retry',
-            action: () => window.location.reload(),
-          },
-        ]
-      );
+      showErrorNotification('Authentication Error', authError, [
+        {
+          label: 'Retry',
+          action: () => window.location.reload(),
+        },
+      ]);
     }
   }, [authError, showNotification]);
 

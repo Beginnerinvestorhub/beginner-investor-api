@@ -1,5 +1,5 @@
-import { prisma } from '../../config/prisma';
-import BaseService from '../base.service';
+import { prisma } from "../../config/prisma";
+import BaseService from "../base.service";
 
 export interface StreakData {
   currentStreak: number;
@@ -33,7 +33,7 @@ export class StreakService extends BaseService {
     }
 
     const daysSinceLastActivity = Math.floor(
-      (today.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24)
+      (today.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24),
     );
 
     let currentStreak = streak.currentStreak;
@@ -66,7 +66,7 @@ export class StreakService extends BaseService {
   }
 
   public async getUserStreak(userId: string): Promise<StreakData | null> {
-    const cacheKey = this.generateCacheKey('user:streak', userId);
+    const cacheKey = this.generateCacheKey("user:streak", userId);
 
     return this.getCachedOrFetch<StreakData | null>(cacheKey, async () => {
       const streak = await prisma.streak.findUnique({ where: { userId } });
@@ -75,7 +75,7 @@ export class StreakService extends BaseService {
   }
 
   public async getStreakLeaderboard(limit = 10) {
-    const cacheKey = this.generateCacheKey('leaderboard:streaks', limit);
+    const cacheKey = this.generateCacheKey("leaderboard:streaks", limit);
 
     return this.getCachedOrFetch(cacheKey, async () => {
       return prisma.$queryRaw`
@@ -110,10 +110,13 @@ export class StreakService extends BaseService {
     const lastActivity = this.startOfDay(streak.lastActivityDate);
 
     const daysSinceLastActivity = Math.floor(
-      (today.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24)
+      (today.getTime() - lastActivity.getTime()) / (1000 * 60 * 60 * 24),
     );
 
-    const daysUntilReset = Math.max(0, this.STREAK_RESET_DAYS - daysSinceLastActivity);
+    const daysUntilReset = Math.max(
+      0,
+      this.STREAK_RESET_DAYS - daysSinceLastActivity,
+    );
 
     return {
       currentStreak: streak.currentStreak,
@@ -144,8 +147,8 @@ export class StreakService extends BaseService {
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
-      this.generateCacheKey('user:streak', userId),
-      'leaderboard:streaks:*',
+      this.generateCacheKey("user:streak", userId),
+      "leaderboard:streaks:*",
     ];
     await this.invalidateCache(cacheKeys);
   }

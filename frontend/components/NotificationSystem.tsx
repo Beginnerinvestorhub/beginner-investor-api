@@ -5,26 +5,30 @@
 
 import React from 'react';
 import { Transition } from '@headlessui/react';
-import { 
-  CheckCircleIcon, 
-  ExclamationTriangleIcon, 
-  InformationCircleIcon, 
+import {
+  CheckCircleIcon,
+  ExclamationTriangleIcon,
+  InformationCircleIcon,
   XCircleIcon,
-  XMarkIcon 
+  XMarkIcon,
 } from '@heroicons/react/24/outline';
 import { useNotifications, useUI } from '../store';
 import { Notification } from '../store/types';
 
-const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({ type }) => {
-  const iconClass = "h-5 w-5"; // Reduced from h-6 w-6
-  
+const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({
+  type,
+}) => {
+  const iconClass = 'h-5 w-5'; // Reduced from h-6 w-6
+
   switch (type) {
     case 'success':
       return <CheckCircleIcon className={`${iconClass} text-green-400`} />;
     case 'error':
       return <XCircleIcon className={`${iconClass} text-red-400`} />;
     case 'warning':
-      return <ExclamationTriangleIcon className={`${iconClass} text-yellow-400`} />;
+      return (
+        <ExclamationTriangleIcon className={`${iconClass} text-yellow-400`} />
+      );
     case 'info':
       return <InformationCircleIcon className={`${iconClass} text-blue-400`} />;
     default:
@@ -32,7 +36,9 @@ const NotificationIcon: React.FC<{ type: Notification['type'] }> = ({ type }) =>
   }
 };
 
-const NotificationItem: React.FC<{ notification: Notification }> = ({ notification }) => {
+const NotificationItem: React.FC<{ notification: Notification }> = ({
+  notification,
+}) => {
   const { dismissNotification } = useUI();
 
   const getNotificationStyles = (type: Notification['type']) => {
@@ -81,16 +87,22 @@ const NotificationItem: React.FC<{ notification: Notification }> = ({ notificati
   };
 
   return (
-    <div className={`max-w-sm w-full border rounded-lg shadow-md p-3 ${getNotificationStyles(notification.type)}`}>
+    <div
+      className={`max-w-sm w-full border rounded-lg shadow-md p-3 ${getNotificationStyles(notification.type)}`}
+    >
       <div className="flex items-start">
         <div className="flex-shrink-0 pt-0.5">
           <NotificationIcon type={notification.type} />
         </div>
         <div className="ml-2.5 w-0 flex-1">
-          <p className={`text-sm font-semibold leading-5 ${getTitleStyles(notification.type)}`}>
+          <p
+            className={`text-sm font-semibold leading-5 ${getTitleStyles(notification.type)}`}
+          >
             {notification.title}
           </p>
-          <p className={`mt-0.5 text-sm leading-5 ${getMessageStyles(notification.type)}`}>
+          <p
+            className={`mt-0.5 text-sm leading-5 ${getMessageStyles(notification.type)}`}
+          >
             {notification.message}
           </p>
           {notification.actions && notification.actions.length > 0 && (
@@ -133,7 +145,7 @@ export const NotificationSystem: React.FC = () => {
       className="fixed inset-0 flex items-end px-4 py-6 pointer-events-none sm:p-6 sm:items-start z-50"
     >
       <div className="w-full flex flex-col items-center space-y-4 sm:items-end">
-        {notifications.map((notification) => (
+        {notifications.map(notification => (
           <Transition
             key={notification.id}
             show={true}

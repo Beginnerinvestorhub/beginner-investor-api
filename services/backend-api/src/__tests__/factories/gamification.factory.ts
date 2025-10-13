@@ -1,13 +1,13 @@
 // /test/factories/gamificationFactories.ts
-import { faker } from 'faker-js/faker';
-import { 
-  Badge, 
-  BadgeType, 
-  PointTransaction, 
-  PointTransactionType, 
-  Streak, 
-  UserProgress 
-} from '@prisma/client';
+import { faker } from "faker-js/faker";
+import {
+  Badge,
+  BadgeType,
+  PointTransaction,
+  PointTransactionType,
+  Streak,
+  UserProgress,
+} from "@prisma/client";
 
 // Base factory for shared fields
 const baseEntity = () => ({
@@ -27,7 +27,9 @@ export const createBadge = (overrides: Partial<Badge> = {}): Badge => ({
 });
 
 // PointTransaction factory
-export const createPointTransaction = (overrides: Partial<PointTransaction> = {}): PointTransaction => ({
+export const createPointTransaction = (
+  overrides: Partial<PointTransaction> = {},
+): PointTransaction => ({
   ...baseEntity(),
   userId: faker.string.uuid(),
   amount: faker.number.int({ min: 10, max: 100 }),
@@ -49,7 +51,9 @@ export const createStreak = (overrides: Partial<Streak> = {}): Streak => ({
 });
 
 // UserProgress factory
-export const createUserProgress = (overrides: Partial<UserProgress> = {}): UserProgress => ({
+export const createUserProgress = (
+  overrides: Partial<UserProgress> = {},
+): UserProgress => ({
   ...baseEntity(),
   userId: faker.string.uuid(),
   level: faker.number.int({ min: 1, max: 100 }),
@@ -95,7 +99,7 @@ export const mockPrismaGamificationResponses = {
 
 // Reset helper
 export const resetMockPrismaGamification = () => {
-  Object.values(mockPrismaGamificationResponses).forEach(model =>
-    Object.values(model).forEach(fn => fn.mockReset())
+  Object.values(mockPrismaGamificationResponses).forEach((model) =>
+    Object.values(model).forEach((fn) => fn.mockReset()),
   );
 };

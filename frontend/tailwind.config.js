@@ -1,9 +1,9 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   content: [
-    "./pages/**/*.{js,ts,jsx,tsx}",
-    "./components/**/*.{js,ts,jsx,tsx}",
-    "./app/**/*.{js,ts,jsx,tsx}"
+    './pages/**/*.{js,ts,jsx,tsx}',
+    './components/**/*.{js,ts,jsx,tsx}',
+    './app/**/*.{js,ts,jsx,tsx}',
   ],
   theme: {
     extend: {
@@ -30,7 +30,7 @@ module.exports = {
         'nyse-lg': 'var(--nyse-spacing-lg)',
         'nyse-xl': 'var(--nyse-spacing-xl)',
         'nyse-xxl': 'var(--nyse-spacing-xxl)',
-      }
+      },
     },
   },
   plugins: [require('@tailwindcss/forms')],

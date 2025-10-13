@@ -42,7 +42,9 @@ export default function OnboardingPage() {
         <div className="nyse-loading-container">
           <div className="nyse-spinner"></div>
           <p className="nyse-loading-text">
-            {isRedirecting ? 'Redirecting...' : 'Preparing your onboarding experience...'}
+            {isRedirecting
+              ? 'Redirecting...'
+              : 'Preparing your onboarding experience...'}
           </p>
         </div>
 
@@ -53,7 +55,11 @@ export default function OnboardingPage() {
             align-items: center;
             justify-content: center;
             min-height: 100vh;
-            background: linear-gradient(135deg, var(--nyse-color-background-alt) 0%, #e8eef5 100%);
+            background: linear-gradient(
+              135deg,
+              var(--nyse-color-background-alt) 0%,
+              #e8eef5 100%
+            );
           }
 
           .nyse-spinner {
@@ -67,8 +73,12 @@ export default function OnboardingPage() {
           }
 
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
 
           .nyse-loading-text {
@@ -90,8 +100,13 @@ export default function OnboardingPage() {
   return (
     <>
       <Head>
-        <title>Welcome - Set Up Your Learning Path | Beginner Investor Hub</title>
-        <meta name="description" content="Personalize your investment learning journey with our AI-powered onboarding process." />
+        <title>
+          Welcome - Set Up Your Learning Path | Beginner Investor Hub
+        </title>
+        <meta
+          name="description"
+          content="Personalize your investment learning journey with our AI-powered onboarding process."
+        />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
@@ -116,14 +131,21 @@ export default function OnboardingPage() {
 
         {/* Footer Note */}
         <footer className="onboarding-footer">
-          <p>You can always update these preferences later in your account settings</p>
+          <p>
+            You can always update these preferences later in your account
+            settings
+          </p>
         </footer>
       </div>
 
       <style jsx>{`
         .onboarding-page {
           min-height: 100vh;
-          background: linear-gradient(180deg, var(--nyse-color-background-alt) 0%, #f0f4f8 100%);
+          background: linear-gradient(
+            180deg,
+            var(--nyse-color-background-alt) 0%,
+            #f0f4f8 100%
+          );
           display: flex;
           flex-direction: column;
         }

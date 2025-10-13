@@ -1,2 +1,2 @@
 // Paywall components will be exported here
-export {};
+export { default as StripeCheckoutFlow } from './StripeCheckoutFlow';

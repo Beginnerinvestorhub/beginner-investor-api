@@ -1,6 +1,6 @@
-import { createClient, RedisClientType, RedisClientOptions } from 'redis';
-import logger from '../../utils/logger';
-import { env } from '../../config/env.schema';
+import { createClient, RedisClientType, RedisClientOptions } from "redis";
+import logger from "../../utils/logger";
+import { env } from "../../config/env.schema";
 
 export class RedisService {
   private static instance: RedisService;
@@ -16,8 +16,8 @@ export class RedisService {
       socket: {
         reconnectStrategy: (retries) => {
           if (retries > this.MAX_RECONNECT_ATTEMPTS) {
-            logger.error('Max reconnection attempts reached');
-            return new Error('Max reconnection attempts reached');
+            logger.error("Max reconnection attempts reached");
+            return new Error("Max reconnection attempts reached");
           }
           return Math.min(retries * 100, this.RECONNECT_DELAY_MS);
         },
@@ -36,64 +36,70 @@ export class RedisService {
   }
 
   private setupEventListeners(): void {
-    this.client.on('connect', () => {
+    this.client.on("connect", () => {
       this.isConnected = true;
       this.reconnectAttempts = 0;
-      logger.info('Redis client connected');
+      logger.info("Redis client connected");
     });
 
-    this.client.on('error', (err) => {
-      logger.error('Redis client error:', err);
+    this.client.on("error", (err) => {
+      logger.error("Redis client error:", err);
       this.isConnected = false;
     });
 
-    this.client.on('reconnecting', () => {
+    this.client.on("reconnecting", () => {
       this.reconnectAttempts++;
-      logger.info(`Reconnecting to Redis (attempt ${this.reconnectAttempts})...`);
+      logger.info(
+        `Reconnecting to Redis (attempt ${this.reconnectAttempts})...`,
+      );
     });
 
-    this.client.on('end', () => {
+    this.client.on("end", () => {
       this.isConnected = false;
-      logger.warn('Redis client connection closed');
+      logger.warn("Redis client connection closed");
     });
   }
 
   public async connect(): Promise<void> {
     if (this.isConnected) return;
-    
+
     try {
       await this.client.connect();
       this.isConnected = true;
     } catch (error) {
-      logger.error('Failed to connect to Redis:', error);
+      logger.error("Failed to connect to Redis:", error);
       throw error;
     }
   }
 
   public async disconnect(): Promise<void> {
     if (!this.isConnected) return;
-    
+
     try {
       await this.client.quit();
       this.isConnected = false;
     } catch (error) {
-      logger.error('Error disconnecting from Redis:', error);
+      logger.error("Error disconnecting from Redis:", error);
       throw error;
     }
   }
 
   // Basic cache operations
-  public async set<T>(key: string, value: T, ttlSeconds?: number): Promise<boolean> {
+  public async set<T>(
+    key: string,
+    value: T,
+    ttlSeconds?: number,
+  ): Promise<boolean> {
     try {
       await this.ensureConnected();
       const serialized = JSON.stringify(value);
-      
+
       if (ttlSeconds) {
         await this.client.set(key, serialized, { EX: ttlSeconds });
       } else {
         await this.client.set(key, serialized);
       }
-      
+
       return true;
     } catch (error) {
       logger.error(`Error setting key ${key}:`, error);
@@ -127,7 +133,7 @@ export class RedisService {
   public async withCache<T>(
     key: string,
     fallback: () => Promise<T>,
-    ttlSeconds = 300
+    ttlSeconds = 300,
   ): Promise<T> {
     try {
       // Try to get from cache
@@ -138,10 +144,10 @@ export class RedisService {
 
       // If not in cache, execute fallback
       const result = await fallback();
-      
+
       // Cache the result
       await this.set(key, result, ttlSeconds);
-      
+
       return result;
     } catch (error) {
       logger.error(`Error in withCache for key ${key}:`, error);
@@ -156,7 +162,7 @@ export class RedisService {
       await this.ensureConnected();
       const keys = await this.client.keys(pattern);
       if (keys.length === 0) return 0;
-      
+
       const deleted = await this.client.del(keys);
       logger.info(`Invalidated ${deleted} keys matching pattern: ${pattern}`);
       return deleted;
@@ -171,11 +177,8 @@ export class RedisService {
     try {
       await this.ensureConnected();
       const multi = this.client.multi();
-      const result = await multi
-        .incr(key)
-        .expire(key, ttlSeconds, 'NX')
-        .exec();
-      
+      const result = await multi.incr(key).expire(key, ttlSeconds, "NX").exec();
+
       return result ? (result[0] as number) : 0;
     } catch (error) {
       logger.error(`Error in incrWithTTL for key ${key}:`, error);
@@ -186,11 +189,11 @@ export class RedisService {
   // Pipeline multiple operations
   public async pipeline(
     operations: Array<{
-      type: 'set' | 'get' | 'del';
+      type: "set" | "get" | "del";
       key: string;
       value?: any;
       ttl?: number;
-    }>
+    }>,
   ): Promise<Array<any>> {
     try {
       await this.ensureConnected();
@@ -198,17 +201,17 @@ export class RedisService {
 
       for (const op of operations) {
         switch (op.type) {
-          case 'set':
+          case "set":
             if (op.ttl) {
               pipeline.set(op.key, JSON.stringify(op.value), { EX: op.ttl });
             } else {
               pipeline.set(op.key, JSON.stringify(op.value));
             }
             break;
-          case 'get':
+          case "get":
             pipeline.get(op.key);
             break;
-          case 'del':
+          case "del":
             pipeline.del(op.key);
             break;
         }
@@ -217,7 +220,7 @@ export class RedisService {
       const results = await pipeline.exec();
       return results || [];
     } catch (error) {
-      logger.error('Error in pipeline operation:', error);
+      logger.error("Error in pipeline operation:", error);
       throw error;
     }
   }
@@ -229,7 +232,7 @@ export class RedisService {
       await this.client.ping();
       return true;
     } catch (error) {
-      logger.error('Redis health check failed:', error);
+      logger.error("Redis health check failed:", error);
       return false;
     }
   }
@@ -261,7 +264,7 @@ export class RedisService {
       await this.ensureConnected();
       return await this.client.dbSize();
     } catch (error) {
-      logger.error('Error getting database size:', error);
+      logger.error("Error getting database size:", error);
       return 0;
     }
   }
@@ -271,8 +274,8 @@ export class RedisService {
       await this.ensureConnected();
       return await this.client.info(section);
     } catch (error) {
-      logger.error('Error getting Redis info:', error);
-      return '';
+      logger.error("Error getting Redis info:", error);
+      return "";
     }
   }
 
@@ -282,7 +285,7 @@ export class RedisService {
       await this.client.flushDb();
       return true;
     } catch (error) {
-      logger.error('Error flushing database:', error);
+      logger.error("Error flushing database:", error);
       return false;
     }
   }
@@ -302,8 +305,8 @@ export const redisService = RedisService.getInstance();
 (async () => {
   try {
     await redisService.connect();
-    logger.info('Redis service initialized');
+    logger.info("Redis service initialized");
   } catch (error) {
-    logger.error('Failed to initialize Redis service:', error);
+    logger.error("Failed to initialize Redis service:", error);
   }
 })();

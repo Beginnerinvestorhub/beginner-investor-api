@@ -30,7 +30,10 @@ export const NAV_LINKS: NavItem[] = [
     href: '/tools',
     label: 'Tools',
     subItems: [
-      { href: '/fractional-share-calculator', label: 'Fractional Share Calculator' },
+      {
+        href: '/fractional-share-calculator',
+        label: 'Fractional Share Calculator',
+      },
       { href: '/risk-assessment', label: 'Risk Assessment' },
       { href: '/esg-screener', label: 'ESG Screener' },
     ],

@@ -8,7 +8,7 @@ try {
     enabled: process.env.ANALYZE === 'true',
   });
 } catch (error) {
-  withBundleAnalyzer = (config) => config;
+  withBundleAnalyzer = config => config;
 }
 
 const nextConfig = withBundleAnalyzer(
@@ -29,7 +29,8 @@ const nextConfig = withBundleAnalyzer(
 
     // Environment variables
     env: {
-      NEXT_PUBLIC_GOOGLE_ANALYTICS_ID: process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,
+      NEXT_PUBLIC_GOOGLE_ANALYTICS_ID:
+        process.env.NEXT_PUBLIC_GOOGLE_ANALYTICS_ID,
       NEXT_PUBLIC_FIREBASE_API_KEY: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
       NEXT_PUBLIC_API_BASE_URL: process.env.NEXT_PUBLIC_API_BASE_URL,
       NUDGE_ENGINE_API_KEY: process.env.NUDGE_ENGINE_API_KEY,
@@ -95,19 +96,28 @@ const nextConfig = withBundleAnalyzer(
           headers: [
             { key: 'X-Frame-Options', value: 'DENY' },
             { key: 'X-Content-Type-Options', value: 'nosniff' },
-            { key: 'Referrer-Policy', value: 'strict-origin-when-cross-origin' },
+            {
+              key: 'Referrer-Policy',
+              value: 'strict-origin-when-cross-origin',
+            },
           ],
         },
         {
           source: '/static/(.*)',
           headers: [
-            { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
           ],
         },
         {
           source: '/_next/static/(.*)',
           headers: [
-            { key: 'Cache-Control', value: 'public, max-age=31536000, immutable' },
+            {
+              key: 'Cache-Control',
+              value: 'public, max-age=31536000, immutable',
+            },
           ],
         },
       ];

@@ -13,7 +13,10 @@ export interface FeatureCardProps {
   linkText?: string;
 }
 
-const iconColorClasses: Record<NonNullable<FeatureCardProps['color']>, string> = {
+const iconColorClasses: Record<
+  NonNullable<FeatureCardProps['color']>,
+  string
+> = {
   indigo: 'text-indigo-500',
   green: 'text-green-500',
   blue: 'text-blue-500',
@@ -37,7 +40,9 @@ export default function FeatureCard({
     : null;
 
   const cardContent = (
-    <div className={`group relative bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 ${className}`}>
+    <div
+      className={`group relative bg-white rounded-xl shadow-sm border border-gray-200 p-6 hover:shadow-lg hover:border-gray-300 transition-all duration-200 ${className}`}
+    >
       <div className="flex items-start space-x-4">
         <div className="flex-shrink-0">{sizedIcon}</div>
         <div className="flex-1 min-w-0">
@@ -51,8 +56,18 @@ export default function FeatureCard({
             <div className="mt-4">
               <span className="inline-flex items-center text-sm font-medium text-indigo-600 group-hover:text-indigo-700">
                 {linkText}
-                <svg className="ml-1 h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                <svg
+                  className="ml-1 h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M9 5l7 7-7 7"
+                  />
                 </svg>
               </span>
             </div>

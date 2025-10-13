@@ -13,10 +13,10 @@ from .base import (
     IDModel,
     TimestampMixin,
     ID_TYPE,
-    NonEmptyStr,
+    NonEmptyStr,""
 )
 
-__all__ = [
+""__all__ = [
     'BaseSchema',
     'BaseResponse',
     'PaginatedResponse',
@@ -30,5 +30,5 @@ __all__ = [
     'IDModel',
     'TimestampMixin',
     'ID_TYPE',
-    'NonEmptyStr',
+    'NonEmptyStr',""'
 ]

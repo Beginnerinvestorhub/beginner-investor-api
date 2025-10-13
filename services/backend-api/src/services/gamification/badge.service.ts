@@ -1,6 +1,6 @@
-import { BadgeType } from '@prisma/client';
-import { prisma } from '../../config/prisma';
-import BaseService from '../base.service';
+import { BadgeType } from "@prisma/client";
+import { prisma } from "../../config/prisma";
+import BaseService from "../base.service";
 
 export interface AwardBadgeInput {
   userId: string;
@@ -37,9 +37,15 @@ export class BadgeService extends BaseService {
   }
 
   public async awardBadge(input: AwardBadgeInput) {
-    const { userId, type, description, metadata = {}, allowDuplicates = false } = input;
+    const {
+      userId,
+      type,
+      description,
+      metadata = {},
+      allowDuplicates = false,
+    } = input;
 
-    if (!allowDuplicates && await this.hasBadge(userId, type)) {
+    if (!allowDuplicates && (await this.hasBadge(userId, type))) {
       return null;
     }
 
@@ -58,25 +64,31 @@ export class BadgeService extends BaseService {
   }
 
   public async getUserBadges(userId: string, type?: BadgeType) {
-    const cacheKey = this.generateCacheKey('user:badges', userId, type || 'all');
+    const cacheKey = this.generateCacheKey(
+      "user:badges",
+      userId,
+      type || "all",
+    );
     return this.getCachedOrFetch(cacheKey, () =>
       prisma.badge.findMany({
         where: { userId, ...(type ? { type } : {}) },
-        orderBy: { awardedAt: 'desc' },
-      })
+        orderBy: { awardedAt: "desc" },
+      }),
     );
   }
 
   public async hasBadge(userId: string, type: BadgeType): Promise<boolean> {
-    const cacheKey = this.generateCacheKey('user:hasBadge', userId, type);
+    const cacheKey = this.generateCacheKey("user:hasBadge", userId, type);
     return this.getCachedOrFetch(cacheKey, async () => {
       const count = await prisma.badge.count({ where: { userId, type } });
       return count > 0;
     });
   }
 
-  public async getBadgeLeaderboard(limit = 10): Promise<BadgeLeaderboardEntry[]> {
-    const cacheKey = this.generateCacheKey('leaderboard:badges', limit);
+  public async getBadgeLeaderboard(
+    limit = 10,
+  ): Promise<BadgeLeaderboardEntry[]> {
+    const cacheKey = this.generateCacheKey("leaderboard:badges", limit);
     return this.getCachedOrFetch(cacheKey, async () => {
       return prisma.$queryRaw<BadgeLeaderboardEntry[]>`
         WITH badge_counts AS (
@@ -95,12 +107,16 @@ export class BadgeService extends BaseService {
   }
 
   public async getRareBadges(limit = 5): Promise<RareBadge[]> {
-    const cacheKey = this.generateCacheKey('badges:rare', limit);
-    return this.getCachedOrFetch(cacheKey, async () => {
-      const totalUsers = await prisma.user.count();
-      if (totalUsers === 0) return [];
+    const cacheKey = this.generateCacheKey("badges:rare", limit);
+    return this.getCachedOrFetch(
+      cacheKey,
+      async () => {
+        const totalUsers = await prisma.user.count();
+        if (totalUsers === 0) return [];
 
-      const rareBadges = await prisma.$queryRaw<Array<{ type: BadgeType; count: number }>>`
+        const rareBadges = await prisma.$queryRaw<
+          Array<{ type: BadgeType; count: number }>
+        >`
         SELECT 
           type,
           COUNT(DISTINCT "userId") as count
@@ -110,19 +126,21 @@ export class BadgeService extends BaseService {
         LIMIT ${limit};
       `;
 
-      return rareBadges.map(b => ({
-        ...b,
-        rarity: Math.round((b.count / totalUsers) * 10000) / 100, // 2 decimal places
-      }));
-    }, 3600);
+        return rareBadges.map((b) => ({
+          ...b,
+          rarity: Math.round((b.count / totalUsers) * 10000) / 100, // 2 decimal places
+        }));
+      },
+      3600,
+    );
   }
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
-      this.generateCacheKey('user:badges', userId, '*'),
-      this.generateCacheKey('user:hasBadge', userId, '*'),
-      'leaderboard:badges:*',
-      'badges:rare:*',
+      this.generateCacheKey("user:badges", userId, "*"),
+      this.generateCacheKey("user:hasBadge", userId, "*"),
+      "leaderboard:badges:*",
+      "badges:rare:*",
     ];
     await this.invalidateCache(cacheKeys);
   }

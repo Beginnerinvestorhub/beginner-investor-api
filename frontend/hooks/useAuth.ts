@@ -1,5 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
-import { User, onAuthStateChanged, signOut, signInWithEmailAndPassword, createUserWithEmailAndPassword, AuthError } from 'firebase/auth';
+import {
+  User,
+  onAuthStateChanged,
+  signOut,
+  signInWithEmailAndPassword,
+  createUserWithEmailAndPassword,
+  AuthError,
+} from 'firebase/auth';
 import { auth } from '../lib/firebase';
 
 interface AuthState {
@@ -19,12 +26,14 @@ export function useAuth(): AuthState {
   const [error, setError] = useState<AuthError | null>(null);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+    const unsubscribe = onAuthStateChanged(auth, async firebaseUser => {
       setUser(firebaseUser);
       setLoading(false);
       if (firebaseUser) {
         const token = await firebaseUser.getIdTokenResult();
-        setRole(typeof token.claims.role === 'string' ? token.claims.role : 'user');
+        setRole(
+          typeof token.claims.role === 'string' ? token.claims.role : 'user'
+        );
       } else {
         setRole(null);
       }

@@ -1,6 +1,6 @@
-import { PointTransactionType } from '@prisma/client';
-import { prisma } from '../../config/prisma';
-import BaseService from '../base.service';
+import { PointTransactionType } from "@prisma/client";
+import { prisma } from "../../config/prisma";
+import BaseService from "../base.service";
 
 export interface AwardPointsInput {
   userId: string;
@@ -32,7 +32,14 @@ export class PointsService extends BaseService {
   }
 
   public async awardPoints(input: AwardPointsInput) {
-    const { userId, points, type, description, metadata = {}, expiresInDays = 30 } = input;
+    const {
+      userId,
+      points,
+      type,
+      description,
+      metadata = {},
+      expiresInDays = 30,
+    } = input;
     if (points <= 0) return null;
 
     const expiresAt = new Date();
@@ -54,7 +61,7 @@ export class PointsService extends BaseService {
   }
 
   public async getUserPoints(userId: string): Promise<number> {
-    const cacheKey = this.generateCacheKey('user:points', userId);
+    const cacheKey = this.generateCacheKey("user:points", userId);
     return this.getCachedOrFetch<number>(cacheKey, async () => {
       const result = await prisma.pointTransaction.aggregate({
         where: {
@@ -70,21 +77,23 @@ export class PointsService extends BaseService {
 
   public async getUserTransactions(
     userId: string,
-    { page = 1, limit = 10 }: { page?: number; limit?: number } = {}
+    { page = 1, limit = 10 }: { page?: number; limit?: number } = {},
   ) {
     const skip = (page - 1) * limit;
     return prisma.pointTransaction.findMany({
       where: { userId },
-      orderBy: { createdAt: 'desc' },
+      orderBy: { createdAt: "desc" },
       skip,
       take: limit,
     });
   }
 
   public async getLeaderboard(limit = 10): Promise<PointsLeaderboardEntry[]> {
-    const cacheKey = this.generateCacheKey('leaderboard:points', limit);
-    return this.getCachedOrFetch<PointsLeaderboardEntry[]>(cacheKey, async () => {
-      return prisma.$queryRaw<PointsLeaderboardEntry[]>`
+    const cacheKey = this.generateCacheKey("leaderboard:points", limit);
+    return this.getCachedOrFetch<PointsLeaderboardEntry[]>(
+      cacheKey,
+      async () => {
+        return prisma.$queryRaw<PointsLeaderboardEntry[]>`
         WITH ranked_users AS (
           SELECT 
             "userId",
@@ -98,11 +107,12 @@ export class PointsService extends BaseService {
         )
         SELECT * FROM ranked_users;
       `;
-    });
+      },
+    );
   }
 
   public async getUserRank(userId: string): Promise<number | null> {
-    const cacheKey = this.generateCacheKey('user:rank', userId);
+    const cacheKey = this.generateCacheKey("user:rank", userId);
     return this.getCachedOrFetch<number | null>(cacheKey, async () => {
       const result = await prisma.$queryRaw<Array<{ rank: number }>>`
         WITH ranked_users AS (
@@ -121,9 +131,9 @@ export class PointsService extends BaseService {
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
-      this.generateCacheKey('user:points', userId),
-      this.generateCacheKey('user:rank', userId),
-      'leaderboard:points:*',
+      this.generateCacheKey("user:points", userId),
+      this.generateCacheKey("user:rank", userId),
+      "leaderboard:points:*",
     ];
     await this.invalidateCache(cacheKeys);
   }

@@ -1,8 +1,12 @@
-import { Router } from 'express';
-import { nudgeRateLimiter } from '../middleware/nudgeRateLimiter';
-import { cacheMiddleware, CacheInvalidator } from '../middleware/cache.middleware';
-import { validateNudgeRequest } from '../validators/nudge.validator';
-import { getNudge } from '../controllers/nudge.controller';
+import { Router } from "express";
+import { nudgeRateLimiter } from "../middleware/nudgeRateLimiter";
+import {
+  cacheMiddleware,
+  CacheInvalidator,
+} from "../middleware/cache.middleware";
+import { validateNudgeRequest } from "../validators/nudge.validator";
+import { getNudge } from "../controllers/nudge.controller";
+import { authenticate, authorize } from "../middleware/auth.middleware";
 
 const router = Router();
 
@@ -148,7 +152,14 @@ const router = Router();
  * type: string
  * format: date-time
  */
-router.post('/', nudgeRateLimiter, cacheMiddleware({ ttl: 300, includeUserId: true }), validateNudgeRequest, getNudge);
+router.post(
+  "/",
+  authenticate(),
+  // nudgeRateLimiter,
+  // cacheMiddleware({ ttl: 300, includeUserId: true }),
+  validateNudgeRequest,
+  getNudge,
+);
 
 /**
  * @swagger
@@ -165,17 +176,19 @@ router.post('/', nudgeRateLimiter, cacheMiddleware({ ttl: 300, includeUserId: tr
  * 401:
  * description: Unauthorized - Missing or invalid authentication
  */
-router.post('/cache/invalidate', async (req, res) => {
+router.post("/cache/invalidate", authenticate(), async (req, res) => {
   try {
-    const userId = req.user?.id;
+    const userId = req.user?.uid;
     if (!userId) {
-      return res.status(401).json({ error: 'Authentication required' });
+      return res.status(401).json({ error: "Authentication required" });
     }
-    
-    await CacheInvalidator.invalidateUserCache(userId, 'api');
-    res.json({ message: 'Cache invalidated successfully' });
+
+    // await CacheInvalidator.invalidateUserCache(userId, "api");
+    res.json({ message: "Cache temporarily disabled" });
   } catch (error) {
-    console.error('Cache invalidation error:', error);
-    res.status(500).json({ error: 'Failed to invalidate cache' });
+    console.error("Error invalidating cache:", error);
+    res.status(500).json({ error: "Internal server error" });
   }
 });
+
+export default router;

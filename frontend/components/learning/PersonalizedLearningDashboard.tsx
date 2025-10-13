@@ -4,7 +4,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { 
+import {
   useLearningStore,
   useCurrentLearningPath,
   useLearningContent,
@@ -12,7 +12,7 @@ import {
   useAIRecommendations,
   useLearningStats,
   useLearningLoading,
-  useLearningError
+  useLearningError,
 } from '../../store/learningStore';
 import {
   PlayIcon,
@@ -23,7 +23,7 @@ import {
   FireIcon,
   BookOpenIcon,
   CheckCircleIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
 } from '@heroicons/react/24/outline';
 import { StarIcon } from '@heroicons/react/24/solid';
 
@@ -32,7 +32,7 @@ const PersonalizedLearningDashboard: React.FC = () => {
     fetchPersonalizedPath,
     fetchAIRecommendations,
     markLessonCompleted,
-    clearError
+    clearError,
   } = useLearningStore();
 
   const currentPath = useCurrentLearningPath();
@@ -116,11 +116,16 @@ const PersonalizedLearningDashboard: React.FC = () => {
                   <LightBulbIcon className="h-6 w-6" />
                 </div>
                 <div>
-                  <h3 className="font-semibold text-lg mb-1">AI Learning Nudge</h3>
-                  <p className="text-indigo-100 mb-3">{aiRecommendations.nudgeMessage}</p>
+                  <h3 className="font-semibold text-lg mb-1">
+                    AI Learning Nudge
+                  </h3>
+                  <p className="text-indigo-100 mb-3">
+                    {aiRecommendations.nudgeMessage}
+                  </p>
                   <div className="flex items-center space-x-4">
                     <span className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded">
-                      Confidence: {Math.round(aiRecommendations.confidenceScore * 100)}%
+                      Confidence:{' '}
+                      {Math.round(aiRecommendations.confidenceScore * 100)}%
                     </span>
                     <span className="text-sm bg-white bg-opacity-20 px-2 py-1 rounded">
                       Priority: {aiRecommendations.priorityScore}/100
@@ -144,37 +149,49 @@ const PersonalizedLearningDashboard: React.FC = () => {
         <div className="bg-white rounded-lg shadow-sm border p-6">
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h2 className="text-2xl font-bold text-gray-900">{currentPath.name}</h2>
+              <h2 className="text-2xl font-bold text-gray-900">
+                {currentPath.name}
+              </h2>
               <p className="text-gray-600 mt-1">{currentPath.description}</p>
             </div>
             <div className="text-right">
-              <div className="text-3xl font-bold text-indigo-600">{currentPath.overallProgress}%</div>
+              <div className="text-3xl font-bold text-indigo-600">
+                {currentPath.overallProgress}%
+              </div>
               <div className="text-sm text-gray-500">Complete</div>
             </div>
           </div>
-          
+
           <div className="w-full bg-gray-200 rounded-full h-3 mb-4">
             <div
               className="bg-gradient-to-r from-indigo-500 to-purple-600 h-3 rounded-full transition-all duration-500"
               style={{ width: `${currentPath.overallProgress}%` }}
             ></div>
           </div>
-          
+
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
             <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.completedLessons}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {stats.completedLessons}
+              </div>
               <div className="text-sm text-gray-500">Lessons Completed</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalLessons}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {stats.totalLessons}
+              </div>
               <div className="text-sm text-gray-500">Total Lessons</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-gray-900">{stats.totalPoints}</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {stats.totalPoints}
+              </div>
               <div className="text-sm text-gray-500">Points Earned</div>
             </div>
             <div>
-              <div className="text-2xl font-bold text-gray-900">{currentPath.estimatedDurationHours}h</div>
+              <div className="text-2xl font-bold text-gray-900">
+                {currentPath.estimatedDurationHours}h
+              </div>
               <div className="text-sm text-gray-500">Est. Duration</div>
             </div>
           </div>
@@ -190,7 +207,7 @@ const PersonalizedLearningDashboard: React.FC = () => {
                 <PlayIcon className="h-6 w-6 text-indigo-600 mr-2" />
                 Continue Learning
               </h3>
-              
+
               <div className="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-lg p-6 border border-indigo-200">
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
@@ -225,7 +242,9 @@ const PersonalizedLearningDashboard: React.FC = () => {
                       </button>
                       {nextRecommended.progressStatus === 'in_progress' && (
                         <button
-                          onClick={() => handleCompleteLesson(nextRecommended.id)}
+                          onClick={() =>
+                            handleCompleteLesson(nextRecommended.id)
+                          }
                           className="bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700 transition-colors flex items-center"
                         >
                           <CheckCircleIcon className="h-4 w-4 mr-2" />
@@ -245,7 +264,7 @@ const PersonalizedLearningDashboard: React.FC = () => {
               <BookOpenIcon className="h-6 w-6 text-gray-600 mr-2" />
               Your Learning Path
             </h3>
-            
+
             <div className="space-y-3">
               {pathContent.slice(0, 6).map((content, index) => (
                 <div
@@ -254,8 +273,8 @@ const PersonalizedLearningDashboard: React.FC = () => {
                     content.progressStatus === 'completed'
                       ? 'border-green-200 bg-green-50'
                       : content.progressStatus === 'in_progress'
-                      ? 'border-indigo-200 bg-indigo-50'
-                      : 'border-gray-200 bg-gray-50'
+                        ? 'border-indigo-200 bg-indigo-50'
+                        : 'border-gray-200 bg-gray-50'
                   }`}
                 >
                   <div className="flex-shrink-0 mr-4">
@@ -269,16 +288,18 @@ const PersonalizedLearningDashboard: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   <div className="flex-1">
-                    <h4 className="font-medium text-gray-900">{content.title}</h4>
+                    <h4 className="font-medium text-gray-900">
+                      {content.title}
+                    </h4>
                     <div className="flex items-center space-x-3 text-sm text-gray-600 mt-1">
                       <span className="capitalize">{content.contentType}</span>
                       <span>{content.estimatedDurationMinutes} min</span>
                       <span>{content.pointsValue} pts</span>
                     </div>
                   </div>
-                  
+
                   {content.progressStatus !== 'completed' && (
                     <button
                       onClick={() => handleStartLesson(content.id)}
@@ -290,7 +311,7 @@ const PersonalizedLearningDashboard: React.FC = () => {
                 </div>
               ))}
             </div>
-            
+
             {pathContent.length > 6 && (
               <div className="mt-4 text-center">
                 <button className="text-indigo-600 hover:text-indigo-800 text-sm font-medium">
@@ -305,59 +326,79 @@ const PersonalizedLearningDashboard: React.FC = () => {
         <div className="space-y-6">
           {/* Quick Stats */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h3 className="text-lg font-bold text-gray-900 mb-4">Your Progress</h3>
+            <h3 className="text-lg font-bold text-gray-900 mb-4">
+              Your Progress
+            </h3>
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <TrophyIcon className="h-5 w-5 text-yellow-500 mr-2" />
                   <span className="text-gray-700">Total Points</span>
                 </div>
-                <span className="font-bold text-gray-900">{stats.totalPoints}</span>
+                <span className="font-bold text-gray-900">
+                  {stats.totalPoints}
+                </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <FireIcon className="h-5 w-5 text-orange-500 mr-2" />
                   <span className="text-gray-700">Current Streak</span>
                 </div>
-                <span className="font-bold text-gray-900">{stats.currentStreak} days</span>
+                <span className="font-bold text-gray-900">
+                  {stats.currentStreak} days
+                </span>
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div className="flex items-center">
                   <ChartBarIcon className="h-5 w-5 text-blue-500 mr-2" />
                   <span className="text-gray-700">Completion Rate</span>
                 </div>
-                <span className="font-bold text-gray-900">{stats.progressPercentage}%</span>
+                <span className="font-bold text-gray-900">
+                  {stats.progressPercentage}%
+                </span>
               </div>
             </div>
           </div>
 
           {/* AI Recommendations */}
-          {aiRecommendations && aiRecommendations.recommendedContent.length > 0 && (
-            <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
-                <StarIcon className="h-5 w-5 text-yellow-500 mr-2" />
-                Recommended for You
-              </h3>
-              
-              <div className="space-y-3">
-                {aiRecommendations.recommendedContent.slice(0, 3).map((content) => (
-                  <div key={content.id} className="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-colors">
-                    <h4 className="font-medium text-gray-900 text-sm mb-1">{content.title}</h4>
-                    <div className="flex items-center justify-between text-xs text-gray-600">
-                      <span className="capitalize">{content.contentType}</span>
-                      <span>{content.estimatedDurationMinutes} min</span>
-                    </div>
-                  </div>
-                ))}
+          {aiRecommendations &&
+            aiRecommendations.recommendedContent.length > 0 && (
+              <div className="bg-white rounded-lg shadow-sm border p-6">
+                <h3 className="text-lg font-bold text-gray-900 mb-4 flex items-center">
+                  <StarIcon className="h-5 w-5 text-yellow-500 mr-2" />
+                  Recommended for You
+                </h3>
+
+                <div className="space-y-3">
+                  {aiRecommendations.recommendedContent
+                    .slice(0, 3)
+                    .map(content => (
+                      <div
+                        key={content.id}
+                        className="p-3 border border-gray-200 rounded-lg hover:border-indigo-300 transition-colors"
+                      >
+                        <h4 className="font-medium text-gray-900 text-sm mb-1">
+                          {content.title}
+                        </h4>
+                        <div className="flex items-center justify-between text-xs text-gray-600">
+                          <span className="capitalize">
+                            {content.contentType}
+                          </span>
+                          <span>{content.estimatedDurationMinutes} min</span>
+                        </div>
+                      </div>
+                    ))}
+                </div>
+
+                <div className="mt-4 text-xs text-gray-500">
+                  <p>
+                    <strong>AI Reasoning:</strong> {aiRecommendations.reasoning}
+                  </p>
+                </div>
               </div>
-              
-              <div className="mt-4 text-xs text-gray-500">
-                <p><strong>AI Reasoning:</strong> {aiRecommendations.reasoning}</p>
-              </div>
-            </div>
-          )}
+            )}
         </div>
       </div>
     </div>

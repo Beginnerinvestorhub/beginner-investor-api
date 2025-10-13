@@ -1,5 +1,5 @@
-import { RedisService } from '../services/redis/redis.service';
-import logger from './logger';
+import { RedisService } from "../services/redis/redis.service";
+import logger from "./logger";
 
 type CacheOptions = {
   ttl?: number;
@@ -17,17 +17,17 @@ export class CacheOptimizer {
   constructor(redisService: RedisService, defaultTtl: number = 300) {
     this.redisService = redisService;
     this.defaultTtl = defaultTtl;
-    this.enabled = process.env.REDIS_ENABLED === 'true';
+    this.enabled = process.env.REDIS_ENABLED === "true";
   }
 
   public generateKey(parts: CacheKey): string {
-    return Array.isArray(parts) ? parts.map(String).join(':') : String(parts);
+    return Array.isArray(parts) ? parts.map(String).join(":") : String(parts);
   }
 
   public async withCache<T>(
     key: CacheKey,
     callback: () => Promise<T>,
-    options: CacheOptions = {}
+    options: CacheOptions = {},
   ): Promise<T> {
     if (!this.enabled || options.skipCache) return callback();
 
@@ -62,30 +62,34 @@ export class CacheOptimizer {
 
     try {
       if (Array.isArray(pattern)) {
-        await Promise.all(pattern.map(tag => this.invalidateByTag(tag)));
-      } else if (pattern.startsWith('tag:')) {
-        await this.invalidateByTag(pattern.replace('tag:', ''));
+        await Promise.all(pattern.map((tag) => this.invalidateByTag(tag)));
+      } else if (pattern.startsWith("tag:")) {
+        await this.invalidateByTag(pattern.replace("tag:", ""));
       } else {
         await this.redisService.del(pattern);
       }
     } catch (error) {
-      logger.error('Cache invalidation error:', error);
+      logger.error("Cache invalidation error:", error);
     }
   }
 
-  private async addToTagGroups(key: string, tags: string[], ttl: number): Promise<void> {
+  private async addToTagGroups(
+    key: string,
+    tags: string[],
+    ttl: number,
+  ): Promise<void> {
     if (!this.enabled) return;
 
     try {
       await Promise.all(
-        tags.map(async tag => {
+        tags.map(async (tag) => {
           const tagKey = `tag:${tag}`;
           await this.redisService.sAdd(tagKey, key);
           await this.redisService.expire(tagKey, ttl);
-        })
+        }),
       );
     } catch (error) {
-      logger.error('Failed to add to tag groups:', error);
+      logger.error("Failed to add to tag groups:", error);
     }
   }
 
@@ -111,9 +115,9 @@ export class CacheOptimizer {
 
     try {
       await this.redisService.flushDb();
-      logger.warn('Cache cleared');
+      logger.warn("Cache cleared");
     } catch (error) {
-      logger.error('Failed to clear cache:', error);
+      logger.error("Failed to clear cache:", error);
       throw error;
     }
   }
@@ -131,19 +135,22 @@ export class CacheOptimizer {
     try {
       const [keys, memoryRaw, infoRaw] = await Promise.all([
         this.redisService.dbSize(),
-        this.redisService.info('memory'),
-        this.redisService.info('server'),
+        this.redisService.info("memory"),
+        this.redisService.info("server"),
       ]);
 
       const parseInfo = (raw: string): Record<string, any> =>
         Object.fromEntries(
           raw
-            .split('\r\n')
-            .filter(line => line && !line.startsWith('#'))
-            .map(line => {
-              const [key, value] = line.split(':');
-              return [key.trim(), isNaN(Number(value)) ? value.trim() : Number(value)];
-            })
+            .split("\r\n")
+            .filter((line) => line && !line.startsWith("#"))
+            .map((line) => {
+              const [key, value] = line.split(":");
+              return [
+                key.trim(),
+                isNaN(Number(value)) ? value.trim() : Number(value),
+              ];
+            }),
         );
 
       return {
@@ -153,7 +160,7 @@ export class CacheOptimizer {
         info: parseInfo(infoRaw),
       };
     } catch (error) {
-      logger.error('Failed to get cache stats:', error);
+      logger.error("Failed to get cache stats:", error);
       throw error;
     }
   }

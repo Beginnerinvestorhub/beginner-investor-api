@@ -1,6 +1,6 @@
 // shared/cache/cache-manager.ts
 import { RedisClient } from './redis-client';
-import type { Redis } from 'ioredis';
+import type { RedisClientType } from 'redis';
 
 export interface CacheOptions {
   ttl?: number; // Time to live in seconds
@@ -8,7 +8,7 @@ export interface CacheOptions {
 }
 
 export class CacheManager {
-  private redis: Redis;
+  private redis: RedisClientType;
   private defaultTTL: number = 3600; // 1 hour default
 
   constructor(defaultTTL?: number) {
@@ -28,7 +28,7 @@ export class CacheManager {
       const serialized = JSON.stringify(value);
       
       if (ttl > 0) {
-        await this.redis.setex(fullKey, ttl, serialized);
+        await this.redis.setEx(fullKey, ttl, serialized);
       } else {
         await this.redis.set(fullKey, serialized);
       }
@@ -89,7 +89,7 @@ export class CacheManager {
     entries: Array<{ key: string; value: T; ttl?: number }>,
     options?: CacheOptions
   ): Promise<void> {
-    const pipeline = this.redis.pipeline();
+    const pipeline = this.redis.multi();
     
     for (const entry of entries) {
       const fullKey = this.buildKey(entry.key, options?.namespace);
@@ -97,7 +97,7 @@ export class CacheManager {
       const ttl = entry.ttl ?? options?.ttl ?? this.defaultTTL;
       
       if (ttl > 0) {
-        pipeline.setex(fullKey, ttl, serialized);
+        pipeline.setEx(fullKey, ttl, serialized);
       } else {
         pipeline.set(fullKey, serialized);
       }
@@ -111,7 +111,7 @@ export class CacheManager {
    */
   async getMany<T>(keys: string[], options?: CacheOptions): Promise<Map<string, T>> {
     const fullKeys = keys.map(k => this.buildKey(k, options?.namespace));
-    const results = await this.redis.mget(...fullKeys);
+    const results = await this.redis.mGet(fullKeys as any);
     
     const map = new Map<string, T>();
     
@@ -170,7 +170,7 @@ export class CacheManager {
    */
   async increment(key: string, by: number = 1, options?: CacheOptions): Promise<number> {
     const fullKey = this.buildKey(key, options?.namespace);
-    return await this.redis.incrby(fullKey, by);
+    return await this.redis.incrBy(fullKey, by);
   }
 
   /**
@@ -178,7 +178,7 @@ export class CacheManager {
    */
   async decrement(key: string, by: number = 1, options?: CacheOptions): Promise<number> {
     const fullKey = this.buildKey(key, options?.namespace);
-    return await this.redis.decrby(fullKey, by);
+    return await this.redis.decrBy(fullKey, by);
   }
 
   /**
@@ -187,7 +187,7 @@ export class CacheManager {
   async expire(key: string, seconds: number, options?: CacheOptions): Promise<boolean> {
     const fullKey = this.buildKey(key, options?.namespace);
     const result = await this.redis.expire(fullKey, seconds);
-    return result === 1;
+    return result;
   }
 
   /**
@@ -209,7 +209,7 @@ export class CacheManager {
    * Flush all keys in the current database
    */
   async flushAll(): Promise<void> {
-    await this.redis.flushdb();
+    await this.redis.flushDb();
   }
 }
 

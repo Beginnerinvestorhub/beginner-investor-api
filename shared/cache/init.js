@@ -1,16 +1,18 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.cacheManager = void 0;
+exports.RATE_LIMITS = void 0;
 exports.initializeCache = initializeCache;
 exports.initializeRateLimiting = initializeRateLimiting;
 exports.initializeSystems = initializeSystems;
 exports.cleanup = cleanup;
+exports.getCacheManager = getCacheManager;
+exports.getRateLimiter = getRateLimiter;
 const redis_client_1 = require("./redis-client");
 const cache_manager_1 = require("./cache-manager");
 const rate_limiter_1 = require("./rate-limiter");
-const dotenv_1 = require("dotenv");
+const _dotenv_1 = require(" dotenv");
 // Load environment variables
-(0, dotenv_1.config)();
+(0, _dotenv_1.config)();
 /**
  * Initialize Redis and cache systems for the application
  */
@@ -18,10 +20,6 @@ async function initializeCache() {
     try {
         // Redis configuration from environment or defaults
         const redisConfig = {
-            host: process.env.REDIS_HOST || 'localhost',
-            port: parseInt(process.env.REDIS_PORT || '6379'),
-            password: process.env.REDIS_PASSWORD,
-            db: parseInt(process.env.REDIS_DB || '0'),
             keyPrefix: process.env.REDIS_KEY_PREFIX || 'bih:',
             retryStrategy: (times) => {
                 const delay = Math.min(times * 50, 2000);
@@ -29,12 +27,27 @@ async function initializeCache() {
             },
             maxRetriesPerRequest: 3
         };
+        // Use REDIS_URL if available, otherwise use individual config
+        if (process.env.REDIS_URL) {
+            redisConfig.url = process.env.REDIS_URL;
+        }
+        else {
+            redisConfig.host = process.env.REDIS_HOST || 'localhost';
+            redisConfig.port = parseInt(process.env.REDIS_PORT || '6379');
+            redisConfig.password = process.env.REDIS_PASSWORD;
+            redisConfig.db = parseInt(process.env.REDIS_DB || '0');
+        }
         // Initialize Redis client
-        const redis = redis_client_1.RedisClient.initialize(redisConfig);
+        await redis_client_1.RedisClient.initialize(redisConfig);
         // Test connection
         await redis_client_1.RedisClient.healthCheck();
         console.log('✅ Redis cache system initialized successfully');
-        console.log(`📍 Redis server: ${redisConfig.host}:${redisConfig.port}`);
+        if (redisConfig.url) {
+            console.log(`📍 Redis server: ${redisConfig.url}`);
+        }
+        else {
+            console.log(`📍 Redis server: ${redisConfig.host}:${redisConfig.port}`);
+        }
         console.log(`🔑 Key prefix: ${redisConfig.keyPrefix}`);
     }
     catch (error) {
@@ -63,6 +76,9 @@ async function initializeRateLimiting() {
         console.error('❌ Failed to initialize rate limiting:', error);
     }
 }
+// Global instances
+let cacheManager = null;
+let rateLimiter = null;
 /**
  * Initialize all caching and rate limiting systems
  */
@@ -72,6 +88,9 @@ async function initializeSystems() {
         initializeCache(),
         initializeRateLimiting()
     ]);
+    // Instantiate after Redis is initialized
+    cacheManager = new cache_manager_1.CacheManager();
+    rateLimiter = new rate_limiter_1.RateLimiter();
     console.log('✅ All systems initialized successfully');
 }
 /**
@@ -86,8 +105,27 @@ async function cleanup() {
         console.error('❌ Error during cleanup:', error);
     }
 }
-// Export cache manager instance for use throughout the application
-exports.cacheManager = new cache_manager_1.CacheManager();
+/**
+ * Get cache manager instance
+ */
+function getCacheManager() {
+    if (!cacheManager) {
+        throw new Error('Cache manager not initialized. Call initializeSystems() first.');
+    }
+    return cacheManager;
+}
+/**
+ * Get rate limiter instance
+ */
+function getRateLimiter() {
+    if (!rateLimiter) {
+        throw new Error('Rate limiter not initialized. Call initializeSystems() first.');
+    }
+    return rateLimiter;
+}
+// Export types and configs
+var rate_limiter_2 = require("./rate-limiter");
+Object.defineProperty(exports, "RATE_LIMITS", { enumerable: true, get: function () { return rate_limiter_2.RATE_LIMITS; } });
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
     console.log('\n🛑 Received SIGINT, shutting down gracefully...');
@@ -104,6 +142,6 @@ exports.default = {
     initializeRateLimiting,
     initializeSystems,
     cleanup,
-    cacheManager: exports.cacheManager,
-    rateLimiter: rate_limiter_1.rateLimiter
+    getCacheManager,
+    getRateLimiter
 };

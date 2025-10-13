@@ -21,28 +21,28 @@ export default function ProgressBar({
   height = 'medium',
   color = 'blue',
   animated = true,
-  className = ''
+  className = '',
 }: ProgressBarProps) {
   const percentage = Math.min((current / max) * 100, 100);
-  
+
   const heightClasses = {
     small: 'h-2',
     medium: 'h-3',
-    large: 'h-4'
+    large: 'h-4',
   };
 
   const colorClasses = {
     blue: 'bg-blue-500',
     green: 'bg-green-500',
     purple: 'bg-purple-500',
-    yellow: 'bg-yellow-500'
+    yellow: 'bg-yellow-500',
   };
 
   const bgColorClasses = {
     blue: 'bg-blue-100',
     green: 'bg-green-100',
     purple: 'bg-purple-100',
-    yellow: 'bg-yellow-100'
+    yellow: 'bg-yellow-100',
   };
 
   return (
@@ -62,10 +62,12 @@ export default function ProgressBar({
       )}
 
       {/* Progress bar container */}
-      <div className={`
+      <div
+        className={`
         w-full rounded-full overflow-hidden
         ${heightClasses[height]} ${bgColorClasses[color]}
-      `}>
+      `}
+      >
         {/* Progress fill */}
         <div
           className={`

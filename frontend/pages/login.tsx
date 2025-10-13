@@ -47,8 +47,12 @@ export default function LoginPage() {
             margin-bottom: 1.5rem;
           }
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
           .nyse-loading-text {
             font-family: var(--nyse-font-sans);
@@ -65,7 +69,10 @@ export default function LoginPage() {
     <>
       <Head>
         <title>Login | Beginner Investor Hub</title>
-        <meta name="description" content="Login to access your personalized investment dashboard and portfolio simulations." />
+        <meta
+          name="description"
+          content="Login to access your personalized investment dashboard and portfolio simulations."
+        />
       </Head>
 
       <div className="login-page">
@@ -76,10 +83,11 @@ export default function LoginPage() {
               <div className="logo-icon">📊</div>
               <span className="brand-name">Investor Hub</span>
             </Link>
-            
+
             <h1>Welcome Back</h1>
             <p className="brand-tagline">
-              Continue your journey to financial mastery with precision tools and AI-powered insights.
+              Continue your journey to financial mastery with precision tools
+              and AI-powered insights.
             </p>
 
             <div className="features-list">
@@ -155,7 +163,11 @@ export default function LoginPage() {
         }
 
         .login-branding {
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-secondary) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl);
           display: flex;
@@ -172,9 +184,21 @@ export default function LoginPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: 
-            repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px),
-            repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px);
+          background:
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            ),
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            );
           pointer-events: none;
         }
 

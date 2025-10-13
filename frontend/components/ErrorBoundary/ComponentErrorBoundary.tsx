@@ -38,8 +38,12 @@ class ComponentErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error(`ComponentErrorBoundary (${this.props.componentName || 'Unknown'}) caught an error:`, error, errorInfo);
-    
+    console.error(
+      `ComponentErrorBoundary (${this.props.componentName || 'Unknown'}) caught an error:`,
+      error,
+      errorInfo
+    );
+
     this.setState({
       errorInfo,
     });
@@ -51,7 +55,9 @@ class ComponentErrorBoundary extends Component<Props, State> {
 
     // Log component-specific error
     if (typeof window !== 'undefined') {
-      console.group(`🔧 Component Error - ${this.props.componentName || 'Unknown Component'}`);
+      console.group(
+        `🔧 Component Error - ${this.props.componentName || 'Unknown Component'}`
+      );
       console.error('Error:', error);
       console.error('Component Stack:', errorInfo.componentStack);
       console.groupEnd();
@@ -107,9 +113,10 @@ class ComponentErrorBoundary extends Component<Props, State> {
                 {componentName} Error
               </h3>
               <p className="text-sm text-red-700 mt-1">
-                This component encountered an error and couldn&apos;t render properly.
+                This component encountered an error and couldn&apos;t render
+                properly.
               </p>
-              
+
               {/* Development mode: Show error message */}
               {process.env.NODE_ENV === 'development' && this.state.error && (
                 <details className="mt-2">
@@ -122,7 +129,7 @@ class ComponentErrorBoundary extends Component<Props, State> {
                 </details>
               )}
             </div>
-            
+
             <div className="flex items-center space-x-2 ml-3">
               {canRetry && (
                 <button
@@ -134,7 +141,7 @@ class ComponentErrorBoundary extends Component<Props, State> {
                   Retry
                 </button>
               )}
-              
+
               <button
                 onClick={this.handleDismiss}
                 className="inline-flex items-center p-1 text-red-400 hover:text-red-600 transition-colors duration-200"

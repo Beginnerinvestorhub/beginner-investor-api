@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '../../config/prisma';
-import BaseService from '../base.service';
+import { Prisma } from "@prisma/client";
+import { prisma } from "../../config/prisma";
+import BaseService from "../base.service";
 
 export interface UserProgressWithRank {
   id: string;
@@ -27,7 +27,10 @@ export class ProgressService extends BaseService {
     return ProgressService.instance;
   }
 
-  public async addExperience(userId: string, xpToAdd: number): Promise<UserProgressWithRank> {
+  public async addExperience(
+    userId: string,
+    xpToAdd: number,
+  ): Promise<UserProgressWithRank> {
     if (xpToAdd <= 0) return this.getUserProgress(userId);
 
     return prisma.$transaction(async (tx) => {
@@ -73,16 +76,19 @@ export class ProgressService extends BaseService {
       return {
         ...progress,
         rank,
-        xpToNextLevel: this.getXpForLevel(progress.level + 1) - progress.experience,
+        xpToNextLevel:
+          this.getXpForLevel(progress.level + 1) - progress.experience,
       };
     });
   }
 
   public async getUserProgress(userId: string): Promise<UserProgressWithRank> {
-    const cacheKey = this.generateCacheKey('user:progress', userId);
+    const cacheKey = this.generateCacheKey("user:progress", userId);
 
     return this.getCachedOrFetch(cacheKey, async () => {
-      const progress = await prisma.userProgress.findUnique({ where: { userId } });
+      const progress = await prisma.userProgress.findUnique({
+        where: { userId },
+      });
 
       if (!progress) return this.createDefaultProgress(userId);
 
@@ -91,13 +97,14 @@ export class ProgressService extends BaseService {
       return {
         ...progress,
         rank,
-        xpToNextLevel: this.getXpForLevel(progress.level + 1) - progress.experience,
+        xpToNextLevel:
+          this.getXpForLevel(progress.level + 1) - progress.experience,
       };
     });
   }
 
   public async getLeaderboard(limit = 10): Promise<UserProgressWithRank[]> {
-    const cacheKey = this.generateCacheKey('leaderboard:progress', limit);
+    const cacheKey = this.generateCacheKey("leaderboard:progress", limit);
 
     return this.getCachedOrFetch(cacheKey, async () => {
       const leaderboard = await prisma.$queryRaw<UserProgressWithRank[]>`
@@ -132,10 +139,13 @@ export class ProgressService extends BaseService {
       WHERE up1.id = subquery.id;
     `;
 
-    await this.invalidateCache('leaderboard:progress:*');
+    await this.invalidateCache("leaderboard:progress:*");
   }
 
-  public async getUserRank(userId: string, tx?: Prisma.TransactionClient): Promise<number> {
+  public async getUserRank(
+    userId: string,
+    tx?: Prisma.TransactionClient,
+  ): Promise<number> {
     const prismaClient = tx || prisma;
 
     const result = await prismaClient.$queryRaw<Array<{ rank: number }>>`
@@ -149,7 +159,9 @@ export class ProgressService extends BaseService {
     return 100 * level * level;
   }
 
-  private async createDefaultProgress(userId: string): Promise<UserProgressWithRank> {
+  private async createDefaultProgress(
+    userId: string,
+  ): Promise<UserProgressWithRank> {
     const progress = await prisma.userProgress.create({
       data: {
         userId,
@@ -171,8 +183,8 @@ export class ProgressService extends BaseService {
 
   private async invalidateUserCaches(userId: string): Promise<void> {
     const cacheKeys = [
-      this.generateCacheKey('user:progress', userId),
-      'leaderboard:progress:*',
+      this.generateCacheKey("user:progress", userId),
+      "leaderboard:progress:*",
     ];
     await this.invalidateCache(cacheKeys);
   }

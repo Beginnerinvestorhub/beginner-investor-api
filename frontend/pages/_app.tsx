@@ -8,7 +8,10 @@ function MyApp({ Component, pageProps: { session, ...pageProps } }: AppProps) {
     <>
       <Head>
         <title>Investment Tools Hub</title>
-        <meta name="description" content="Your personal investment and financial tools dashboard" />
+        <meta
+          name="description"
+          content="Your personal investment and financial tools dashboard"
+        />
         <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />

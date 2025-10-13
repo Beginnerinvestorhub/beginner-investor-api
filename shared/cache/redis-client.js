@@ -1,13 +1,12 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.RedisClient = void 0;
 // shared/cache/redis-client.ts
-const ioredis_1 = __importDefault(require("ioredis"));
+const redis_1 = require("redis");
 class RedisClient {
-    static initialize(config) {
+    static instance = null;
+    static config = {};
+    static async initialize(config) {
         if (this.instance) {
             console.warn('Redis client already initialized. Returning existing instance.');
             return this.instance;
@@ -15,24 +14,26 @@ class RedisClient {
         this.config = config;
         try {
             if (config.url) {
-                this.instance = new ioredis_1.default(config.url, {
-                    keyPrefix: config.keyPrefix || 'bih:',
-                    retryStrategy: config.retryStrategy || this.defaultRetryStrategy,
-                    maxRetriesPerRequest: config.maxRetriesPerRequest ?? 3,
+                this.instance = (0, redis_1.createClient)({
+                    url: config.url,
+                    socket: {
+                        reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
+                    }
                 });
             }
             else {
-                this.instance = new ioredis_1.default({
-                    host: config.host || 'localhost',
-                    port: config.port || 6379,
+                this.instance = (0, redis_1.createClient)({
+                    socket: {
+                        host: config.host || 'localhost',
+                        port: config.port || 6379,
+                        reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
+                    },
                     password: config.password,
-                    db: config.db || 0,
-                    keyPrefix: config.keyPrefix || 'bih:',
-                    retryStrategy: config.retryStrategy || this.defaultRetryStrategy,
-                    maxRetriesPerRequest: config.maxRetriesPerRequest ?? 3,
+                    database: config.db || 0
                 });
             }
             this.setupEventHandlers();
+            await this.instance.connect();
             console.log('✅ Redis client initialized successfully');
             return this.instance;
         }
@@ -63,7 +64,7 @@ class RedisClient {
         this.instance.on('error', (err) => {
             console.error('❌ Redis client error:', err);
         });
-        this.instance.on('close', () => {
+        this.instance.on('end', () => {
             console.log('🔌 Redis connection closed');
         });
         this.instance.on('reconnecting', () => {
@@ -91,5 +92,3 @@ class RedisClient {
     }
 }
 exports.RedisClient = RedisClient;
-RedisClient.instance = null;
-RedisClient.config = {};

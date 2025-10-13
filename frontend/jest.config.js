@@ -25,7 +25,11 @@ const customJestConfig = {
   // transformIgnorePatterns: ['/node_modules/(?!(next-auth|@babel/runtime)/)'],
 
   // ----- Test Discovery -----
-  testPathIgnorePatterns: ['<rootDir>/node_modules/', '<rootDir>/.next/', '<rootDir>/cypress/'],
+  testPathIgnorePatterns: [
+    '<rootDir>/node_modules/',
+    '<rootDir>/.next/',
+    '<rootDir>/cypress/',
+  ],
   testMatch: ['**/__tests__/**/*.(test|spec).(js|jsx|ts|tsx)'],
 
   // ----- Coverage -----
@@ -46,7 +50,7 @@ const customJestConfig = {
 
   // ----- Performance & Debugging -----
   testTimeout: 30000, // allow slower DOM tests
-  maxWorkers: 1,      // run in-band to reduce OOM
+  maxWorkers: 1, // run in-band to reduce OOM
   maxConcurrency: 1,
   logHeapUsage: true,
 };

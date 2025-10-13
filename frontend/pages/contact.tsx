@@ -7,15 +7,21 @@ export default function Contact() {
     name: '',
     email: '',
     subject: 'general',
-    message: ''
+    message: '',
   });
-  const [status, setStatus] = useState<'idle' | 'sending' | 'success' | 'error'>('idle');
+  const [status, setStatus] = useState<
+    'idle' | 'sending' | 'success' | 'error'
+  >('idle');
   const [errorMessage, setErrorMessage] = useState('');
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
     setFormData(prev => ({
       ...prev,
-      [e.target.name]: e.target.value
+      [e.target.name]: e.target.value,
     }));
   };
 
@@ -43,7 +49,9 @@ export default function Contact() {
       setTimeout(() => setStatus('idle'), 5000);
     } catch (error) {
       setStatus('error');
-      setErrorMessage('Failed to send message. Please try emailing us directly.');
+      setErrorMessage(
+        'Failed to send message. Please try emailing us directly.'
+      );
     }
   };
 
@@ -51,7 +59,10 @@ export default function Contact() {
     <>
       <Head>
         <title>Contact Us | Beginner Investor Hub</title>
-        <meta name="description" content="Get in touch with our support team. We're here to help with questions about portfolio simulation, AI coaching, and platform features." />
+        <meta
+          name="description"
+          content="Get in touch with our support team. We're here to help with questions about portfolio simulation, AI coaching, and platform features."
+        />
       </Head>
 
       <div className="contact-page">
@@ -76,7 +87,8 @@ export default function Contact() {
               <div className="contact-info-section">
                 <h2>Get in Touch</h2>
                 <p className="section-description">
-                  Choose the best way to reach us. We typically respond within 24 hours during business days.
+                  Choose the best way to reach us. We typically respond within
+                  24 hours during business days.
                 </p>
 
                 {/* Contact Methods */}
@@ -86,7 +98,10 @@ export default function Contact() {
                     <div className="method-content">
                       <h3>Email Support</h3>
                       <p>For general inquiries and support</p>
-                      <a href="mailto:support@beginnerinvestorhub.com" className="contact-link">
+                      <a
+                        href="mailto:support@beginnerinvestorhub.com"
+                        className="contact-link"
+                      >
                         support@beginnerinvestorhub.com
                       </a>
                     </div>
@@ -97,7 +112,10 @@ export default function Contact() {
                     <div className="method-content">
                       <h3>Privacy Inquiries</h3>
                       <p>Data requests and privacy concerns</p>
-                      <a href="mailto:privacy@beginnerinvestorhub.com" className="contact-link">
+                      <a
+                        href="mailto:privacy@beginnerinvestorhub.com"
+                        className="contact-link"
+                      >
                         privacy@beginnerinvestorhub.com
                       </a>
                     </div>
@@ -108,7 +126,10 @@ export default function Contact() {
                     <div className="method-content">
                       <h3>Business Partnerships</h3>
                       <p>Affiliate program and collaborations</p>
-                      <a href="mailto:partnerships@beginnerinvestorhub.com" className="contact-link">
+                      <a
+                        href="mailto:partnerships@beginnerinvestorhub.com"
+                        className="contact-link"
+                      >
                         partnerships@beginnerinvestorhub.com
                       </a>
                     </div>
@@ -138,7 +159,10 @@ export default function Contact() {
                 {/* FAQ Link */}
                 <div className="faq-callout">
                   <h4>Looking for quick answers?</h4>
-                  <p>Check our FAQ section for common questions about portfolio simulation, risk analysis, and platform features.</p>
+                  <p>
+                    Check our FAQ section for common questions about portfolio
+                    simulation, risk analysis, and platform features.
+                  </p>
                   <Link href="/faq" className="faq-link">
                     Visit FAQ →
                   </Link>
@@ -150,7 +174,8 @@ export default function Contact() {
                 <div className="form-card">
                   <h2>Send Us a Message</h2>
                   <p className="form-description">
-                    Fill out the form below and we'll get back to you as soon as possible.
+                    Fill out the form below and we'll get back to you as soon as
+                    possible.
                   </p>
 
                   <form onSubmit={handleSubmit} className="contact-form">
@@ -203,7 +228,9 @@ export default function Contact() {
                         <option value="account">Account Issues</option>
                         <option value="feature">Feature Request</option>
                         <option value="bug">Bug Report</option>
-                        <option value="partnership">Partnership Opportunity</option>
+                        <option value="partnership">
+                          Partnership Opportunity
+                        </option>
                         <option value="feedback">Feedback</option>
                       </select>
                     </div>
@@ -226,14 +253,13 @@ export default function Contact() {
 
                     {status === 'success' && (
                       <div className="alert alert-success">
-                        ✓ Message sent successfully! We'll respond within 24 hours.
+                        ✓ Message sent successfully! We'll respond within 24
+                        hours.
                       </div>
                     )}
 
                     {status === 'error' && (
-                      <div className="alert alert-error">
-                        ✕ {errorMessage}
-                      </div>
+                      <div className="alert alert-error">✕ {errorMessage}</div>
                     )}
 
                     <button
@@ -258,7 +284,11 @@ export default function Contact() {
         }
 
         .contact-header {
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-secondary) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl) 0;
         }
@@ -402,7 +432,11 @@ export default function Contact() {
         }
 
         .faq-callout {
-          background: linear-gradient(135deg, rgba(0, 61, 122, 0.05) 0%, rgba(0, 160, 227, 0.05) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba(0, 61, 122, 0.05) 0%,
+            rgba(0, 160, 227, 0.05) 100%
+          );
           padding: var(--nyse-spacing-lg);
           border-radius: 8px;
           border: 1px solid var(--nyse-color-border);

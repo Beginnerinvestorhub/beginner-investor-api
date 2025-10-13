@@ -29,7 +29,7 @@ if (process.env.NODE_ENV !== 'production') {
 }
 
 // Middleware to add request context to logs
-export const addRequestContext = (req: Request, res: Response, next: any) => {
+export const addRequestContext = (req: Request, _res: Response, next: any) => {
   // Add request ID if not present
   if (!req.headers['x-request-id']) {
     req.headers['x-request-id'] = generateRequestId();

@@ -28,7 +28,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
   static getDerivedStateFromError(error: Error): Partial<State> {
     // Generate unique error ID for tracking
     const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`;
-    
+
     return {
       hasError: true,
       error,
@@ -39,7 +39,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Log error details
     console.error('GlobalErrorBoundary caught an error:', error, errorInfo);
-    
+
     // Update state with error info
     this.setState({
       errorInfo,
@@ -53,7 +53,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
     // Send error to monitoring service (Sentry, LogRocket, etc.)
     if (typeof window !== 'undefined') {
       // Example: Sentry.captureException(error, { extra: errorInfo });
-      
+
       // For now, log to console with structured data
       console.group('🚨 Global Error Boundary - Error Details');
       console.error('Error ID:', this.state.errorId);
@@ -98,7 +98,8 @@ class GlobalErrorBoundary extends Component<Props, State> {
                 Oops! Something went wrong
               </h1>
               <p className="text-gray-600 mb-4">
-                We encountered an unexpected error. Our team has been notified and is working on a fix.
+                We encountered an unexpected error. Our team has been notified
+                and is working on a fix.
               </p>
               <div className="bg-gray-100 rounded-md p-3 mb-6">
                 <p className="text-sm text-gray-500 font-mono">
@@ -115,7 +116,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Try Again
               </button>
-              
+
               <button
                 onClick={this.handleReload}
                 className="w-full bg-gray-600 hover:bg-gray-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center"
@@ -123,7 +124,7 @@ class GlobalErrorBoundary extends Component<Props, State> {
                 <RefreshCw className="mr-2 h-4 w-4" />
                 Reload Page
               </button>
-              
+
               <button
                 onClick={this.handleGoHome}
                 className="w-full bg-green-600 hover:bg-green-700 text-white font-medium py-2 px-4 rounded-md transition-colors duration-200 flex items-center justify-center"

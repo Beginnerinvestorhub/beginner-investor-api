@@ -1,7 +1,7 @@
 // shared/cache/utils.ts
 import { CacheManager } from './cache-manager';
 import { RedisClient } from './redis-client';
-import type { CacheHealth, CacheMetrics, WarmCacheConfig } from './types';
+import type { CacheHealth, WarmCacheConfig } from './types';
 
 /**
  * Warm cache by preloading frequently accessed data
@@ -69,7 +69,7 @@ export async function getCacheHealth(): Promise<CacheHealth> {
     const uptime = uptimeMatch ? parseInt(uptimeMatch[1]) : 0;
 
     // Get key count
-    const dbSize = await redis.dbsize();
+    const dbSize = await redis.dbSize();
 
     return {
       connected: true,
@@ -82,4 +82,14 @@ export async function getCacheHealth(): Promise<CacheHealth> {
       keyCount: dbSize,
       uptime,
     };
-  } catch
+  } catch (error) {
+    console.error('Error getting Redis stats:', error);
+    return {
+      connected: false,
+      latency: 0,
+      memoryUsage: { used: 0, max: 0, percentage: 0 },
+      keyCount: 0,
+      uptime: 0,
+    };
+  }
+}

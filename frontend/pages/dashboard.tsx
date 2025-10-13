@@ -1,4 +1,3 @@
-
 import Head from 'next/head';
 import { useAuth } from '../hooks/useAuth';
 import { useEffect, useState } from 'react';
@@ -8,7 +7,9 @@ export default function DashboardPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
   const [isRedirecting, setIsRedirecting] = useState(false);
-  const [activeTab, setActiveTab] = useState<'overview' | 'tools' | 'learning'>('overview');
+  const [activeTab, setActiveTab] = useState<'overview' | 'tools' | 'learning'>(
+    'overview'
+  );
 
   useEffect(() => {
     if (!loading && !user) {
@@ -52,8 +53,12 @@ export default function DashboardPage() {
           }
 
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
 
           .nyse-loading-text {
@@ -75,7 +80,10 @@ export default function DashboardPage() {
     <>
       <Head>
         <title>My Dashboard | Beginner Investor Hub</title>
-        <meta name="description" content="Your personalized investment dashboard and learning journey." />
+        <meta
+          name="description"
+          content="Your personalized investment dashboard and learning journey."
+        />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
@@ -154,21 +162,27 @@ export default function DashboardPage() {
                       <div className="activity-item">
                         <div className="activity-icon">✅</div>
                         <div className="activity-content">
-                          <div className="activity-text">Completed "Risk Assessment" module</div>
+                          <div className="activity-text">
+                            Completed "Risk Assessment" module
+                          </div>
                           <div className="activity-time">2 hours ago</div>
                         </div>
                       </div>
                       <div className="activity-item">
                         <div className="activity-icon">📈</div>
                         <div className="activity-content">
-                          <div className="activity-text">Updated portfolio simulation</div>
+                          <div className="activity-text">
+                            Updated portfolio simulation
+                          </div>
                           <div className="activity-time">1 day ago</div>
                         </div>
                       </div>
                       <div className="activity-item">
                         <div className="activity-icon">🏆</div>
                         <div className="activity-content">
-                          <div className="activity-text">Earned "First Investment" badge</div>
+                          <div className="activity-text">
+                            Earned "First Investment" badge
+                          </div>
                           <div className="activity-time">3 days ago</div>
                         </div>
                       </div>
@@ -182,21 +196,32 @@ export default function DashboardPage() {
                       <div className="progress-item">
                         <div className="progress-label">Modules Completed</div>
                         <div className="progress-bar">
-                          <div className="progress-fill" style={{ width: '65%' }}></div>
+                          <div
+                            className="progress-fill"
+                            style={{ width: '65%' }}
+                          ></div>
                         </div>
                         <div className="progress-text">13/20</div>
                       </div>
                       <div className="progress-item">
                         <div className="progress-label">Tools Mastered</div>
                         <div className="progress-bar">
-                          <div className="progress-fill" style={{ width: '40%' }}></div>
+                          <div
+                            className="progress-fill"
+                            style={{ width: '40%' }}
+                          ></div>
                         </div>
                         <div className="progress-text">4/10</div>
                       </div>
                       <div className="progress-item">
-                        <div className="progress-label">Portfolio Simulations</div>
+                        <div className="progress-label">
+                          Portfolio Simulations
+                        </div>
                         <div className="progress-bar">
-                          <div className="progress-fill" style={{ width: '80%' }}></div>
+                          <div
+                            className="progress-fill"
+                            style={{ width: '80%' }}
+                          ></div>
                         </div>
                         <div className="progress-text">8/10</div>
                       </div>
@@ -212,28 +237,36 @@ export default function DashboardPage() {
                   <div className="tool-card">
                     <div className="tool-icon">📊</div>
                     <h3 className="tool-title">Portfolio Monitor</h3>
-                    <p className="tool-description">Track your virtual investments</p>
+                    <p className="tool-description">
+                      Track your virtual investments
+                    </p>
                     <button className="tool-button">Open Tool</button>
                   </div>
 
                   <div className="tool-card">
                     <div className="tool-icon">⚖️</div>
                     <h3 className="tool-title">Risk Assessment</h3>
-                    <p className="tool-description">Evaluate your risk tolerance</p>
+                    <p className="tool-description">
+                      Evaluate your risk tolerance
+                    </p>
                     <button className="tool-button">Open Tool</button>
                   </div>
 
                   <div className="tool-card">
                     <div className="tool-icon">🎯</div>
                     <h3 className="tool-title">ESG Screener</h3>
-                    <p className="tool-description">Find sustainable investments</p>
+                    <p className="tool-description">
+                      Find sustainable investments
+                    </p>
                     <button className="tool-button">Open Tool</button>
                   </div>
 
                   <div className="tool-card">
                     <div className="tool-icon">💰</div>
                     <h3 className="tool-title">Fractional Calculator</h3>
-                    <p className="tool-description">Calculate fractional share values</p>
+                    <p className="tool-description">
+                      Calculate fractional share values
+                    </p>
                     <button className="tool-button">Open Tool</button>
                   </div>
                 </div>
@@ -394,8 +427,14 @@ export default function DashboardPage() {
         }
 
         @keyframes fadeIn {
-          from { opacity: 0; transform: translateY(10px); }
-          to { opacity: 1; transform: translateY(0); }
+          from {
+            opacity: 0;
+            transform: translateY(10px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
         }
 
         .overview-grid {
@@ -482,7 +521,11 @@ export default function DashboardPage() {
 
         .progress-fill {
           height: 100%;
-          background: linear-gradient(90deg, var(--nyse-color-primary) 0%, var(--nyse-color-accent) 100%);
+          background: linear-gradient(
+            90deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-accent) 100%
+          );
           transition: width 0.5s ease;
         }
 
@@ -577,7 +620,11 @@ export default function DashboardPage() {
 
         .module-item.current {
           border-left: 4px solid var(--nyse-color-primary);
-          background: linear-gradient(135deg, rgba(0, 61, 122, 0.05) 0%, rgba(0, 160, 227, 0.05) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba(0, 61, 122, 0.05) 0%,
+            rgba(0, 160, 227, 0.05) 100%
+          );
         }
 
         .module-item.locked {

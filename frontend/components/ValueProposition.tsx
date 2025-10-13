@@ -5,7 +5,10 @@ interface ValuePropositionProps {
   points: string[];
 }
 
-export default function ValueProposition({ title, points }: ValuePropositionProps) {
+export default function ValueProposition({
+  title,
+  points,
+}: ValuePropositionProps) {
   return (
     <section className="bg-indigo-50 rounded-xl p-8 my-8 shadow">
       <h2 className="text-2xl font-bold text-indigo-800 mb-4">{title}</h2>

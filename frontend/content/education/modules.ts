@@ -19,14 +19,16 @@ export const modules: Module[] = [
   {
     id: 'stocks-101',
     title: 'What Is a Stock?',
-    description: 'Learn the fundamentals of equity ownership and how stocks trade.',
+    description:
+      'Learn the fundamentals of equity ownership and how stocks trade.',
     badgeId: 'bootcamp_starter',
     lessons: [
       {
         slug: 'stocks-overview',
         title: 'Stocks Overview',
         videoUrl: '',
-        summary: 'Definition, shareholder rights, and why companies issue stock.',
+        summary:
+          'Definition, shareholder rights, and why companies issue stock.',
         points: 50,
       },
     ],

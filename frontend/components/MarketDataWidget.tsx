@@ -1,5 +1,9 @@
 import React, { useEffect, useState } from 'react';
-import { fetchAlphaVantage, fetchIEXCloud, fetchCoinGecko } from '../lib/marketData';
+import {
+  fetchAlphaVantage,
+  fetchIEXCloud,
+  fetchCoinGecko,
+} from '../lib/marketData';
 
 interface MarketDataWidgetProps {
   alphaVantageKey: string;
@@ -8,7 +12,12 @@ interface MarketDataWidgetProps {
   coinId: string; // e.g., 'bitcoin'
 }
 
-export default function MarketDataWidget({ alphaVantageKey, iexCloudKey, symbol, coinId }: MarketDataWidgetProps) {
+export default function MarketDataWidget({
+  alphaVantageKey,
+  iexCloudKey,
+  symbol,
+  coinId,
+}: MarketDataWidgetProps) {
   const [alphaData, setAlphaData] = useState<any>(null);
   const [iexData, setIexData] = useState<any>(null);
   const [coinData, setCoinData] = useState<any>(null);
@@ -49,14 +58,33 @@ export default function MarketDataWidget({ alphaVantageKey, iexCloudKey, symbol,
           <div>
             <h4 className="font-semibold text-indigo-700">Stock ({symbol})</h4>
             <div className="text-sm text-gray-700">
-              <div><b>Alpha Vantage:</b> {alphaData && alphaData['Time Series (Daily)'] ? (Object.entries(alphaData['Time Series (Daily)'])[0][1] as any)['4. close'] : 'N/A'}</div>
-              <div><b>IEX Cloud:</b> {iexData && iexData.latestPrice ? `$${iexData.latestPrice}` : 'N/A'}</div>
+              <div>
+                <b>Alpha Vantage:</b>{' '}
+                {alphaData && alphaData['Time Series (Daily)']
+                  ? (
+                      Object.entries(
+                        alphaData['Time Series (Daily)']
+                      )[0][1] as any
+                    )['4. close']
+                  : 'N/A'}
+              </div>
+              <div>
+                <b>IEX Cloud:</b>{' '}
+                {iexData && iexData.latestPrice
+                  ? `$${iexData.latestPrice}`
+                  : 'N/A'}
+              </div>
             </div>
           </div>
           <div>
             <h4 className="font-semibold text-indigo-700">Crypto ({coinId})</h4>
             <div className="text-sm text-gray-700">
-              <div><b>CoinGecko:</b> {coinData && coinData.market_data ? `$${coinData.market_data.current_price.usd}` : 'N/A'}</div>
+              <div>
+                <b>CoinGecko:</b>{' '}
+                {coinData && coinData.market_data
+                  ? `$${coinData.market_data.current_price.usd}`
+                  : 'N/A'}
+              </div>
             </div>
           </div>
         </div>

@@ -1,13 +1,13 @@
-import { beforeAll, afterAll, afterEach } from '@jest/globals';
-import { MongoMemoryServer } from 'mongodb-memory-server';
-import { PrismaClient } from '@prisma/client';
-import { RedisService } from '../services/redis/redis.service';
+import { beforeAll, afterAll, afterEach } from "@jest/globals";
+import { MongoMemoryServer } from "mongodb-memory-server";
+import { PrismaClient } from "@prisma/client";
+import { RedisService } from "../services/redis/redis.service";
 
 // Mock Redis service
-jest.mock('../services/redis/redis.service');
+jest.mock("../services/redis/redis.service");
 
 // Mock Prisma Client
-jest.mock('@prisma/client', () => {
+jest.mock("@prisma/client", () => {
   const mockPrismaClient = {
     $connect: jest.fn(),
     $disconnect: jest.fn(),
@@ -27,13 +27,14 @@ jest.mock('@prisma/client', () => {
 });
 
 // Mock Redis service methods
-const mockRedisService = RedisService.getInstance() as jest.Mocked<RedisService>;
+const mockRedisService =
+  RedisService.getInstance() as jest.Mocked<RedisService>;
 
 // Mock implementation for Redis service
 mockRedisService.get.mockImplementation(async (key: string) => {
   // Return mock data based on key
-  if (key.startsWith('user:')) {
-    return JSON.stringify({ id: 'user1', name: 'Test User' });
+  if (key.startsWith("user:")) {
+    return JSON.stringify({ id: "user1", name: "Test User" });
   }
   return null;
 });
@@ -48,7 +49,7 @@ beforeAll(async () => {
   // Start MongoDB in-memory server
   mongoServer = await MongoMemoryServer.create();
   process.env.DATABASE_URL = mongoServer.getUri();
-  
+
   // Initialize Redis service
   await mockRedisService.connect();
 });
@@ -56,7 +57,7 @@ beforeAll(async () => {
 afterAll(async () => {
   // Stop MongoDB in-memory server
   await mongoServer.stop();
-  
+
   // Disconnect Redis
   await mockRedisService.disconnect();
 });

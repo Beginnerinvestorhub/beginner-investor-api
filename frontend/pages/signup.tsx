@@ -47,8 +47,12 @@ export default function SignupPage() {
             margin-bottom: 1.5rem;
           }
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
           .nyse-loading-text {
             font-family: var(--nyse-font-sans);
@@ -65,7 +69,10 @@ export default function SignupPage() {
     <>
       <Head>
         <title>Sign Up | Beginner Investor Hub</title>
-        <meta name="description" content="Create your account to start building your investment knowledge with AI-powered tools and portfolio simulations." />
+        <meta
+          name="description"
+          content="Create your account to start building your investment knowledge with AI-powered tools and portfolio simulations."
+        />
       </Head>
 
       <div className="signup-page">
@@ -76,10 +83,11 @@ export default function SignupPage() {
               <div className="logo-icon">📊</div>
               <span className="brand-name">Investor Hub</span>
             </Link>
-            
+
             <h1>Start Your Journey</h1>
             <p className="brand-tagline">
-              Join thousands of investors mastering the art of portfolio management with our precision-engineered learning platform.
+              Join thousands of investors mastering the art of portfolio
+              management with our precision-engineered learning platform.
             </p>
 
             <div className="benefits-list">
@@ -87,21 +95,27 @@ export default function SignupPage() {
                 <div className="benefit-icon">🎯</div>
                 <div className="benefit-content">
                   <h3>Risk-Free Simulation</h3>
-                  <p>Practice with virtual portfolios before investing real money</p>
+                  <p>
+                    Practice with virtual portfolios before investing real money
+                  </p>
                 </div>
               </div>
               <div className="benefit-item">
                 <div className="benefit-icon">🤖</div>
                 <div className="benefit-content">
                   <h3>AI-Powered Coaching</h3>
-                  <p>Get personalized behavioral insights and recommendations</p>
+                  <p>
+                    Get personalized behavioral insights and recommendations
+                  </p>
                 </div>
               </div>
               <div className="benefit-item">
                 <div className="benefit-icon">📈</div>
                 <div className="benefit-content">
                   <h3>Real Market Data</h3>
-                  <p>Access institutional-grade analytics and market insights</p>
+                  <p>
+                    Access institutional-grade analytics and market insights
+                  </p>
                 </div>
               </div>
             </div>
@@ -179,7 +193,11 @@ export default function SignupPage() {
         }
 
         .signup-branding {
-          background: linear-gradient(135deg, var(--nyse-color-secondary) 0%, var(--nyse-color-accent) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-secondary) 0%,
+            var(--nyse-color-accent) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl);
           display: flex;
@@ -196,9 +214,21 @@ export default function SignupPage() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: 
-            repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px),
-            repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px);
+          background:
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            ),
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            );
           pointer-events: none;
         }
 

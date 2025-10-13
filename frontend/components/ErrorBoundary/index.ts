@@ -1,6 +1,9 @@
 export { default as GlobalErrorBoundary } from './GlobalErrorBoundary';
 export { default as ComponentErrorBoundary } from './ComponentErrorBoundary';
-export { default as PageErrorBoundary, withPageErrorBoundary } from './PageErrorBoundary';
+export {
+  default as PageErrorBoundary,
+  withPageErrorBoundary,
+} from './PageErrorBoundary';
 
 // Error boundary utilities and hooks
 export const logError = (error: Error, errorInfo?: any, context?: string) => {
@@ -23,11 +26,11 @@ export const errorBoundaryConfig = {
   // Global settings
   enableErrorReporting: process.env.NODE_ENV === 'production',
   maxRetries: 3,
-  
+
   // Development settings
   showErrorDetails: process.env.NODE_ENV === 'development',
   logToConsole: true,
-  
+
   // Production settings
   sentryDsn: process.env.NEXT_PUBLIC_SENTRY_DSN,
   enableUserFeedback: true,

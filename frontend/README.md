@@ -12,6 +12,7 @@ packages/         # Shared code (types, UI, utils)
 ```
 
 ## Features
+
 - Next.js (frontend, SSR, API routes)
 - Tailwind CSS (responsive, mobile-first)
 - Firebase Auth (email/password, OAuth, RBAC)
@@ -39,16 +40,20 @@ See full documentation in each subfolder and below.
 ---
 
 ## Environment Variables
+
 - All secrets/config in `.env` (see `.env.example`)
 
 ## Deployment
+
 - Dockerfiles provided for each service
 - docker-compose for local dev
 - See `/infra` for AWS deployment templates (coming soon)
 
 ## Testing
+
 - Jest (frontend/backend)
 - Example tests in `/tests`
 
 ## Contact
+
 Kevin Ringler <beginnerinvestorhub@gmail.com>

@@ -20,7 +20,10 @@ const riskOptions = [
 
 export default function ProfileForm() {
   const { user } = useAuth();
-  const [statusMessage, setStatusMessage] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
+  const [statusMessage, setStatusMessage] = useState<{
+    type: 'success' | 'error';
+    message: string;
+  } | null>(null);
 
   const {
     register,
@@ -43,9 +46,12 @@ export default function ProfileForm() {
       if (!user) return;
       try {
         const token = await user.getIdToken();
-        const { data } = await axios.get(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const { data } = await axios.get(
+          `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
         // The old form had a single 'name' field. We adapt to firstName/lastName.
         // Assuming backend returns firstName, lastName, riskTolerance, goals directly
         reset({
@@ -67,13 +73,21 @@ export default function ProfileForm() {
     try {
       const token = await user.getIdToken();
       // The backend route is PUT for updates
-      await axios.put(`${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile`, data, {
-        headers: { Authorization: `Bearer ${token}` },
+      await axios.put(
+        `${process.env.NEXT_PUBLIC_API_BASE_URL}/api/profile`,
+        data,
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      setStatusMessage({
+        type: 'success',
+        message: 'Profile saved successfully!',
       });
-      setStatusMessage({ type: 'success', message: 'Profile saved successfully!' });
       // No need to reset(data) here as formState.isDirty will be reset by react-hook-form automatically
     } catch (error: any) {
-      const message = error.response?.data?.message || 'An unexpected error occurred.';
+      const message =
+        error.response?.data?.message || 'An unexpected error occurred.';
       setStatusMessage({ type: 'error', message });
     }
   };
@@ -81,10 +95,19 @@ export default function ProfileForm() {
   return (
     <div className="max-w-md mx-auto mt-16 bg-white rounded-xl shadow-lg p-8">
       <h2 className="text-2xl font-bold mb-6 text-indigo-700">Profile</h2>
-      {user?.email && <p className="mb-4">Email: <span className="font-mono">{user.email}</span></p>}
+      {user?.email && (
+        <p className="mb-4">
+          Email: <span className="font-mono">{user.email}</span>
+        </p>
+      )}
       <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
         <div>
-          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700">First Name</label>
+          <label
+            htmlFor="firstName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            First Name
+          </label>
           <input
             type="text"
             id="firstName"
@@ -92,10 +115,19 @@ export default function ProfileForm() {
             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${errors.firstName ? 'border-red-500' : ''}`}
             disabled={isSubmitting}
           />
-          {errors.firstName && <p className="mt-1 text-sm text-red-600">{errors.firstName.message}</p>}
+          {errors.firstName && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.firstName.message}
+            </p>
+          )}
         </div>
         <div>
-          <label htmlFor="lastName" className="block text-sm font-medium text-gray-700">Last Name</label>
+          <label
+            htmlFor="lastName"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Last Name
+          </label>
           <input
             type="text"
             id="lastName"
@@ -103,10 +135,19 @@ export default function ProfileForm() {
             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${errors.lastName ? 'border-red-500' : ''}`}
             disabled={isSubmitting}
           />
-          {errors.lastName && <p className="mt-1 text-sm text-red-600">{errors.lastName.message}</p>}
+          {errors.lastName && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.lastName.message}
+            </p>
+          )}
         </div>
         <div>
-          <label htmlFor="riskTolerance" className="block text-sm font-medium text-gray-700">Risk Tolerance</label>
+          <label
+            htmlFor="riskTolerance"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Risk Tolerance
+          </label>
           <select
             id="riskTolerance"
             {...register('riskTolerance')}
@@ -115,13 +156,24 @@ export default function ProfileForm() {
           >
             <option value="">Select...</option>
             {riskOptions.map(option => (
-              <option key={option.value} value={option.value}>{option.label}</option>
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
             ))}
           </select>
-          {errors.riskTolerance && <p className="mt-1 text-sm text-red-600">{errors.riskTolerance.message}</p>}
+          {errors.riskTolerance && (
+            <p className="mt-1 text-sm text-red-600">
+              {errors.riskTolerance.message}
+            </p>
+          )}
         </div>
         <div>
-          <label htmlFor="goals" className="block text-sm font-medium text-gray-700">Investment Goals (Optional)</label>
+          <label
+            htmlFor="goals"
+            className="block text-sm font-medium text-gray-700"
+          >
+            Investment Goals (Optional)
+          </label>
           <textarea
             id="goals"
             {...register('goals')}
@@ -129,7 +181,9 @@ export default function ProfileForm() {
             className={`mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-300 focus:ring focus:ring-indigo-200 focus:ring-opacity-50 ${errors.goals ? 'border-red-500' : ''}`}
             disabled={isSubmitting}
           />
-          {errors.goals && <p className="mt-1 text-sm text-red-600">{errors.goals.message}</p>}
+          {errors.goals && (
+            <p className="mt-1 text-sm text-red-600">{errors.goals.message}</p>
+          )}
         </div>
         <button
           type="submit"
@@ -139,7 +193,9 @@ export default function ProfileForm() {
           {isSubmitting ? 'Saving...' : 'Save Profile'}
         </button>
         {statusMessage && (
-          <p className={`mt-3 text-center text-sm ${statusMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}>
+          <p
+            className={`mt-3 text-center text-sm ${statusMessage.type === 'success' ? 'text-green-600' : 'text-red-600'}`}
+          >
             {statusMessage.message}
           </p>
         )}

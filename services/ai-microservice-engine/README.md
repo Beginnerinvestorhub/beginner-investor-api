@@ -108,7 +108,7 @@ pip install -r requirements.txt
 
 ### Running the Service
 ```bash
-uvicorn src.main:app --reload --port 8000
+uvicorn src.main:app --reload --port 8002
 ```
 
 ### Testing

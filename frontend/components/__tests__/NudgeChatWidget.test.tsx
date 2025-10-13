@@ -38,13 +38,13 @@ describe('NudgeChatWidget', () => {
   it('opens the chat widget when button is clicked', async () => {
     render(<NudgeChatWidget />);
     const button = screen.getByRole('button', { name: /open chat/i });
-    
+
     await act(async () => {
       fireEvent.click(button);
       // Wait for the component to finish loading
       await new Promise(resolve => setTimeout(resolve, 0));
     });
-    
+
     // Check if chat widget is open
     const chatWidget = await screen.findByRole('dialog');
     expect(chatWidget).toBeInTheDocument();
@@ -52,22 +52,24 @@ describe('NudgeChatWidget', () => {
 
   it('closes the chat widget when close button is clicked', async () => {
     render(<NudgeChatWidget />);
-    
+
     // Open the chat widget
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /open chat/i }));
       // Wait for the component to finish loading
       await new Promise(resolve => setTimeout(resolve, 0));
     });
-    
+
     // Click the close button
     await act(async () => {
       fireEvent.click(screen.getByRole('button', { name: /close chat/i }));
       // Wait for the component to finish updating
       await new Promise(resolve => setTimeout(resolve, 0));
     });
-    
+
     // The chat button should be visible again
-    expect(screen.getByRole('button', { name: /open chat/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /open chat/i })
+    ).toBeInTheDocument();
   });
 });

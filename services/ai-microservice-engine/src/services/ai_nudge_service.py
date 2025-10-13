@@ -41,7 +41,6 @@ class AIEnhancedNudgeService:
         self.temperature = temperature
         self.max_tokens = max_tokens
         self.logger = logging.getLogger(__name__)
-{{ ... }}
 
     async def generate_personalized_nudge(
         self,
@@ -105,25 +104,24 @@ class AIEnhancedNudgeService:
             raise
 
     def _build_prompt(self, context: NudgeContext) -> str:
-{{ ... }}
         return f"""
         Generate a personalized investment nudge for a {context.investment_experience} investor.
-        
+
         Risk Profile:
         - Risk Tolerance: {context.risk_profile.get('risk_tolerance', 'N/A')}
         - Max Drawdown Tolerance: {context.risk_profile.get('max_drawdown', 'N/A')}
-        
+
         Portfolio Metrics:
         - Current Volatility: {context.portfolio_metrics.get('volatility', 'N/A')}
         - Sharpe Ratio: {context.portfolio_metrics.get('sharpe_ratio', 'N/A')}
         - Diversification Score: {context.portfolio_metrics.get('diversification', 'N/A')}
-        
+
         Recent Actions:
         {self._format_recent_actions(context.recent_actions)}
-        
+
         Market Conditions:
         {self._format_market_conditions(context.market_conditions)}
-        
+
         Generate a nudge that includes:
         1. A clear, actionable message
         2. The type of nudge (educational/risk_warning/opportunity/goal_tracking)

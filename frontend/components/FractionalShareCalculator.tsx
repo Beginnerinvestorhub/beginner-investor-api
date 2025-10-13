@@ -1,16 +1,36 @@
 import React, { useState, Suspense, useEffect } from 'react';
 
-const Pie = React.lazy(() => import('react-chartjs-2').then(mod => ({ default: mod.Pie })));
-const Bar = React.lazy(() => import('react-chartjs-2').then(mod => ({ default: mod.Bar })));
+const Pie = React.lazy(() =>
+  import('react-chartjs-2').then(mod => ({ default: mod.Pie }))
+);
+const Bar = React.lazy(() =>
+  import('react-chartjs-2').then(mod => ({ default: mod.Bar }))
+);
 
 function useRegisterChartJS() {
   useEffect(() => {
-    import('chart.js').then(({ Chart, ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale }) => {
-      Chart.register(ArcElement, Tooltip, Legend, BarElement, CategoryScale, LinearScale);
-    });
+    import('chart.js').then(
+      ({
+        Chart,
+        ArcElement,
+        Tooltip,
+        Legend,
+        BarElement,
+        CategoryScale,
+        LinearScale,
+      }) => {
+        Chart.register(
+          ArcElement,
+          Tooltip,
+          Legend,
+          BarElement,
+          CategoryScale,
+          LinearScale
+        );
+      }
+    );
   }, []);
 }
-
 
 const brokers = [
   { name: 'Broker A', fee: 0 },
@@ -20,10 +40,10 @@ const brokers = [
 
 /**
  * FractionalShareCalculator is a component that allows users to calculate the number of fractional shares
- * they can buy from various brokers based on an investment amount and stock price. It provides a form for 
- * inputting the investment amount and stock symbol, fetches the stock price, and displays the results in 
- * both a pie chart showing fractional shares by broker and a bar chart comparing broker fees. Users can 
- * select a broker to see the specific number of shares they can purchase with the investment amount minus 
+ * they can buy from various brokers based on an investment amount and stock price. It provides a form for
+ * inputting the investment amount and stock symbol, fetches the stock price, and displays the results in
+ * both a pie chart showing fractional shares by broker and a bar chart comparing broker fees. Users can
+ * select a broker to see the specific number of shares they can purchase with the investment amount minus
  * the broker's fee.
  */
 export default function FractionalShareCalculator(): JSX.Element {
@@ -40,7 +60,9 @@ export default function FractionalShareCalculator(): JSX.Element {
     setPriceError(null);
     setPrice('');
     try {
-      const res = await fetch(`/api/price-proxy?symbol=${encodeURIComponent(sym)}`);
+      const res = await fetch(
+        `/api/price-proxy?symbol=${encodeURIComponent(sym)}`
+      );
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch price');
       setPrice(data.price.toString());
@@ -51,12 +73,15 @@ export default function FractionalShareCalculator(): JSX.Element {
     }
   };
 
-  const calcShares = (amt: number, p: number, fee: number) => (amt - fee > 0 && p > 0 ? (amt - fee) / p : 0);
+  const calcShares = (amt: number, p: number, fee: number) =>
+    amt - fee > 0 && p > 0 ? (amt - fee) / p : 0;
 
-  const shares = brokers.map((b) => calcShares(Number(amount), Number(price), b.fee));
+  const shares = brokers.map(b =>
+    calcShares(Number(amount), Number(price), b.fee)
+  );
 
   const pieData = {
-    labels: brokers.map((b) => b.name),
+    labels: brokers.map(b => b.name),
     datasets: [
       {
         data: shares,
@@ -66,11 +91,11 @@ export default function FractionalShareCalculator(): JSX.Element {
   };
 
   const barData = {
-    labels: brokers.map((b) => b.name),
+    labels: brokers.map(b => b.name),
     datasets: [
       {
         label: 'Broker Fee ($)',
-        data: brokers.map((b) => b.fee),
+        data: brokers.map(b => b.fee),
         backgroundColor: '#6366f1',
       },
     ],
@@ -86,7 +111,7 @@ export default function FractionalShareCalculator(): JSX.Element {
           className="input"
           placeholder="Investment Amount (USD)"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
+          onChange={e => setAmount(e.target.value)}
           required
         />
         <div className="flex gap-2">
@@ -95,7 +120,7 @@ export default function FractionalShareCalculator(): JSX.Element {
             className="input flex-1"
             placeholder="Stock Symbol (e.g. AAPL)"
             value={symbol}
-            onChange={(e) => setSymbol(e.target.value.toUpperCase())}
+            onChange={e => setSymbol(e.target.value.toUpperCase())}
             onBlur={() => symbol && fetchPrice(symbol)}
           />
           <button
@@ -114,35 +139,49 @@ export default function FractionalShareCalculator(): JSX.Element {
           className="input"
           placeholder="Stock Price (USD)"
           value={price}
-          onChange={(e) => setPrice(e.target.value)}
+          onChange={e => setPrice(e.target.value)}
           required
         />
         {priceError && <div className="text-red-500 text-sm">{priceError}</div>}
         <select
           className="input"
           value={selectedBroker}
-          onChange={(e) => setSelectedBroker(e.target.value)}
+          onChange={e => setSelectedBroker(e.target.value)}
         >
-          {brokers.map((b) => (
-            <option key={b.name} value={b.name}>{b.name}</option>
+          {brokers.map(b => (
+            <option key={b.name} value={b.name}>
+              {b.name}
+            </option>
           ))}
         </select>
       </form>
       <div className="mb-6">
         <h3 className="font-semibold mb-2">Fractional Shares by Broker</h3>
         <Suspense fallback={<div>Loading chart...</div>}>
-  <Pie data={pieData} options={{ plugins: { legend: { position: 'bottom' } } }} />
-</Suspense>
+          <Pie
+            data={pieData}
+            options={{ plugins: { legend: { position: 'bottom' } } }}
+          />
+        </Suspense>
       </div>
       <div className="mb-6">
         <h3 className="font-semibold mb-2">Broker Fee Comparison</h3>
         <Suspense fallback={<div>Loading chart...</div>}>
-  <Bar data={barData} options={{ plugins: { legend: { display: false } } }} />
-</Suspense>
+          <Bar
+            data={barData}
+            options={{ plugins: { legend: { display: false } } }}
+          />
+        </Suspense>
       </div>
       <div className="text-center mt-4">
         <span className="text-lg font-bold text-indigo-700">
-          {selectedBroker}: {calcShares(Number(amount), Number(price), brokers.find(b => b.name === selectedBroker)?.fee ?? 0).toFixed(4)} shares
+          {selectedBroker}:{' '}
+          {calcShares(
+            Number(amount),
+            Number(price),
+            brokers.find(b => b.name === selectedBroker)?.fee ?? 0
+          ).toFixed(4)}{' '}
+          shares
         </span>
       </div>
     </div>

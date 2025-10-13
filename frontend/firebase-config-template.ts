@@ -15,21 +15,26 @@ const firebaseConfig = {
   storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
   messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
   appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
-  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
 // Check if required Firebase environment variables are present
 const requiredEnvVars = [
   'NEXT_PUBLIC_FIREBASE_API_KEY',
   'NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN',
-  'NEXT_PUBLIC_FIREBASE_PROJECT_ID'
+  'NEXT_PUBLIC_FIREBASE_PROJECT_ID',
 ];
 
 const missingEnvVars = requiredEnvVars.filter(envVar => !process.env[envVar]);
 
 if (missingEnvVars.length > 0) {
-  console.error('Firebase not initialized: Missing environment variables:', missingEnvVars.join(', '));
-  console.error('Please set the following environment variables in your .env.local file or deployment platform:');
+  console.error(
+    'Firebase not initialized: Missing environment variables:',
+    missingEnvVars.join(', ')
+  );
+  console.error(
+    'Please set the following environment variables in your .env.local file or deployment platform:'
+  );
   missingEnvVars.forEach(envVar => {
     console.error(`- ${envVar}`);
   });
@@ -44,9 +49,12 @@ try {
     // Initialize Firebase only if not already initialized
     app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0];
     auth = getAuth(app);
-    
+
     // Connect to Auth emulator in development if specified
-    if (process.env.NODE_ENV === 'development' && process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true') {
+    if (
+      process.env.NODE_ENV === 'development' &&
+      process.env.NEXT_PUBLIC_USE_FIREBASE_EMULATOR === 'true'
+    ) {
       try {
         connectAuthEmulator(auth, 'http://localhost:9099');
         console.log('Connected to Firebase Auth emulator');
@@ -54,10 +62,12 @@ try {
         console.warn('Failed to connect to Firebase Auth emulator:', error);
       }
     }
-    
+
     console.log('Firebase initialized successfully');
   } else {
-    console.warn('Firebase initialization skipped due to missing environment variables');
+    console.warn(
+      'Firebase initialization skipped due to missing environment variables'
+    );
   }
 } catch (error) {
   console.error('Error initializing Firebase:', error);
@@ -77,7 +87,7 @@ export const getFirebaseStatus = () => {
     initialized: isFirebaseInitialized(),
     missingEnvVars,
     hasApp: app !== null,
-    hasAuth: auth !== null
+    hasAuth: auth !== null,
   };
 };
 

@@ -7,7 +7,7 @@ module.exports = {
     'plugin:@typescript-eslint/recommended',
     'plugin:react/recommended',
     'plugin:react-hooks/recommended',
-    'eslint:recommended'
+    'eslint:recommended',
   ],
   rules: {
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
@@ -19,17 +19,17 @@ module.exports = {
     'no-var': 'error',
     'react/no-unescaped-entities': 'error',
     'react/react-in-jsx-scope': 'off', // Next.js doesn't require React import
-    'react-hooks/exhaustive-deps': 'warn'
+    'react-hooks/exhaustive-deps': 'warn',
   },
   env: {
     browser: true,
     es2021: true,
     node: true,
-    jest: true
+    jest: true,
   },
   settings: {
     react: {
-      version: 'detect'
-    }
-  }
+      version: 'detect',
+    },
+  },
 };

@@ -5,11 +5,20 @@ import os
 from dotenv import load_dotenv
 import asyncio
 from datetime import datetime
+from contextlib import asynccontextmanager
 
 # Load environment variables
 load_dotenv()
 
-app = FastAPI(title="Market Data Service")
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup
+    asyncio.create_task(ingest_market_data())
+    yield
+    # Shutdown
+    # Add any cleanup logic here
+
+app = FastAPI(title="Market Data Service", lifespan=lifespan)
 
 # Configure CORS
 app.add_middleware(
@@ -34,13 +43,12 @@ async def ingest_market_data():
         try:
             # TODO: Implement data ingestion logic
             await asyncio.sleep(int(os.getenv("DATA_INGESTION_INTERVAL", 300)))
+        except asyncio.CancelledError:
+            # Task was cancelled, exit gracefully
+            break
         except Exception as e:
             print(f"Error in market data ingestion: {e}")
             await asyncio.sleep(60)  # Wait before retry
-
-@app.on_event("startup")
-async def startup_event():
-    asyncio.create_task(ingest_market_data())
 
 if __name__ == "__main__":
     uvicorn.run(

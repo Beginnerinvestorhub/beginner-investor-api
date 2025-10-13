@@ -1,11 +1,11 @@
 // src/utils/secure-cookies.ts
-import { Request, Response } from 'express';
-import { env } from '../config/env.schema';
+import { Request, Response } from "express";
+import { env } from "../config/env.schema";
 
 type CookieOptions = {
   httpOnly: boolean;
   secure: boolean;
-  sameSite: 'strict' | 'lax' | 'none';
+  sameSite: "strict" | "lax" | "none";
   maxAge?: number;
   domain?: string;
   path?: string;
@@ -15,9 +15,9 @@ type CookieOptions = {
 
 const defaultCookieOptions: CookieOptions = {
   httpOnly: true,
-  secure: env.NODE_ENV === 'production',
-  sameSite: 'lax',
-  path: '/',
+  secure: env.NODE_ENV === "production",
+  sameSite: "lax",
+  path: "/",
   partitioned: true,
 };
 
@@ -29,7 +29,7 @@ export class SecureCookies {
     res: Response,
     name: string,
     value: string,
-    options: Partial<CookieOptions> = {}
+    options: Partial<CookieOptions> = {},
   ): void {
     const cookieOptions: CookieOptions = {
       ...defaultCookieOptions,
@@ -74,18 +74,18 @@ export class SecureCookies {
       accessToken: string;
       refreshToken: string;
       accessTokenExpiresIn: number; // in seconds
-    }
+    },
   ): void {
     // Set access token cookie (short-lived)
-    this.setCookie(res, 'access_token', accessToken, {
+    this.setCookie(res, "access_token", accessToken, {
       maxAge: accessTokenExpiresIn * 1000, // convert to milliseconds
-      sameSite: 'strict',
+      sameSite: "strict",
     });
 
     // Set refresh token cookie (long-lived, httpOnly)
-    this.setCookie(res, 'refresh_token', refreshToken, {
+    this.setCookie(res, "refresh_token", refreshToken, {
       maxAge: 60 * 60 * 24 * 7 * 1000, // 7 days
-      sameSite: 'strict',
+      sameSite: "strict",
     });
   }
 
@@ -93,17 +93,17 @@ export class SecureCookies {
    * Clear authentication cookies
    */
   static clearAuthCookies(res: Response): void {
-    this.clearCookie(res, 'access_token');
-    this.clearCookie(res, 'refresh_token');
+    this.clearCookie(res, "access_token");
+    this.clearCookie(res, "refresh_token");
   }
 
   /**
    * Generate CSRF token and set it in a cookie
    */
   static setCsrfToken(res: Response, token: string): void {
-    this.setCookie(res, 'XSRF-TOKEN', token, {
+    this.setCookie(res, "XSRF-TOKEN", token, {
       httpOnly: false, // Needs to be accessible from JavaScript
-      sameSite: 'strict',
+      sameSite: "strict",
       maxAge: 60 * 60 * 1000, // 1 hour
     });
   }
@@ -112,7 +112,7 @@ export class SecureCookies {
    * Clear CSRF token cookie
    */
   static clearCsrfToken(res: Response): void {
-    this.clearCookie(res, 'XSRF-TOKEN');
+    this.clearCookie(res, "XSRF-TOKEN");
   }
 
   /**
@@ -120,10 +120,11 @@ export class SecureCookies {
    */
   static getCsrfToken(req: Request): string | undefined {
     // Check header first (for API requests)
-    const headerToken = req.headers['x-csrf-token'] || 
-                       req.headers['xsrf-token'] || 
-                       req.headers['x-xsrf-token'];
-    
+    const headerToken =
+      req.headers["x-csrf-token"] ||
+      req.headers["xsrf-token"] ||
+      req.headers["x-xsrf-token"];
+
     if (Array.isArray(headerToken)) {
       return headerToken[0];
     } else if (headerToken) {
@@ -144,8 +145,8 @@ export class SecureCookies {
    */
   static verifyCsrfToken(req: Request): boolean {
     const csrfToken = this.getCsrfToken(req);
-    const cookieToken = req.cookies['XSRF-TOKEN'];
-    
+    const cookieToken = req.cookies["XSRF-TOKEN"];
+
     if (!csrfToken || !cookieToken) {
       return false;
     }
@@ -158,14 +159,14 @@ export class SecureCookies {
    */
   static csrfProtection(req: Request, res: Response, next: Function): void {
     // Skip CSRF check for safe methods
-    if (['GET', 'HEAD', 'OPTIONS', 'TRACE'].includes(req.method)) {
+    if (["GET", "HEAD", "OPTIONS", "TRACE"].includes(req.method)) {
       return next();
     }
 
     if (!this.verifyCsrfToken(req)) {
-      res.status(403).json({ 
-        error: 'Invalid CSRF token',
-        code: 'INVALID_CSRF_TOKEN'
+      res.status(403).json({
+        error: "Invalid CSRF token",
+        code: "INVALID_CSRF_TOKEN",
       });
       return;
     }
@@ -180,14 +181,14 @@ export const secureCookies = new SecureCookies();
 // Middleware to automatically add CSRF token to responses
 export const csrfMiddleware = (req: Request, res: Response, next: Function) => {
   // Skip for API routes that don't need CSRF
-  if (req.path.startsWith('/api/')) {
+  if (req.path.startsWith("/api/")) {
     return next();
   }
 
   // Generate and set CSRF token if not already set
-  if (!req.cookies['XSRF-TOKEN']) {
-    const crypto = require('crypto');
-    const token = crypto.randomBytes(32).toString('hex');
+  if (!req.cookies["XSRF-TOKEN"]) {
+    const crypto = require("crypto");
+    const token = crypto.randomBytes(32).toString("hex");
     SecureCookies.setCsrfToken(res, token);
   }
 

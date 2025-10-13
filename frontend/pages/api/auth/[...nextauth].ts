@@ -7,7 +7,7 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
       async authorize(credentials) {
         // This is where you would typically check against your database
@@ -21,8 +21,8 @@ export const authOptions: NextAuthOptions = {
           };
         }
         return null;
-      }
-    })
+      },
+    }),
   ],
   pages: {
     signIn: '/login',

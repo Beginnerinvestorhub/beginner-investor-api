@@ -7,7 +7,7 @@ import { useRouter } from 'next/router';
  * @prop {string} mode - The form mode. Must be either 'login' or 'signup'.
  */
 interface AuthFormProps {
-       mode: 'login' |    'signup';
+  mode: 'login' | 'signup';
 }
 
 export default function AuthForm({ mode }: AuthFormProps) {

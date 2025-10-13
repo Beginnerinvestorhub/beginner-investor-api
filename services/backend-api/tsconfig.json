@@ -1,18 +1,63 @@
 {
   "compilerOptions": {
-    "target": "es2020",
+    // Language and Environment
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "commonjs",
-    "lib": ["es2020"],
+    "moduleResolution": "node",
+    
+    // Project Structure
     "outDir": "./dist",
-    "rootDir": "./src",
+    "baseUrl": "./",
+    "paths": {
+      "@/*": ["src/*"],
+      "@shared/*": ["../../shared/*"]
+    },
+    
+    // Type Checking
     "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": true
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "allowUnusedLabels": false,
+    "allowUnreachableCode": false,
+    
+    // Interop Constraints
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "isolatedModules": true,
+    
+    // Emit
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "newLine": "lf",
+    
+    // Additional Checks
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    
+    // Experimental
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true
   },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "include": [
+    "src/**/*",
+    "../../shared/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "**/*.test.ts",
+    "**/*.spec.ts",
+    "**/__tests__/**"
+  ],
+  "ts-node": {
+    "transpileOnly": true,
+    "files": true
+  }
 }

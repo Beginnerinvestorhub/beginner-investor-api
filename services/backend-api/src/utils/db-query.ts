@@ -1,5 +1,5 @@
-import { PrismaClient, Prisma } from '@prisma/client';
-import { logger } from './logger';
+import { PrismaClient, Prisma } from "@prisma/client";
+import { logger } from "./logger";
 
 const prisma = new PrismaClient();
 
@@ -18,7 +18,7 @@ export class SafeQuery {
   static async findMany<T = any>(
     model: keyof PrismaClient,
     where: any = {},
-    options: QueryOptions = {}
+    options: QueryOptions = {},
   ): Promise<T[]> {
     try {
       this.sanitizeWhereClause(where);
@@ -39,7 +39,7 @@ export class SafeQuery {
   static async findUnique<T = any>(
     model: keyof PrismaClient,
     where: any,
-    options: Omit<QueryOptions, 'skip' | 'take'> = {}
+    options: Omit<QueryOptions, "skip" | "take"> = {},
   ): Promise<T | null> {
     try {
       this.sanitizeWhereClause(where);
@@ -49,7 +49,10 @@ export class SafeQuery {
       });
       return result;
     } catch (error) {
-      logger.error(`Error in SafeQuery.findUnique for ${String(model)}:`, error);
+      logger.error(
+        `Error in SafeQuery.findUnique for ${String(model)}:`,
+        error,
+      );
       throw this.handleDatabaseError(error);
     }
   }
@@ -59,7 +62,7 @@ export class SafeQuery {
    */
   static async create<T = any>(
     model: keyof PrismaClient,
-    data: any
+    data: any,
   ): Promise<T> {
     try {
       this.sanitizeData(data);
@@ -77,7 +80,7 @@ export class SafeQuery {
   static async update<T = any>(
     model: keyof PrismaClient,
     where: any,
-    data: any
+    data: any,
   ): Promise<T> {
     try {
       this.sanitizeWhereClause(where);
@@ -96,7 +99,10 @@ export class SafeQuery {
   /**
    * Execute a safe DELETE query
    */
-  static async delete<T = any>(model: keyof PrismaClient, where: any): Promise<T> {
+  static async delete<T = any>(
+    model: keyof PrismaClient,
+    where: any,
+  ): Promise<T> {
     try {
       this.sanitizeWhereClause(where);
       const result = await (prisma[model as string] as any).delete({ where });
@@ -110,19 +116,16 @@ export class SafeQuery {
   /**
    * Execute a raw SQL query with parameterized inputs
    */
-  static async raw<T = any>(
-    query: string,
-    values: any[] = []
-  ): Promise<T[]> {
+  static async raw<T = any>(query: string, values: any[] = []): Promise<T[]> {
     try {
       // Validate the query doesn't contain potential SQL injection patterns
       this.validateRawQuery(query);
-      
+
       // Use Prisma's $queryRaw with parameterized inputs
       const result = await prisma.$queryRawUnsafe<T[]>(query, ...values);
       return result;
     } catch (error) {
-      logger.error('Error in SafeQuery.raw:', error);
+      logger.error("Error in SafeQuery.raw:", error);
       throw this.handleDatabaseError(error);
     }
   }
@@ -136,7 +139,7 @@ export class SafeQuery {
     // Check for potential SQL injection in where clause
     const whereString = JSON.stringify(where).toLowerCase();
     if (this.detectSqlInjection(whereString)) {
-      throw new Error('Potential SQL injection detected in WHERE clause');
+      throw new Error("Potential SQL injection detected in WHERE clause");
     }
   }
 
@@ -149,7 +152,7 @@ export class SafeQuery {
     // Check for potential SQL injection in data
     const dataString = JSON.stringify(data).toLowerCase();
     if (this.detectSqlInjection(dataString)) {
-      throw new Error('Potential SQL injection detected in data');
+      throw new Error("Potential SQL injection detected in data");
     }
   }
 
@@ -162,8 +165,8 @@ export class SafeQuery {
       /\b(?:drop\s+table|delete\s+from|truncate\s+table|insert\s+into|update\s+\w+\s+set|delete\s+from)\b/i,
       /\b(?:union\s+select|select\s+\*\s+from|select\s+\w+\s+from\s+\w+\s+where\s+\d+\s*=\s*\d+)/i,
       /\b(?:exec\s*\(|execute\s+immediate|sp_executesql)/i,
-      /--|\/\*|\*\/|;\s*$/,  // Comments and statement terminators
-      /\b(?:xp_|sp_|sys\.|information_schema\.|pg_)/i,  // Dangerous procedures/tables
+      /--|\/\*|\*\/|;\s*$/, // Comments and statement terminators
+      /\b(?:xp_|sp_|sys\.|information_schema\.|pg_)/i, // Dangerous procedures/tables
     ];
 
     for (const pattern of injectionPatterns) {
@@ -186,7 +189,7 @@ export class SafeQuery {
       /\b(?:0x[0-9a-f]+|char\(|concat\()/i,
     ];
 
-    return sqlInjectionPatterns.some(pattern => pattern.test(input));
+    return sqlInjectionPatterns.some((pattern) => pattern.test(input));
   }
 
   /**
@@ -196,21 +199,21 @@ export class SafeQuery {
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
       // Handle known Prisma errors
       switch (error.code) {
-        case 'P2002':
-          return new Error('Unique constraint violation');
-        case 'P2025':
-          return new Error('Record not found');
-        case 'P2016':
-          return new Error('Inconsistent query result');
+        case "P2002":
+          return new Error("Unique constraint violation");
+        case "P2025":
+          return new Error("Record not found");
+        case "P2016":
+          return new Error("Inconsistent query result");
         default:
           return new Error(`Database error: ${error.message}`);
       }
     } else if (error instanceof Prisma.PrismaClientValidationError) {
-      return new Error('Validation error: ' + error.message);
+      return new Error("Validation error: " + error.message);
     } else if (error instanceof Error) {
       return error;
     } else {
-      return new Error('An unknown database error occurred');
+      return new Error("An unknown database error occurred");
     }
   }
 
@@ -218,7 +221,12 @@ export class SafeQuery {
    * Create a transaction
    */
   static async transaction<T>(
-    callback: (tx: Omit<PrismaClient, '$connect' | '$disconnect' | '$on' | '$transaction' | '$use'>) => Promise<T>
+    callback: (
+      tx: Omit<
+        PrismaClient,
+        "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+      >,
+    ) => Promise<T>,
   ): Promise<T> {
     return await prisma.$transaction(callback);
   }

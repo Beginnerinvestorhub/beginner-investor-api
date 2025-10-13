@@ -4,6 +4,7 @@ exports.RATE_LIMITS = exports.rateLimiter = exports.RateLimiter = void 0;
 const cache_manager_1 = require("./cache-manager");
 const cache_keys_1 = require("./cache-keys");
 class RateLimiter {
+    cacheManager;
     constructor() {
         this.cacheManager = new cache_manager_1.CacheManager();
     }

@@ -14,7 +14,7 @@ export default function ProfilePage() {
     riskTolerance: 'moderate',
     investmentGoal: '',
     investmentHorizon: '3-5',
-    initialCapital: 10000
+    initialCapital: 10000,
   });
   const [profileCompletion, setProfileCompletion] = useState(0);
   const [profileLoading, setProfileLoading] = useState(false);
@@ -36,28 +36,30 @@ export default function ProfilePage() {
         riskTolerance: user.riskTolerance || 'moderate',
         investmentGoal: user.investmentGoal || '',
         investmentHorizon: user.investmentHorizon || '3-5',
-        initialCapital: user.initialCapital || 10000
+        initialCapital: user.initialCapital || 10000,
       });
     }
   }, [user]);
 
   useEffect(() => {
-    const completedFields = Object.values(profileData).filter(value => value !== '' && value !== 0).length;
+    const completedFields = Object.values(profileData).filter(
+      value => value !== '' && value !== 0
+    ).length;
     const totalFields = Object.keys(profileData).length;
     setProfileCompletion(Math.round((completedFields / totalFields) * 100));
   }, [profileData]);
 
-  const handleChange = (e) => {
+  const handleChange = e => {
     const { name, value } = e.target;
     setProfileData(prev => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     setSuccess(false);
     setError('');
   };
 
-  const handleSubmit = async (e) => {
+  const handleSubmit = async e => {
     e.preventDefault();
     setProfileLoading(true);
     setError('');
@@ -119,8 +121,12 @@ export default function ProfilePage() {
           }
 
           @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
+            0% {
+              transform: rotate(0deg);
+            }
+            100% {
+              transform: rotate(360deg);
+            }
           }
 
           .nyse-loading-text {
@@ -142,7 +148,10 @@ export default function ProfilePage() {
     <>
       <Head>
         <title>My Profile | Beginner Investor Hub</title>
-        <meta name="description" content="Manage your profile and investment preferences." />
+        <meta
+          name="description"
+          content="Manage your profile and investment preferences."
+        />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
 
@@ -152,7 +161,9 @@ export default function ProfilePage() {
           <div className="profile-header">
             <div className="profile-avatar">
               <div className="avatar-circle">
-                {user.displayName?.charAt(0)?.toUpperCase() || user.email?.charAt(0)?.toUpperCase() || 'U'}
+                {user.displayName?.charAt(0)?.toUpperCase() ||
+                  user.email?.charAt(0)?.toUpperCase() ||
+                  'U'}
               </div>
             </div>
             <div className="profile-info">
@@ -197,14 +208,12 @@ export default function ProfilePage() {
                   </div>
                   <div className="form-group">
                     <label>Email</label>
-                    <input
-                      type="email"
-                      value={user.email || ''}
-                      disabled
-                    />
+                    <input type="email" value={user.email || ''} disabled />
                     <small>Email cannot be changed</small>
                   </div>
-                  <button className="nyse-btn nyse-btn-primary">Save Changes</button>
+                  <button className="nyse-btn nyse-btn-primary">
+                    Save Changes
+                  </button>
                 </div>
               </div>
             </div>
@@ -236,7 +245,11 @@ export default function ProfilePage() {
         .avatar-circle {
           width: 80px;
           height: 80px;
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-accent) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-accent) 100%
+          );
           border-radius: 50%;
           display: flex;
           align-items: center;

@@ -6,75 +6,91 @@ const tools = [
   {
     name: 'Portfolio Simulation Engine',
     icon: '⚙️',
-    description: 'Build and test investment strategies in a risk-free environment with virtual capital.',
+    description:
+      'Build and test investment strategies in a risk-free environment with virtual capital.',
     href: '/portfolio-simulation',
     category: 'Core Tools',
     status: 'active',
-    features: ['Virtual trading', 'Historical data', 'Performance tracking']
+    features: ['Virtual trading', 'Historical data', 'Performance tracking'],
   },
   {
     name: 'AI Behavioral Coach',
     icon: '🧠',
-    description: 'Get real-time insights on emotional patterns and decision-making biases.',
+    description:
+      'Get real-time insights on emotional patterns and decision-making biases.',
     //href: '/ai-coach',
     category: 'Core Tools',
     status: 'active',
-    features: ['Pattern recognition', 'Nudge alerts', 'Learning recommendations']
+    features: [
+      'Pattern recognition',
+      'Nudge alerts',
+      'Learning recommendations',
+    ],
   },
   {
     name: 'Risk Analysis Dashboard',
     icon: '📊',
-    description: 'Understand portfolio risk metrics with advanced analytics powered by Python.',
+    description:
+      'Understand portfolio risk metrics with advanced analytics powered by Python.',
     href: '/risk-analysis',
     category: 'Core Tools',
     status: 'active',
-    features: ['Sharpe ratio', 'Beta analysis', 'Volatility metrics']
+    features: ['Sharpe ratio', 'Beta analysis', 'Volatility metrics'],
   },
   {
     name: 'Market Data Explorer',
     icon: '📈',
-    description: 'Access real-time and historical market data from Alpha Vantage and Finnhub.',
+    description:
+      'Access real-time and historical market data from Alpha Vantage and Finnhub.',
     href: '/market-data',
     category: 'Research',
     status: 'active',
-    features: ['Live quotes', 'Historical charts', 'Company fundamentals']
+    features: ['Live quotes', 'Historical charts', 'Company fundamentals'],
   },
   {
     name: 'Risk Assessment Quiz',
     icon: '🎯',
-    description: 'Discover your risk tolerance and get a personalized investment profile.',
+    description:
+      'Discover your risk tolerance and get a personalized investment profile.',
     href: '/risk-assessment',
     category: 'Learning',
     status: 'active',
-    features: ['Personality analysis', 'Goal setting', 'Custom recommendations']
+    features: [
+      'Personality analysis',
+      'Goal setting',
+      'Custom recommendations',
+    ],
   },
   {
     name: 'Fractional Share Calculator',
     icon: '🧮',
-    description: 'Calculate how much of any stock you can buy with your available capital.',
+    description:
+      'Calculate how much of any stock you can buy with your available capital.',
     href: '/fractional-calculator',
     category: 'Utilities',
     status: 'active',
-    features: ['Real-time prices', 'Cost breakdown', 'Multiple stocks']
+    features: ['Real-time prices', 'Cost breakdown', 'Multiple stocks'],
   },
   {
     name: 'ESG/SRI Screener',
     icon: '🌍',
-    description: 'Screen investments for environmental, social, and governance factors.',
+    description:
+      'Screen investments for environmental, social, and governance factors.',
     href: '/esg-screener',
     category: 'Research',
     status: 'coming-soon',
-    features: ['ESG ratings', 'Impact metrics', 'Sustainable portfolios']
+    features: ['ESG ratings', 'Impact metrics', 'Sustainable portfolios'],
   },
   {
     name: 'Learning Dashboard',
     icon: '📚',
-    description: 'Track your educational progress, achievements, and unlock new features.',
+    description:
+      'Track your educational progress, achievements, and unlock new features.',
     href: '/learning',
     category: 'Learning',
     status: 'active',
-    features: ['Progress tracking', 'Achievements', 'Gamification']
-  }
+    features: ['Progress tracking', 'Achievements', 'Gamification'],
+  },
 ];
 
 export default function ToolsOverview() {
@@ -83,15 +99,19 @@ export default function ToolsOverview() {
   const categories = ['All', 'Core Tools', 'Research', 'Learning', 'Utilities'];
   const [activeCategory, setActiveCategory] = React.useState('All');
 
-  const filteredTools = activeCategory === 'All' 
-    ? tools 
-    : tools.filter(tool => tool.category === activeCategory);
+  const filteredTools =
+    activeCategory === 'All'
+      ? tools
+      : tools.filter(tool => tool.category === activeCategory);
 
   return (
     <>
       <Head>
         <title>Investment Tools | Beginner Investor Hub</title>
-        <meta name="description" content="Explore our comprehensive suite of investment tools: portfolio simulation, AI coaching, risk analysis, market data, and more." />
+        <meta
+          name="description"
+          content="Explore our comprehensive suite of investment tools: portfolio simulation, AI coaching, risk analysis, market data, and more."
+        />
       </Head>
 
       <div className="tools-page">
@@ -126,18 +146,18 @@ export default function ToolsOverview() {
 
             {/* Tools Grid */}
             <div className="tools-grid">
-              {filteredTools.map((tool) => (
+              {filteredTools.map(tool => (
                 <div key={tool.name} className="tool-card">
                   {tool.status === 'coming-soon' && (
                     <div className="coming-soon-badge">Coming Soon</div>
                   )}
-                  
+
                   <div className="tool-icon">{tool.icon}</div>
-                  
+
                   <h3 className="tool-name">{tool.name}</h3>
-                  
+
                   <p className="tool-description">{tool.description}</p>
-                  
+
                   <ul className="tool-features">
                     {tool.features.map((feature, idx) => (
                       <li key={idx}>
@@ -146,7 +166,7 @@ export default function ToolsOverview() {
                       </li>
                     ))}
                   </ul>
-                  
+
                   <div className="tool-footer">
                     {tool.status === 'active' ? (
                       user ? (
@@ -172,7 +192,10 @@ export default function ToolsOverview() {
             {!user && (
               <div className="cta-section">
                 <h2>Ready to Start Building?</h2>
-                <p>Create a free account to access all our investment tools and start your learning journey.</p>
+                <p>
+                  Create a free account to access all our investment tools and
+                  start your learning journey.
+                </p>
                 <div className="cta-buttons">
                   <Link href="/signup" className="cta-button primary">
                     Create Free Account
@@ -194,7 +217,11 @@ export default function ToolsOverview() {
         }
 
         .tools-header {
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-secondary) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl) 0;
           position: relative;
@@ -208,9 +235,21 @@ export default function ToolsOverview() {
           left: 0;
           right: 0;
           bottom: 0;
-          background: 
-            repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px),
-            repeating-linear-gradient(0deg, transparent, transparent 30px, rgba(255,255,255,0.03) 30px, rgba(255,255,255,0.03) 31px);
+          background:
+            repeating-linear-gradient(
+              90deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            ),
+            repeating-linear-gradient(
+              0deg,
+              transparent,
+              transparent 30px,
+              rgba(255, 255, 255, 0.03) 30px,
+              rgba(255, 255, 255, 0.03) 31px
+            );
           pointer-events: none;
         }
 
@@ -408,7 +447,11 @@ export default function ToolsOverview() {
         }
 
         .cta-section {
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-secondary) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl);
           border-radius: 12px;

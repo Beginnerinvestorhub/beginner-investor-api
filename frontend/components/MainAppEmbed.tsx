@@ -15,9 +15,12 @@ const MainAppEmbed: React.FC<MainAppEmbedProps> = ({ className = '' }) => {
       </h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         <div className="p-4 bg-indigo-50 rounded-lg border border-indigo-200">
-          <h3 className="font-medium text-indigo-900 mb-2">Portfolio Simulator</h3>
+          <h3 className="font-medium text-indigo-900 mb-2">
+            Portfolio Simulator
+          </h3>
           <p className="text-sm text-indigo-700">
-            Practice investing with virtual money in real-time market conditions.
+            Practice investing with virtual money in real-time market
+            conditions.
           </p>
         </div>
         <div className="p-4 bg-green-50 rounded-lg border border-green-200">

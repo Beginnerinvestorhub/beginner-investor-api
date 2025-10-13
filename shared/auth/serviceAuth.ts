@@ -10,7 +10,7 @@ class ServiceAuth {
   private static instance: ServiceAuth;
   private secret: string;
   private algorithm = 'sha256';
-  private encoding: BufferEncoding = 'hex';
+  private encoding: 'hex' = 'hex';
   private headerName = 'x-service-signature';
   private timestampHeader = 'x-service-timestamp';
   private maxTimeDiff = 5 * 60 * 1000; // 5 minutes

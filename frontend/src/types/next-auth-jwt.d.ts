@@ -6,50 +6,47 @@ declare module 'next-auth/jwt' {
    */
   interface JWT {
     /** OpenID ID Token */
-    name?: string | null
-    email?: string | null
-    picture?: string | null
-    sub?: string
-    iat?: number
-    exp?: number
-    jti?: string
-    
+    name?: string | null;
+    email?: string | null;
+    picture?: string | null;
+    sub?: string;
+    iat?: number;
+    exp?: number;
+    jti?: string;
+
     // Custom fields
-    accessToken?: string
-    refreshToken?: string
-    accessTokenExpires?: number
-    error?: string
+    accessToken?: string;
+    refreshToken?: string;
+    accessTokenExpires?: number;
+    error?: string;
     user?: {
-      id: string
-      name?: string | null
-      email?: string | null
-      image?: string | null
-    }
+      id: string;
+      name?: string | null;
+      email?: string | null;
+      image?: string | null;
+    };
   }
 
   /**
    * The JWT decode function
    */
   export function decode(params: {
-    token?: string
-    secret: string | Buffer
-  }): JWT | null
+    token?: string;
+    secret: string | Buffer;
+  }): JWT | null;
 
   /**
    * The JWT encode function
    */
   export function encode(params: {
-    token?: JWT
-    secret: string | Buffer
-  }): Promise<string>
+    token?: JWT;
+    secret: string | Buffer;
+  }): Promise<string>;
 
   /**
    * The JWT verify function
    */
-  export function verify(
-    token: string,
-    secret: string | Buffer
-  ): Promise<JWT>
+  export function verify(token: string, secret: string | Buffer): Promise<JWT>;
 
   /**
    * The JWT sign function
@@ -58,20 +55,20 @@ declare module 'next-auth/jwt' {
     payload: string | object | Buffer,
     secret: string | Buffer,
     options?: {
-      algorithm?: string
-      keyid?: string
-      mutatePayload?: boolean
-      allowInsecureKeySizes?: boolean
-      allowInvalidAsymmetricKeyTypes?: boolean
-      expiresIn?: string | number
-      notBefore?: string | number
-      audience?: string | string[]
-      issuer?: string
-      jwtid?: string
-      subject?: string
-      noTimestamp?: boolean
-      header?: object
-      encoding?: string
+      algorithm?: string;
+      keyid?: string;
+      mutatePayload?: boolean;
+      allowInsecureKeySizes?: boolean;
+      allowInvalidAsymmetricKeyTypes?: boolean;
+      expiresIn?: string | number;
+      notBefore?: string | number;
+      audience?: string | string[];
+      issuer?: string;
+      jwtid?: string;
+      subject?: string;
+      noTimestamp?: boolean;
+      header?: object;
+      encoding?: string;
     }
-  ): string
+  ): string;
 }

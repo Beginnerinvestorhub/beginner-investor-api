@@ -1,5 +1,5 @@
 // shared/cache/redis-client.ts
-import Redis from 'ioredis';
+import { createClient, RedisClientType } from 'redis';
 
 interface RedisConfig {
   url?: string;
@@ -8,15 +8,15 @@ interface RedisConfig {
   password?: string;
   db?: number;
   keyPrefix?: string;
-  retryStrategy?: (times: number) => number | void;
+  retryStrategy?: (times: number) => number;
   maxRetriesPerRequest?: number;
 }
 
 class RedisClient {
-  private static instance: Redis | null = null;
+  private static instance: RedisClientType | null = null;
   private static config: RedisConfig = {};
 
-  static initialize(config: RedisConfig): Redis {
+  static async initialize(config: RedisConfig): Promise<RedisClientType> {
     if (this.instance) {
       console.warn('Redis client already initialized. Returning existing instance.');
       return this.instance;
@@ -26,24 +26,26 @@ class RedisClient {
 
     try {
       if (config.url) {
-        this.instance = new Redis(config.url, {
-          keyPrefix: config.keyPrefix || 'bih:',
-          retryStrategy: config.retryStrategy || this.defaultRetryStrategy,
-          maxRetriesPerRequest: config.maxRetriesPerRequest ?? 3,
+        this.instance = createClient({
+          url: config.url,
+          socket: {
+            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
+          }
         });
       } else {
-        this.instance = new Redis({
-          host: config.host || 'localhost',
-          port: config.port || 6379,
+        this.instance = createClient({
+          socket: {
+            host: config.host || 'localhost',
+            port: config.port || 6379,
+            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
+          },
           password: config.password,
-          db: config.db || 0,
-          keyPrefix: config.keyPrefix || 'bih:',
-          retryStrategy: config.retryStrategy || this.defaultRetryStrategy,
-          maxRetriesPerRequest: config.maxRetriesPerRequest ?? 3,
+          database: config.db || 0
         });
       }
 
       this.setupEventHandlers();
+      await this.instance.connect();
       console.log('✅ Redis client initialized successfully');
       return this.instance;
     } catch (error) {
@@ -52,14 +54,14 @@ class RedisClient {
     }
   }
 
-  static getInstance(): Redis {
+  static getInstance(): RedisClientType {
     if (!this.instance) {
       throw new Error('Redis client not initialized. Call initialize() first.');
     }
     return this.instance;
   }
 
-  private static defaultRetryStrategy(times: number): number | void {
+  private static defaultRetryStrategy(times: number): number {
     const delay = Math.min(times * 50, 2000);
     return delay;
   }
@@ -79,7 +81,7 @@ class RedisClient {
       console.error('❌ Redis client error:', err);
     });
 
-    this.instance.on('close', () => {
+    this.instance.on('end', () => {
       console.log('🔌 Redis connection closed');
     });
 
@@ -108,4 +110,5 @@ class RedisClient {
   }
 }
 
-export { RedisClient, RedisConfig };
+export { RedisClient };
+export type { RedisConfig };

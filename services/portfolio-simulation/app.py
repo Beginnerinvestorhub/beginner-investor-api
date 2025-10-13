@@ -9,7 +9,7 @@ load_dotenv()
 
 # Import the main application from src/app
 try:
-    from src.app.main import app
+    from src.app.main import main
 except ImportError as e:
     print(f"Failed to import main application: {e}")
     print("Please ensure the src/app structure is correct")

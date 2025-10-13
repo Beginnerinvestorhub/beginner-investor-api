@@ -1,6 +1,6 @@
 import { RedisClient } from './redis-client';
 import { CacheManager } from './cache-manager';
-import { rateLimiter } from './rate-limiter';
+import { RateLimiter } from './rate-limiter';
 import { config } from 'dotenv';
 
 // Load environment variables
@@ -12,11 +12,7 @@ config();
 export async function initializeCache(): Promise<void> {
   try {
     // Redis configuration from environment or defaults
-    const redisConfig = {
-      host: process.env.REDIS_HOST || 'localhost',
-      port: parseInt(process.env.REDIS_PORT || '6379'),
-      password: process.env.REDIS_PASSWORD,
-      db: parseInt(process.env.REDIS_DB || '0'),
+    const redisConfig: any = {
       keyPrefix: process.env.REDIS_KEY_PREFIX || 'bih:',
       retryStrategy: (times: number) => {
         const delay = Math.min(times * 50, 2000);
@@ -25,13 +21,27 @@ export async function initializeCache(): Promise<void> {
       maxRetriesPerRequest: 3
     };
 
+    // Use REDIS_URL if available, otherwise use individual config
+    if (process.env.REDIS_URL) {
+      redisConfig.url = process.env.REDIS_URL;
+    } else {
+      redisConfig.host = process.env.REDIS_HOST || 'localhost';
+      redisConfig.port = parseInt(process.env.REDIS_PORT || '6379');
+      redisConfig.password = process.env.REDIS_PASSWORD;
+      redisConfig.db = parseInt(process.env.REDIS_DB || '0');
+    }
+
     // Initialize Redis client
-    const redis = RedisClient.initialize(redisConfig);
+    await RedisClient.initialize(redisConfig);
 
     // Test connection
     await RedisClient.healthCheck();
     console.log('✅ Redis cache system initialized successfully');
-    console.log(`📍 Redis server: ${redisConfig.host}:${redisConfig.port}`);
+    if (redisConfig.url) {
+      console.log(`📍 Redis server: ${redisConfig.url}`);
+    } else {
+      console.log(`📍 Redis server: ${redisConfig.host}:${redisConfig.port}`);
+    }
     console.log(`🔑 Key prefix: ${redisConfig.keyPrefix}`);
 
   } catch (error) {
@@ -62,6 +72,10 @@ export async function initializeRateLimiting(): Promise<void> {
   }
 }
 
+// Global instances
+let cacheManager: CacheManager | null = null;
+let rateLimiter: RateLimiter | null = null;
+
 /**
  * Initialize all caching and rate limiting systems
  */
@@ -72,6 +86,10 @@ export async function initializeSystems(): Promise<void> {
     initializeCache(),
     initializeRateLimiting()
   ]);
+
+  // Instantiate after Redis is initialized
+  cacheManager = new CacheManager();
+  rateLimiter = new RateLimiter();
 
   console.log('✅ All systems initialized successfully');
 }
@@ -88,8 +106,29 @@ export async function cleanup(): Promise<void> {
   }
 }
 
-// Export cache manager instance for use throughout the application
-export const cacheManager = new CacheManager();
+/**
+ * Get cache manager instance
+ */
+export function getCacheManager(): CacheManager {
+  if (!cacheManager) {
+    throw new Error('Cache manager not initialized. Call initializeSystems() first.');
+  }
+  return cacheManager;
+}
+
+/**
+ * Get rate limiter instance
+ */
+export function getRateLimiter(): RateLimiter {
+  if (!rateLimiter) {
+    throw new Error('Rate limiter not initialized. Call initializeSystems() first.');
+  }
+  return rateLimiter;
+}
+
+// Export types and configs
+export { RATE_LIMITS } from './rate-limiter';
+export type { RateLimitOptions } from './rate-limiter';
 
 // Graceful shutdown handling
 process.on('SIGINT', async () => {
@@ -109,6 +148,6 @@ export default {
   initializeRateLimiting,
   initializeSystems,
   cleanup,
-  cacheManager,
-  rateLimiter
+  getCacheManager,
+  getRateLimiter
 };

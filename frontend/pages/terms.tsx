@@ -6,7 +6,10 @@ export default function TermsOfService() {
     <>
       <Head>
         <title>Terms of Service | Beginner Investor Hub</title>
-        <meta name="description" content="Read the Terms of Service for Beginner Investor Hub - Educational investment tools and portfolio simulation platform." />
+        <meta
+          name="description"
+          content="Read the Terms of Service for Beginner Investor Hub - Educational investment tools and portfolio simulation platform."
+        />
       </Head>
 
       <div className="terms-page">
@@ -28,7 +31,9 @@ export default function TermsOfService() {
               {/* Introduction */}
               <section className="terms-section">
                 <p className="intro-text">
-                  Welcome to Beginner Investor Hub. By accessing or using our platform, you agree to be bound by these Terms of Service. Please read them carefully before using our services.
+                  Welcome to Beginner Investor Hub. By accessing or using our
+                  platform, you agree to be bound by these Terms of Service.
+                  Please read them carefully before using our services.
                 </p>
               </section>
 
@@ -36,10 +41,17 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>1. Service Description</h2>
                 <p>
-                  BeginnerInvestorHub.com provides educational financial tools including risk assessment, portfolio simulation, AI-powered behavioral coaching, and investment monitoring. These tools are designed for educational and informational purposes only and do not constitute financial advice, investment recommendations, or professional financial planning services.
+                  BeginnerInvestorHub.com provides educational financial tools
+                  including risk assessment, portfolio simulation, AI-powered
+                  behavioral coaching, and investment monitoring. These tools
+                  are designed for educational and informational purposes only
+                  and do not constitute financial advice, investment
+                  recommendations, or professional financial planning services.
                 </p>
                 <div className="highlight-box">
-                  <strong>Important:</strong> All simulations and tools are for learning purposes. Always consult with qualified financial professionals before making investment decisions.
+                  <strong>Important:</strong> All simulations and tools are for
+                  learning purposes. Always consult with qualified financial
+                  professionals before making investment decisions.
                 </div>
               </section>
 
@@ -48,13 +60,33 @@ export default function TermsOfService() {
                 <h2>2. User Responsibilities</h2>
                 <p>As a user of our platform, you agree to:</p>
                 <ul className="styled-list">
-                  <li>Provide accurate and complete information for personalized results</li>
-                  <li>Understand that all tools are educational in nature and not financial advice</li>
-                  <li>Consult qualified financial professionals for investment decisions</li>
-                  <li>Maintain the security and confidentiality of your account credentials</li>
-                  <li>Use the platform in compliance with all applicable laws and regulations</li>
-                  <li>Not attempt to manipulate, reverse engineer, or abuse the platform</li>
-                  <li>Not share your account access with unauthorized parties</li>
+                  <li>
+                    Provide accurate and complete information for personalized
+                    results
+                  </li>
+                  <li>
+                    Understand that all tools are educational in nature and not
+                    financial advice
+                  </li>
+                  <li>
+                    Consult qualified financial professionals for investment
+                    decisions
+                  </li>
+                  <li>
+                    Maintain the security and confidentiality of your account
+                    credentials
+                  </li>
+                  <li>
+                    Use the platform in compliance with all applicable laws and
+                    regulations
+                  </li>
+                  <li>
+                    Not attempt to manipulate, reverse engineer, or abuse the
+                    platform
+                  </li>
+                  <li>
+                    Not share your account access with unauthorized parties
+                  </li>
                 </ul>
               </section>
 
@@ -64,12 +96,34 @@ export default function TermsOfService() {
                 <div className="warning-box">
                   <h3>⚠️ Important Disclaimers</h3>
                   <ul className="styled-list">
-                    <li><strong>No Financial Advice:</strong> Nothing on this platform constitutes professional financial, investment, tax, or legal advice</li>
-                    <li><strong>Past Performance:</strong> Past performance does not guarantee future results or investment success</li>
-                    <li><strong>Simulation Limitations:</strong> Portfolio simulations are based on historical data and mathematical models that may not reflect real market conditions</li>
-                    <li><strong>Market Data:</strong> Market data may be delayed, subject to provider limitations, and may contain errors</li>
-                    <li><strong>Estimates Only:</strong> All results, projections, and calculations are estimates and may not reflect actual investment outcomes</li>
-                    <li><strong>AI Limitations:</strong> AI-generated insights are based on algorithms and may not account for all variables or personal circumstances</li>
+                    <li>
+                      <strong>No Financial Advice:</strong> Nothing on this
+                      platform constitutes professional financial, investment,
+                      tax, or legal advice
+                    </li>
+                    <li>
+                      <strong>Past Performance:</strong> Past performance does
+                      not guarantee future results or investment success
+                    </li>
+                    <li>
+                      <strong>Simulation Limitations:</strong> Portfolio
+                      simulations are based on historical data and mathematical
+                      models that may not reflect real market conditions
+                    </li>
+                    <li>
+                      <strong>Market Data:</strong> Market data may be delayed,
+                      subject to provider limitations, and may contain errors
+                    </li>
+                    <li>
+                      <strong>Estimates Only:</strong> All results, projections,
+                      and calculations are estimates and may not reflect actual
+                      investment outcomes
+                    </li>
+                    <li>
+                      <strong>AI Limitations:</strong> AI-generated insights are
+                      based on algorithms and may not account for all variables
+                      or personal circumstances
+                    </li>
                   </ul>
                 </div>
               </section>
@@ -77,17 +131,37 @@ export default function TermsOfService() {
               {/* Data Usage & Privacy */}
               <section className="terms-section">
                 <h2>4. Data Usage & Privacy</h2>
-                <p>We take your privacy seriously and handle your data with care:</p>
+                <p>
+                  We take your privacy seriously and handle your data with care:
+                </p>
                 <ul className="styled-list">
-                  <li>Personal information is encrypted and stored securely using industry-standard practices</li>
-                  <li>Market data is provided by licensed third-party providers (Alpha Vantage, Finnhub)</li>
-                  <li>User data is not shared with unauthorized third parties without your consent</li>
-                  <li>We use cookies and tracking technologies as described in our Privacy Policy</li>
-                  <li>You may request data export or account deletion at any time</li>
-                  <li>Portfolio simulations and learning progress are stored to enhance your experience</li>
+                  <li>
+                    Personal information is encrypted and stored securely using
+                    industry-standard practices
+                  </li>
+                  <li>
+                    Market data is provided by licensed third-party providers
+                    (Alpha Vantage, Finnhub)
+                  </li>
+                  <li>
+                    User data is not shared with unauthorized third parties
+                    without your consent
+                  </li>
+                  <li>
+                    We use cookies and tracking technologies as described in our
+                    Privacy Policy
+                  </li>
+                  <li>
+                    You may request data export or account deletion at any time
+                  </li>
+                  <li>
+                    Portfolio simulations and learning progress are stored to
+                    enhance your experience
+                  </li>
                 </ul>
                 <p className="policy-link">
-                  For detailed information, please review our <Link href="/privacy">Privacy Policy</Link>.
+                  For detailed information, please review our{' '}
+                  <Link href="/privacy">Privacy Policy</Link>.
                 </p>
               </section>
 
@@ -95,13 +169,24 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>5. Account Management</h2>
                 <h3>Account Creation</h3>
-                <p>You must provide accurate information when creating an account. You are responsible for maintaining the confidentiality of your login credentials.</p>
-                
+                <p>
+                  You must provide accurate information when creating an
+                  account. You are responsible for maintaining the
+                  confidentiality of your login credentials.
+                </p>
+
                 <h3>Account Termination</h3>
-                <p>We reserve the right to suspend or terminate accounts that violate these terms, engage in fraudulent activity, or misuse the platform.</p>
-                
+                <p>
+                  We reserve the right to suspend or terminate accounts that
+                  violate these terms, engage in fraudulent activity, or misuse
+                  the platform.
+                </p>
+
                 <h3>User-Initiated Deletion</h3>
-                <p>You may delete your account at any time through your account settings or by contacting support.</p>
+                <p>
+                  You may delete your account at any time through your account
+                  settings or by contacting support.
+                </p>
               </section>
 
               {/* Limitation of Liability */}
@@ -109,18 +194,35 @@ export default function TermsOfService() {
                 <h2>6. Limitation of Liability</h2>
                 <div className="legal-box">
                   <p>
-                    <strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW:</strong> The platform, its operators, employees, and affiliates are not liable for:
+                    <strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW:</strong> The
+                    platform, its operators, employees, and affiliates are not
+                    liable for:
                   </p>
                   <ul className="styled-list">
-                    <li>Investment losses or financial damages resulting from use of the platform</li>
-                    <li>Inaccuracies in data, calculations, or AI-generated insights</li>
-                    <li>Decisions made based on tool outputs or platform information</li>
-                    <li>Service interruptions, technical errors, or data loss</li>
+                    <li>
+                      Investment losses or financial damages resulting from use
+                      of the platform
+                    </li>
+                    <li>
+                      Inaccuracies in data, calculations, or AI-generated
+                      insights
+                    </li>
+                    <li>
+                      Decisions made based on tool outputs or platform
+                      information
+                    </li>
+                    <li>
+                      Service interruptions, technical errors, or data loss
+                    </li>
                     <li>Third-party content or linked external resources</li>
-                    <li>Unauthorized access to your account due to compromised credentials</li>
+                    <li>
+                      Unauthorized access to your account due to compromised
+                      credentials
+                    </li>
                   </ul>
                   <p>
-                    You acknowledge that investing involves risk and that you are solely responsible for your investment decisions.
+                    You acknowledge that investing involves risk and that you
+                    are solely responsible for your investment decisions.
                   </p>
                 </div>
               </section>
@@ -129,7 +231,11 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>7. Intellectual Property</h2>
                 <p>
-                  All content, features, functionality, and technology on the platform are owned by Beginner Investor Hub and are protected by copyright, trademark, and other intellectual property laws. You may not copy, modify, distribute, or create derivative works without explicit permission.
+                  All content, features, functionality, and technology on the
+                  platform are owned by Beginner Investor Hub and are protected
+                  by copyright, trademark, and other intellectual property laws.
+                  You may not copy, modify, distribute, or create derivative
+                  works without explicit permission.
                 </p>
               </section>
 
@@ -137,7 +243,12 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>8. Affiliate Disclosure</h2>
                 <p>
-                  Our platform may contain affiliate links to third-party products and services. We may receive compensation for referrals, which helps support the platform. All affiliate relationships are disclosed within content, and recommendations are based on editorial merit, not compensation.
+                  Our platform may contain affiliate links to third-party
+                  products and services. We may receive compensation for
+                  referrals, which helps support the platform. All affiliate
+                  relationships are disclosed within content, and
+                  recommendations are based on editorial merit, not
+                  compensation.
                 </p>
               </section>
 
@@ -145,7 +256,10 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>9. Changes to Terms</h2>
                 <p>
-                  We reserve the right to modify these Terms of Service at any time. We will notify users of material changes via email or platform notification. Continued use of the platform after changes constitutes acceptance of the updated terms.
+                  We reserve the right to modify these Terms of Service at any
+                  time. We will notify users of material changes via email or
+                  platform notification. Continued use of the platform after
+                  changes constitutes acceptance of the updated terms.
                 </p>
               </section>
 
@@ -153,7 +267,9 @@ export default function TermsOfService() {
               <section className="terms-section">
                 <h2>10. Governing Law</h2>
                 <p>
-                  These Terms are governed by the laws of the United States and the State of North Carolina, without regard to conflict of law provisions.
+                  These Terms are governed by the laws of the United States and
+                  the State of North Carolina, without regard to conflict of law
+                  provisions.
                 </p>
               </section>
 
@@ -161,21 +277,33 @@ export default function TermsOfService() {
               <section className="terms-section contact-section">
                 <h2>11. Contact Information</h2>
                 <p>
-                  For questions, concerns, or requests regarding these Terms of Service:
+                  For questions, concerns, or requests regarding these Terms of
+                  Service:
                 </p>
                 <div className="contact-info">
-                  <p><strong>Email:</strong> support@beginnerinvestorhub.com</p>
-                  <p><strong>Address:</strong> Charlotte, North Carolina, United States</p>
+                  <p>
+                    <strong>Email:</strong> support@beginnerinvestorhub.com
+                  </p>
+                  <p>
+                    <strong>Address:</strong> Charlotte, North Carolina, United
+                    States
+                  </p>
                 </div>
               </section>
 
               {/* Footer Navigation */}
               <div className="terms-footer">
-                <Link href="/privacy" className="footer-link">Privacy Policy</Link>
+                <Link href="/privacy" className="footer-link">
+                  Privacy Policy
+                </Link>
                 <span className="separator">•</span>
-                <Link href="/" className="footer-link">Home</Link>
+                <Link href="/" className="footer-link">
+                  Home
+                </Link>
                 <span className="separator">•</span>
-                <Link href="/contact" className="footer-link">Contact</Link>
+                <Link href="/contact" className="footer-link">
+                  Contact
+                </Link>
               </div>
             </div>
           </div>
@@ -189,7 +317,11 @@ export default function TermsOfService() {
         }
 
         .terms-header {
-          background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+          background: linear-gradient(
+            135deg,
+            var(--nyse-color-primary) 0%,
+            var(--nyse-color-secondary) 100%
+          );
           color: white;
           padding: var(--nyse-spacing-xxl) 0;
         }
@@ -293,7 +425,11 @@ export default function TermsOfService() {
         }
 
         .highlight-box {
-          background: linear-gradient(135deg, rgba(0, 61, 122, 0.05) 0%, rgba(0, 160, 227, 0.05) 100%);
+          background: linear-gradient(
+            135deg,
+            rgba(0, 61, 122, 0.05) 0%,
+            rgba(0, 160, 227, 0.05) 100%
+          );
           border-left: 4px solid var(--nyse-color-accent);
           padding: var(--nyse-spacing-lg);
           border-radius: 4px;

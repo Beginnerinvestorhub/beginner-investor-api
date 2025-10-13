@@ -15,12 +15,14 @@ interface ChatInterfaceProps {
 }
 
 export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
-  const [messages, setMessages] = useState<Message[]>([{
-    id: '1',
-    from: 'bot',
-    text: "Hello! I'm your AI investment assistant. How can I help you today?",
-    timestamp: new Date(),
-  }]);
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: '1',
+      from: 'bot',
+      text: "Hello! I'm your AI investment assistant. How can I help you today?",
+      timestamp: new Date(),
+    },
+  ]);
   const [input, setInput] = useState('');
   const [error, setError] = useState<string | null>(null);
   const { loading, sendNudge } = useNudgeApi();
@@ -33,12 +35,12 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
 
   const showError = (message: string) => {
     setError(message);
-    
+
     // Clear previous timeout if exists
     if (errorTimeoutRef.current) {
       clearTimeout(errorTimeoutRef.current);
     }
-    
+
     // Auto-hide error after 5 seconds
     errorTimeoutRef.current = setTimeout(() => {
       setError(null);
@@ -47,7 +49,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
 
   useEffect(() => {
     scrollToBottom();
-    
+
     // Cleanup timeout on unmount
     return () => {
       if (errorTimeoutRef.current) {
@@ -55,26 +57,33 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       }
     };
   }, [messages, scrollToBottom]);
-  
+
   const retryMessage = async (messageId: string) => {
     const messageToRetry = messages.find(msg => msg.id === messageId);
     if (!messageToRetry) return;
-    
+
     // Update message status to sending
-    setMessages(prev => 
-      prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, status: 'sending', text: messageToRetry.text.replace(' (Failed to send)', '') } 
+    setMessages(prev =>
+      prev.map(msg =>
+        msg.id === messageId
+          ? {
+              ...msg,
+              status: 'sending',
+              text: messageToRetry.text.replace(' (Failed to send)', ''),
+            }
           : msg
       )
     );
-    
-    await sendMessage(messageToRetry.text.replace(' (Failed to send)', ''), messageId);
+
+    await sendMessage(
+      messageToRetry.text.replace(' (Failed to send)', ''),
+      messageId
+    );
   };
 
   const sendMessage = async (messageText: string, messageId?: string) => {
     const messageToUpdate = messageId || Date.now().toString();
-    
+
     if (!messageId) {
       // This is a new message
       const newMessage: Message = {
@@ -100,11 +109,9 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       });
 
       // Update message status to sent
-      setMessages(prev => 
-        prev.map(msg => 
-          msg.id === messageToUpdate
-            ? { ...msg, status: 'sent' as const }
-            : msg
+      setMessages(prev =>
+        prev.map(msg =>
+          msg.id === messageToUpdate ? { ...msg, status: 'sent' as const } : msg
         )
       );
 
@@ -116,13 +123,14 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         timestamp: new Date(),
         status: 'sent',
       };
-      
+
       setMessages(prev => [...prev, botMessage]);
       setError(null);
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to send message';
+      const errorMessage =
+        err instanceof Error ? err.message : 'Failed to send message';
       showError('Failed to send message. Please try again.');
-      
+
       setMessages(prev =>
         prev.map(msg =>
           msg.id === messageToUpdate
@@ -140,7 +148,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   const handleSendMessage = (e: React.FormEvent) => {
     e.preventDefault();
     if (!input.trim() || loading) return;
-    
+
     const messageId = Date.now().toString();
     sendMessage(input, messageId);
     setInput('');
@@ -153,7 +161,10 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         <div className="bg-red-50 border-l-4 border-red-400 p-4">
           <div className="flex">
             <div className="flex-shrink-0">
-              <FiAlertCircle className="h-5 w-5 text-red-400" aria-hidden="true" />
+              <FiAlertCircle
+                className="h-5 w-5 text-red-400"
+                aria-hidden="true"
+              />
             </div>
             <div className="ml-3">
               <p className="text-sm text-red-700">{error}</p>
@@ -198,7 +209,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
         </button>
       </div>
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message) => (
+        {messages.map(message => (
           <div
             key={message.id}
             className={`flex ${
@@ -253,7 +264,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
           <input
             type="text"
             value={input}
-            onChange={(e) => setInput(e.target.value)}
+            onChange={e => setInput(e.target.value)}
             placeholder="Type your message..."
             className="w-full rounded-lg border border-gray-300 pl-4 pr-12 py-3 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:border-transparent"
             aria-label="Type your message"

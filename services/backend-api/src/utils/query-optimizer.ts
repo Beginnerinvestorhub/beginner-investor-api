@@ -1,6 +1,6 @@
-import { Prisma } from '@prisma/client';
-import { prisma } from '../config/prisma';
-import { logger } from './logger';
+import { Prisma } from "@prisma/client";
+import { prisma } from "../config/prisma";
+import { logger } from "./logger";
 
 type QueryInfo = {
   model: string;
@@ -20,17 +20,17 @@ class QueryOptimizer {
     this.slowQueryThreshold = 100; // ms
     this.maxQueryLogSize = 1000;
     this.queryLog = [];
-    
+
     this.setupQueryLogging();
   }
 
   private setupQueryLogging() {
     // Log all queries in development
-    if (process.env.NODE_ENV === 'development') {
-      prisma.$on('query' as any, (e: any) => {
+    if (process.env.NODE_ENV === "development") {
+      prisma.$on("query" as any, (e: any) => {
         const queryInfo: QueryInfo = {
-          model: e.model || 'unknown',
-          action: e.action || 'unknown',
+          model: e.model || "unknown",
+          action: e.action || "unknown",
           duration: e.duration,
           sql: e.query,
           params: e.params,
@@ -39,7 +39,7 @@ class QueryOptimizer {
 
         // Log slow queries
         if (queryInfo.duration > this.slowQueryThreshold) {
-          logger.warn('Slow query detected:', {
+          logger.warn("Slow query detected:", {
             duration: `${queryInfo.duration}ms`,
             model: queryInfo.model,
             action: queryInfo.action,
@@ -49,7 +49,7 @@ class QueryOptimizer {
 
         // Add to query log
         this.queryLog.push(queryInfo);
-        
+
         // Limit log size
         if (this.queryLog.length > this.maxQueryLogSize) {
           this.queryLog.shift();
@@ -64,8 +64,12 @@ class QueryOptimizer {
   public getQueryStats() {
     const stats = {
       totalQueries: this.queryLog.length,
-      slowQueries: this.queryLog.filter(q => q.duration > this.slowQueryThreshold).length,
-      averageDuration: this.queryLog.reduce((sum, q) => sum + q.duration, 0) / Math.max(1, this.queryLog.length),
+      slowQueries: this.queryLog.filter(
+        (q) => q.duration > this.slowQueryThreshold,
+      ).length,
+      averageDuration:
+        this.queryLog.reduce((sum, q) => sum + q.duration, 0) /
+        Math.max(1, this.queryLog.length),
       queriesByModel: this.groupByModel(),
       slowestQueries: this.getSlowestQueries(10),
     };
@@ -77,14 +81,17 @@ class QueryOptimizer {
    * Group queries by model and action
    */
   private groupByModel() {
-    const groups: Record<string, {
-      count: number;
-      avgDuration: number;
-      maxDuration: number;
-      actions: Record<string, number>;
-    }> = {};
+    const groups: Record<
+      string,
+      {
+        count: number;
+        avgDuration: number;
+        maxDuration: number;
+        actions: Record<string, number>;
+      }
+    > = {};
 
-    this.queryLog.forEach(query => {
+    this.queryLog.forEach((query) => {
       if (!groups[query.model]) {
         groups[query.model] = {
           count: 0,
@@ -96,9 +103,10 @@ class QueryOptimizer {
 
       const model = groups[query.model];
       model.count++;
-      model.avgDuration = (model.avgDuration * (model.count - 1) + query.duration) / model.count;
+      model.avgDuration =
+        (model.avgDuration * (model.count - 1) + query.duration) / model.count;
       model.maxDuration = Math.max(model.maxDuration, query.duration);
-      
+
       // Track actions
       if (!model.actions[query.action]) {
         model.actions[query.action] = 0;
@@ -131,12 +139,15 @@ class QueryOptimizer {
   /**
    * Optimize a query by adding conditions
    */
-  public optimizeQuery<T>(query: T, options: {
-    limit?: number;
-    selectOnlyNeededFields?: boolean;
-    useCursorPagination?: boolean;
-    lastId?: string | number;
-  } = {}): T {
+  public optimizeQuery<T>(
+    query: T,
+    options: {
+      limit?: number;
+      selectOnlyNeededFields?: boolean;
+      useCursorPagination?: boolean;
+      lastId?: string | number;
+    } = {},
+  ): T {
     const optimized: any = { ...query };
 
     // Add limit if specified
@@ -167,14 +178,14 @@ class QueryOptimizer {
       // PostgreSQL specific EXPLAIN ANALYZE
       const explainQuery = `EXPLAIN ANALYZE ${query}`;
       const result = await prisma.$queryRawUnsafe(explainQuery, ...params);
-      
+
       return {
         success: true,
         analysis: result,
         recommendations: this.generateRecommendations(result),
       };
     } catch (error) {
-      logger.error('Query analysis failed:', error);
+      logger.error("Query analysis failed:", error);
       return {
         success: false,
         error: error.message,
@@ -189,25 +200,38 @@ class QueryOptimizer {
     const recommendations: string[] = [];
 
     // Check for sequential scans
-    if (JSON.stringify(analysis).includes('Seq Scan')) {
-      recommendations.push('Consider adding an index to improve this sequential scan');
+    if (JSON.stringify(analysis).includes("Seq Scan")) {
+      recommendations.push(
+        "Consider adding an index to improve this sequential scan",
+      );
     }
 
     // Check for missing indexes
-    if (JSON.stringify(analysis).includes('never executed')) {
-      recommendations.push('This query was never executed in the analyzed plan');
+    if (JSON.stringify(analysis).includes("never executed")) {
+      recommendations.push(
+        "This query was never executed in the analyzed plan",
+      );
     }
 
     // Check for expensive operations
-    if (JSON.stringify(analysis).includes('Sort') || JSON.stringify(analysis).includes('Sort Method')) {
-      recommendations.push('Sorting operation detected. Consider adding an index on the sort columns');
+    if (
+      JSON.stringify(analysis).includes("Sort") ||
+      JSON.stringify(analysis).includes("Sort Method")
+    ) {
+      recommendations.push(
+        "Sorting operation detected. Consider adding an index on the sort columns",
+      );
     }
 
-    if (JSON.stringify(analysis).includes('Hash Join')) {
-      recommendations.push('Hash join detected. Ensure join columns are properly indexed');
+    if (JSON.stringify(analysis).includes("Hash Join")) {
+      recommendations.push(
+        "Hash join detected. Ensure join columns are properly indexed",
+      );
     }
 
-    return recommendations.length > 0 ? recommendations : ['No specific recommendations available'];
+    return recommendations.length > 0
+      ? recommendations
+      : ["No specific recommendations available"];
   }
 }
 

@@ -10,10 +10,10 @@ datasource db {
 // --- ENUMS ---
 
 enum SubscriptionTier {
-  FREE
-  BASIC
-  PREMIUM
-  ENTERPRISE
+  FREE      // $0/month - Freemium tier
+  STARTER   // $9.99/month or $99/year
+  PRO       // $24.99/month or $249/year
+  PREMIUM   // $49.99/month or $499/year
 }
 
 enum ReferralStatus {

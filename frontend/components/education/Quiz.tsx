@@ -37,14 +37,17 @@ export default function Quiz({ onPass }: QuizProps) {
   const q = sampleQuestions[current];
 
   function submit() {
-    if (selected === q.correctIndex) setScore((s) => s + 1);
+    if (selected === q.correctIndex) setScore(s => s + 1);
 
     if (current + 1 < sampleQuestions.length) {
-      setCurrent((c) => c + 1);
+      setCurrent(c => c + 1);
       setSelected(null);
     } else {
       // pass if 70%+
-      const passed = (score + (selected === q.correctIndex ? 1 : 0)) / sampleQuestions.length >= 0.7;
+      const passed =
+        (score + (selected === q.correctIndex ? 1 : 0)) /
+          sampleQuestions.length >=
+        0.7;
       if (passed) onPass();
     }
   }

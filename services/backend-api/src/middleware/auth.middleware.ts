@@ -1,6 +1,13 @@
-import { authenticate } from '../../../shared/auth/firebase';
+// Import the improved authentication middleware from shared library
+export {
+  authenticate,
+  authorize,
+  optionalAuth,
+  requireEmailVerified,
+  requireAdmin,
+  requirePremium,
+  serviceAuth,
+} from "/../shared/auth/firebase.js";
 
-/**
- * Middleware to require authentication for routes
- */
-export const requireAuth = authenticate;
+// Re-export for backward compatibility and convenience
+export { authenticate as requireAuth } from "../../../shared/auth/firebase.js";

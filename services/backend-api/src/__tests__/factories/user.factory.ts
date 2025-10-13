@@ -1,5 +1,5 @@
-import { faker } from '@faker-js/faker';
-import { User, UserRole } from '@prisma/client';
+import { faker } from "@faker-js/faker";
+import { User, UserRole } from "@prisma/client";
 
 type UserFactoryOptions = Partial<User>;
 
@@ -17,7 +17,10 @@ export const createUser = (overrides: UserFactoryOptions = {}): User => ({
   ...overrides,
 });
 
-export const createUserArray = (count: number, overrides: UserFactoryOptions = {}): User[] => {
+export const createUserArray = (
+  count: number,
+  overrides: UserFactoryOptions = {},
+): User[] => {
   return Array.from({ length: count }, () => createUser(overrides));
 };
 

@@ -9,7 +9,7 @@ Redis has been fully integrated into the Beginner Investor Hub application for b
 ### Components
 
 1. **Redis Client** (`shared/cache/redis-client.ts`)
-   - Singleton Redis client using ioredis
+   - Singleton Redis client using node-redis
    - Connection management and retry logic
    - Health checking capabilities
 

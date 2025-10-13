@@ -16,7 +16,7 @@ interface LearningState {
 
 export const useLearningStore = create<LearningState>()(
   persist(
-    (set) => ({
+    set => ({
       onboardingCompleted: false,
       currentModule: null,
       completedModules: [],
@@ -29,13 +29,12 @@ export const useLearningStore = create<LearningState>()(
         set({ currentModule: module }),
 
       addCompletedModule: (module: string) =>
-        set((state) => ({
+        set(state => ({
           completedModules: [...state.completedModules, module],
           progress: Math.min(state.progress + 10, 100), // Increment progress by 10% per module
         })),
 
-      setProgress: (progress: number) =>
-        set({ progress }),
+      setProgress: (progress: number) => set({ progress }),
 
       resetProgress: () =>
         set({

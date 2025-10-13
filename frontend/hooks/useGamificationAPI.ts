@@ -58,7 +58,7 @@ interface UseGamificationReturn {
   notifications: GamificationNotification[];
   isLoading: boolean;
   error: string | null;
-  
+
   // Actions
   trackEvent: (eventType: string, eventData?: any) => Promise<void>;
   awardPoints: (points: number, reason: string) => Promise<void>;
@@ -73,12 +73,15 @@ export const useGamificationAPI = (): UseGamificationReturn => {
   const [userProgress, setUserProgress] = useState<UserProgress | null>(null);
   const [badges, setBadges] = useState<Badge[]>([]);
   const [achievements, setAchievements] = useState<Achievement[]>([]);
-  const [notifications, setNotifications] = useState<GamificationNotification[]>([]);
+  const [notifications, setNotifications] = useState<
+    GamificationNotification[]
+  >([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   // API configuration
-  const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
+  const API_BASE_URL =
+    process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
   // Create authenticated API client
   const createApiClient = useCallback(async () => {
@@ -89,7 +92,7 @@ export const useGamificationAPI = (): UseGamificationReturn => {
     return axios.create({
       baseURL: API_BASE_URL,
       headers: {
-        'Authorization': `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
         'Content-Type': 'application/json',
       },
     });
@@ -105,30 +108,38 @@ export const useGamificationAPI = (): UseGamificationReturn => {
     try {
       setIsLoading(true);
       setError(null);
-      
+
       const apiClient = await createApiClient();
       if (!apiClient) {
         setError('Authentication required');
         return;
       }
       const response = await apiClient.get('/api/gamification/progress');
-      
+
       if (response.data) {
-        const { progress, badges: userBadges, achievements: userAchievements } = response.data;
-        
+        const {
+          progress,
+          badges: userBadges,
+          achievements: userAchievements,
+        } = response.data;
+
         setUserProgress({
           ...progress,
-          lastLoginDate: progress.lastLoginDate ? new Date(progress.lastLoginDate) : undefined,
-          lastLearningDate: progress.lastLearningDate ? new Date(progress.lastLearningDate) : undefined,
+          lastLoginDate: progress.lastLoginDate
+            ? new Date(progress.lastLoginDate)
+            : undefined,
+          lastLearningDate: progress.lastLearningDate
+            ? new Date(progress.lastLearningDate)
+            : undefined,
         });
-        
+
         setBadges(userBadges || []);
         setAchievements(userAchievements || []);
       }
     } catch (err: any) {
       console.error('Error loading gamification data:', err);
       setError(err.response?.data?.error || 'Failed to load gamification data');
-      
+
       // Fallback to localStorage if available
       try {
         const savedData = localStorage.getItem(`gamification_${user.uid}`);
@@ -149,7 +160,7 @@ export const useGamificationAPI = (): UseGamificationReturn => {
   // Save data to localStorage as backup
   const saveToLocalStorage = useCallback(() => {
     if (!user || !userProgress) return;
-    
+
     try {
       const data = {
         progress: userProgress,
@@ -164,210 +175,252 @@ export const useGamificationAPI = (): UseGamificationReturn => {
   }, [user, userProgress, badges, achievements]);
 
   // Track gamification event
-  const trackEvent = useCallback(async (eventType: string, eventData?: any) => {
-    if (!user) {
-      console.warn('Cannot track event: user not authenticated');
-      return;
-    }
+  const trackEvent = useCallback(
+    async (eventType: string, eventData?: any) => {
+      if (!user) {
+        console.warn('Cannot track event: user not authenticated');
+        return;
+      }
 
-    try {
-      const apiClient = await createApiClient();
-      if (!apiClient) return;
-      const response = await apiClient.post('/api/gamification/track-event', {
-        eventType,
-        eventData: eventData || {},
-      });
-
-      if (response.data?.success && response.data?.data) {
-        const { progress, badges: updatedBadges, achievements: updatedAchievements } = response.data.data;
-        
-        // Check for level up
-        const leveledUp = progress.level > (userProgress?.level || 0);
-        const pointsAwarded = progress.totalPoints - (userProgress?.totalPoints || 0);
-        
-        // Update state
-        setUserProgress({
-          ...progress,
-          lastLoginDate: progress.lastLoginDate ? new Date(progress.lastLoginDate) : undefined,
-          lastLearningDate: progress.lastLearningDate ? new Date(progress.lastLearningDate) : undefined,
+      try {
+        const apiClient = await createApiClient();
+        if (!apiClient) return;
+        const response = await apiClient.post('/api/gamification/track-event', {
+          eventType,
+          eventData: eventData || {},
         });
-        setBadges(updatedBadges || []);
-        setAchievements(updatedAchievements || []);
 
-        // Check for newly unlocked badges
-        const newlyUnlocked = updatedBadges?.filter((badge: Badge) => 
-          badge.isUnlocked && !badges.find(b => b.id === badge.id && b.isUnlocked)
-        ) || [];
+        if (response.data?.success && response.data?.data) {
+          const {
+            progress,
+            badges: updatedBadges,
+            achievements: updatedAchievements,
+          } = response.data.data;
 
-        // Show notifications
-        if (leveledUp) {
-          showNotification({
-            id: `level-up-${Date.now()}`,
-            type: 'level',
-            title: 'Level Up!',
-            message: `Congratulations! You reached Level ${progress.level}!`,
-            timestamp: new Date(),
+          // Check for level up
+          const leveledUp = progress.level > (userProgress?.level || 0);
+          const pointsAwarded =
+            progress.totalPoints - (userProgress?.totalPoints || 0);
+
+          // Update state
+          setUserProgress({
+            ...progress,
+            lastLoginDate: progress.lastLoginDate
+              ? new Date(progress.lastLoginDate)
+              : undefined,
+            lastLearningDate: progress.lastLearningDate
+              ? new Date(progress.lastLearningDate)
+              : undefined,
           });
-        }
+          setBadges(updatedBadges || []);
+          setAchievements(updatedAchievements || []);
 
-        if (pointsAwarded > 0) {
+          // Check for newly unlocked badges
+          const newlyUnlocked =
+            updatedBadges?.filter(
+              (badge: Badge) =>
+                badge.isUnlocked &&
+                !badges.find(b => b.id === badge.id && b.isUnlocked)
+            ) || [];
+
+          // Show notifications
+          if (leveledUp) {
+            showNotification({
+              id: `level-up-${Date.now()}`,
+              type: 'level',
+              title: 'Level Up!',
+              message: `Congratulations! You reached Level ${progress.level}!`,
+              timestamp: new Date(),
+            });
+          }
+
+          if (pointsAwarded > 0) {
+            showNotification({
+              id: `points-${Date.now()}`,
+              type: 'points',
+              title: 'Points Earned!',
+              message: `You earned ${pointsAwarded} points!`,
+              points: pointsAwarded,
+              timestamp: new Date(),
+            });
+          }
+
+          newlyUnlocked.forEach((badge: Badge) => {
+            showNotification({
+              id: `badge-${badge.id}-${Date.now()}`,
+              type: 'badge',
+              title: 'Badge Unlocked!',
+              message: `You earned the "${badge.name}" badge!`,
+              badge,
+              points: badge.points,
+              timestamp: new Date(),
+            });
+          });
+
+          // Save to localStorage as backup
+          saveToLocalStorage();
+        }
+      } catch (err: any) {
+        console.error('Error tracking event:', err);
+        setError(err.response?.data?.error || 'Failed to track event');
+      }
+    },
+    [user, createApiClient, userProgress, badges, saveToLocalStorage]
+  );
+
+  // Award points manually
+  const awardPoints = useCallback(
+    async (points: number, reason: string) => {
+      if (!user) return;
+
+      try {
+        const apiClient = await createApiClient();
+        if (!apiClient) throw new Error('Failed to create API client');
+        const response = await apiClient.post(
+          '/api/gamification/award-points',
+          {
+            points,
+            reason,
+          }
+        );
+
+        if (response.data?.success) {
+          const { newTotalPoints, leveledUp, newLevel } = response.data.data;
+
+          setUserProgress(prev =>
+            prev
+              ? {
+                  ...prev,
+                  totalPoints: newTotalPoints,
+                  level: newLevel,
+                  experiencePoints: newTotalPoints,
+                }
+              : null
+          );
+
+          if (leveledUp) {
+            showNotification({
+              id: `level-up-${Date.now()}`,
+              type: 'level',
+              title: 'Level Up!',
+              message: `Congratulations! You reached Level ${newLevel}!`,
+              timestamp: new Date(),
+            });
+          }
+
           showNotification({
             id: `points-${Date.now()}`,
             type: 'points',
-            title: 'Points Earned!',
-            message: `You earned ${pointsAwarded} points!`,
-            points: pointsAwarded,
+            title: 'Points Awarded!',
+            message: `You earned ${points} points for ${reason}!`,
+            points,
             timestamp: new Date(),
           });
         }
-
-        newlyUnlocked.forEach((badge: Badge) => {
-          showNotification({
-            id: `badge-${badge.id}-${Date.now()}`,
-            type: 'badge',
-            title: 'Badge Unlocked!',
-            message: `You earned the "${badge.name}" badge!`,
-            badge,
-            points: badge.points,
-            timestamp: new Date(),
-          });
-        });
-
-        // Save to localStorage as backup
-        saveToLocalStorage();
+      } catch (err: any) {
+        console.error('Error awarding points:', err);
+        setError(err.response?.data?.error || 'Failed to award points');
       }
-    } catch (err: any) {
-      console.error('Error tracking event:', err);
-      setError(err.response?.data?.error || 'Failed to track event');
-    }
-  }, [user, createApiClient, userProgress, badges, saveToLocalStorage]);
-
-  // Award points manually
-  const awardPoints = useCallback(async (points: number, reason: string) => {
-    if (!user) return;
-
-    try {
-      const apiClient = await createApiClient();
-      if (!apiClient) throw new Error('Failed to create API client');
-      const response = await apiClient.post('/api/gamification/award-points', {
-        points,
-        reason,
-      });
-
-      if (response.data?.success) {
-        const { newTotalPoints, leveledUp, newLevel } = response.data.data;
-        
-        setUserProgress(prev => prev ? {
-          ...prev,
-          totalPoints: newTotalPoints,
-          level: newLevel,
-          experiencePoints: newTotalPoints,
-        } : null);
-
-        if (leveledUp) {
-          showNotification({
-            id: `level-up-${Date.now()}`,
-            type: 'level',
-            title: 'Level Up!',
-            message: `Congratulations! You reached Level ${newLevel}!`,
-            timestamp: new Date(),
-          });
-        }
-
-        showNotification({
-          id: `points-${Date.now()}`,
-          type: 'points',
-          title: 'Points Awarded!',
-          message: `You earned ${points} points for ${reason}!`,
-          points,
-          timestamp: new Date(),
-        });
-      }
-    } catch (err: any) {
-      console.error('Error awarding points:', err);
-      setError(err.response?.data?.error || 'Failed to award points');
-    }
-  }, [user, createApiClient]);
+    },
+    [user, createApiClient]
+  );
 
   // Unlock badge manually
-  const unlockBadge = useCallback(async (badgeId: string) => {
-    if (!user) return;
+  const unlockBadge = useCallback(
+    async (badgeId: string) => {
+      if (!user) return;
 
-    try {
-      const apiClient = await createApiClient();
-      if (!apiClient) return;
-      const response = await apiClient.post('/api/gamification/unlock-badge', {
-        badgeId,
-      });
+      try {
+        const apiClient = await createApiClient();
+        if (!apiClient) return;
+        const response = await apiClient.post(
+          '/api/gamification/unlock-badge',
+          {
+            badgeId,
+          }
+        );
 
-      if (response.data?.success) {
-        // Refresh data to get updated badges
-        await loadUserData();
-        
-        const badge = badges.find(b => b.id === badgeId);
-        if (badge) {
-          showNotification({
-            id: `badge-${badgeId}-${Date.now()}`,
-            type: 'badge',
-            title: 'Badge Unlocked!',
-            message: `You earned the "${badge.name}" badge!`,
-            badge,
-            points: badge.points,
-            timestamp: new Date(),
-          });
+        if (response.data?.success) {
+          // Refresh data to get updated badges
+          await loadUserData();
+
+          const badge = badges.find(b => b.id === badgeId);
+          if (badge) {
+            showNotification({
+              id: `badge-${badgeId}-${Date.now()}`,
+              type: 'badge',
+              title: 'Badge Unlocked!',
+              message: `You earned the "${badge.name}" badge!`,
+              badge,
+              points: badge.points,
+              timestamp: new Date(),
+            });
+          }
         }
+      } catch (err: any) {
+        console.error('Error unlocking badge:', err);
+        setError(err.response?.data?.error || 'Failed to unlock badge');
       }
-    } catch (err: any) {
-      console.error('Error unlocking badge:', err);
-      setError(err.response?.data?.error || 'Failed to unlock badge');
-    }
-  }, [user, createApiClient, badges, loadUserData]);
+    },
+    [user, createApiClient, badges, loadUserData]
+  );
 
   // Update streak
-  const updateStreak = useCallback(async (streakType: 'login' | 'learning') => {
-    if (!user) return;
+  const updateStreak = useCallback(
+    async (streakType: 'login' | 'learning') => {
+      if (!user) return;
 
-    try {
-      const apiClient = await createApiClient();
-      if (!apiClient) return;
-      const response = await apiClient.put('/api/gamification/streak', {
-        streakType,
-      });
+      try {
+        const apiClient = await createApiClient();
+        if (!apiClient) return;
+        const response = await apiClient.put('/api/gamification/streak', {
+          streakType,
+        });
 
-      if (response.data?.success) {
-        const { newStreak } = response.data;
-        
-        setUserProgress(prev => prev ? {
-          ...prev,
-          [streakType === 'login' ? 'loginStreak' : 'learningStreak']: newStreak,
-        } : null);
+        if (response.data?.success) {
+          const { newStreak } = response.data;
 
-        // Check for streak milestones
-        if (newStreak === 7 || newStreak === 30 || newStreak % 50 === 0) {
-          showNotification({
-            id: `streak-${streakType}-${newStreak}-${Date.now()}`,
-            type: 'achievement',
-            title: 'Streak Milestone!',
-            message: `Amazing! You've maintained a ${newStreak}-day ${streakType} streak!`,
-            timestamp: new Date(),
-          });
+          setUserProgress(prev =>
+            prev
+              ? {
+                  ...prev,
+                  [streakType === 'login' ? 'loginStreak' : 'learningStreak']:
+                    newStreak,
+                }
+              : null
+          );
+
+          // Check for streak milestones
+          if (newStreak === 7 || newStreak === 30 || newStreak % 50 === 0) {
+            showNotification({
+              id: `streak-${streakType}-${newStreak}-${Date.now()}`,
+              type: 'achievement',
+              title: 'Streak Milestone!',
+              message: `Amazing! You've maintained a ${newStreak}-day ${streakType} streak!`,
+              timestamp: new Date(),
+            });
+          }
         }
+      } catch (err: any) {
+        console.error('Error updating streak:', err);
+        setError(err.response?.data?.error || 'Failed to update streak');
       }
-    } catch (err: any) {
-      console.error('Error updating streak:', err);
-      setError(err.response?.data?.error || 'Failed to update streak');
-    }
-  }, [user, createApiClient]);
+    },
+    [user, createApiClient]
+  );
 
   // Show notification
-  const showNotification = useCallback((notification: GamificationNotification) => {
-    setNotifications(prev => [notification, ...prev.slice(0, 4)]); // Keep max 5 notifications
-    
-    // Auto-dismiss after 5 seconds
-    setTimeout(() => {
-      dismissNotification(notification.id);
-    }, 5000);
-  }, []);
+  const showNotification = useCallback(
+    (notification: GamificationNotification) => {
+      setNotifications(prev => [notification, ...prev.slice(0, 4)]); // Keep max 5 notifications
+
+      // Auto-dismiss after 5 seconds
+      setTimeout(() => {
+        dismissNotification(notification.id);
+      }, 5000);
+    },
+    []
+  );
 
   // Dismiss notification
   const dismissNotification = useCallback((notificationId: string) => {

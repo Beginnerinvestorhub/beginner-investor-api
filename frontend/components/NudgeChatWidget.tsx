@@ -45,14 +45,26 @@ const NudgeChatWidget: React.FC = () => {
         <div className="fixed bottom-24 right-8 w-80 h-96 bg-white rounded-xl shadow-2xl z-50 border border-gray-200">
           <div className="p-4 border-b border-gray-200">
             <div className="flex items-center justify-between">
-              <h3 className="text-lg font-semibold text-gray-900">Nudge Chat</h3>
+              <h3 className="text-lg font-semibold text-gray-900">
+                Nudge Chat
+              </h3>
               <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-400 hover:text-gray-600"
                 aria-label="Close chat"
               >
-                <svg className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                <svg
+                  className="h-5 w-5"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M6 18L18 6M6 6l12 12"
+                  />
                 </svg>
               </button>
             </div>
@@ -61,10 +73,15 @@ const NudgeChatWidget: React.FC = () => {
           <div className="p-4 h-80 overflow-y-auto">
             <div className="mb-4">
               <p className="text-sm text-gray-600">
-                Welcome back, <span className="font-medium text-indigo-600">{session.user?.name || session.user?.email || 'User'}</span>!
+                Welcome back,{' '}
+                <span className="font-medium text-indigo-600">
+                  {session.user?.name || session.user?.email || 'User'}
+                </span>
+                !
               </p>
               <p className="text-sm text-gray-500 mt-1">
-                This is your personal nudge assistant. Ask me anything about your investments!
+                This is your personal nudge assistant. Ask me anything about
+                your investments!
               </p>
             </div>
 
@@ -72,7 +89,8 @@ const NudgeChatWidget: React.FC = () => {
             <div className="space-y-3">
               <div className="bg-gray-100 rounded-lg p-3 max-w-xs">
                 <p className="text-sm text-gray-700">
-                  Hi! I'm here to help you with your investment questions. What would you like to know?
+                  Hi! I'm here to help you with your investment questions. What
+                  would you like to know?
                 </p>
               </div>
             </div>

@@ -32,7 +32,7 @@ AI-powered backend service for processing and generating insights using machine 
 
 ### Installation
 
-1. Install dependencies with Poetry:
+1. Install dependencies with Python pip:
    ```bash
    poetry install
    ```

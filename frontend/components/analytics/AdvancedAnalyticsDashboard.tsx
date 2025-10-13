@@ -12,7 +12,7 @@ import {
   CogIcon,
   RefreshIcon,
   CheckCircleIcon,
-  XCircleIcon
+  XCircleIcon,
 } from '@heroicons/react/24/outline';
 
 interface UserInsights {
@@ -71,26 +71,34 @@ interface ModelPerformance {
 }
 
 const AdvancedAnalyticsDashboard: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<'insights' | 'cohorts' | 'performance'>('insights');
+  const [activeTab, setActiveTab] = useState<
+    'insights' | 'cohorts' | 'performance'
+  >('insights');
   const [userInsights, setUserInsights] = useState<UserInsights | null>(null);
   const [cohortData, setCohortData] = useState<CohortAnalysis | null>(null);
-  const [modelPerformance, setModelPerformance] = useState<ModelPerformance | null>(null);
+  const [modelPerformance, setModelPerformance] =
+    useState<ModelPerformance | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [selectedUserId, setSelectedUserId] = useState('demo-user-123');
   const [isRetraining, setIsRetraining] = useState(false);
 
-  const AI_API_URL = process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8000';
+  const AI_API_URL =
+    process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8000';
 
   const fetchUserInsights = async (userId: string) => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${AI_API_URL}/analytics/user-insights?user_id=${userId}`);
+      const response = await fetch(
+        `${AI_API_URL}/analytics/user-insights?user_id=${userId}`
+      );
       if (!response.ok) throw new Error('Failed to fetch user insights');
       const data = await response.json();
       setUserInsights(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch user insights');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch user insights'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -99,12 +107,16 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
   const fetchCohortAnalysis = async () => {
     try {
       setIsLoading(true);
-      const response = await fetch(`${AI_API_URL}/analytics/cohort-analysis?cohort_period=weekly`);
+      const response = await fetch(
+        `${AI_API_URL}/analytics/cohort-analysis?cohort_period=weekly`
+      );
       if (!response.ok) throw new Error('Failed to fetch cohort analysis');
       const data = await response.json();
       setCohortData(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch cohort analysis');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch cohort analysis'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -118,7 +130,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
       const data = await response.json();
       setModelPerformance(data);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to fetch model performance');
+      setError(
+        err instanceof Error ? err.message : 'Failed to fetch model performance'
+      );
     } finally {
       setIsLoading(false);
     }
@@ -127,10 +141,12 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
   const retrainModels = async () => {
     try {
       setIsRetraining(true);
-      const response = await fetch(`${AI_API_URL}/models/retrain`, { method: 'POST' });
+      const response = await fetch(`${AI_API_URL}/models/retrain`, {
+        method: 'POST',
+      });
       if (!response.ok) throw new Error('Failed to retrain models');
       const data = await response.json();
-      
+
       if (data.status === 'success') {
         await fetchModelPerformance(); // Refresh performance data
       }
@@ -155,12 +171,14 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     <div className="space-y-6">
       {/* User Selection */}
       <div className="bg-white rounded-lg shadow-sm border p-6">
-        <h3 className="text-lg font-semibold text-gray-900 mb-4">User Analysis</h3>
+        <h3 className="text-lg font-semibold text-gray-900 mb-4">
+          User Analysis
+        </h3>
         <div className="flex items-center space-x-4">
           <input
             type="text"
             value={selectedUserId}
-            onChange={(e) => setSelectedUserId(e.target.value)}
+            onChange={e => setSelectedUserId(e.target.value)}
             placeholder="Enter User ID"
             className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
           />
@@ -182,7 +200,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <TrendingUpIcon className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Engagement Score</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Engagement Score
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(userInsights.engagement_score * 100)}%
                   </p>
@@ -194,7 +214,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <CheckCircleIcon className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Completion Probability</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Completion Probability
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(userInsights.completion_probability * 100)}%
                   </p>
@@ -204,9 +226,13 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
 
             <div className="bg-white rounded-lg shadow-sm border p-6">
               <div className="flex items-center">
-                <ExclamationTriangleIcon className={`h-8 w-8 ${userInsights.churn_risk > 0.7 ? 'text-red-500' : 'text-yellow-500'}`} />
+                <ExclamationTriangleIcon
+                  className={`h-8 w-8 ${userInsights.churn_risk > 0.7 ? 'text-red-500' : 'text-yellow-500'}`}
+                />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Churn Risk</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Churn Risk
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(userInsights.churn_risk * 100)}%
                   </p>
@@ -218,7 +244,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <ChartBarIcon className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Learning Velocity</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Learning Velocity
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {userInsights.learning_velocity.toFixed(1)}/week
                   </p>
@@ -230,49 +258,79 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           {/* Behavioral Segment & Recommendations */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Behavioral Segment</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Behavioral Segment
+              </h4>
               <div className="flex items-center space-x-3">
-                <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                  userInsights.behavioral_segment === 'champion' ? 'bg-green-100 text-green-800' :
-                  userInsights.behavioral_segment === 'at_risk' ? 'bg-red-100 text-red-800' :
-                  userInsights.behavioral_segment === 'loyal' ? 'bg-blue-100 text-blue-800' :
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {userInsights.behavioral_segment.replace('_', ' ').toUpperCase()}
+                <span
+                  className={`px-3 py-1 rounded-full text-sm font-medium ${
+                    userInsights.behavioral_segment === 'champion'
+                      ? 'bg-green-100 text-green-800'
+                      : userInsights.behavioral_segment === 'at_risk'
+                        ? 'bg-red-100 text-red-800'
+                        : userInsights.behavioral_segment === 'loyal'
+                          ? 'bg-blue-100 text-blue-800'
+                          : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
+                  {userInsights.behavioral_segment
+                    .replace('_', ' ')
+                    .toUpperCase()}
                 </span>
               </div>
-              
+
               <div className="mt-4 space-y-2">
                 <p className="text-sm text-gray-600">
-                  <strong>Preferred Content:</strong> {userInsights.preferred_content_types.join(', ') || 'None identified'}
+                  <strong>Preferred Content:</strong>{' '}
+                  {userInsights.preferred_content_types.join(', ') ||
+                    'None identified'}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Active Days:</strong> {userInsights.learning_trajectory.total_days_active}
+                  <strong>Active Days:</strong>{' '}
+                  {userInsights.learning_trajectory.total_days_active}
                 </p>
                 <p className="text-sm text-gray-600">
-                  <strong>Avg Daily Completions:</strong> {userInsights.learning_trajectory.avg_daily_completions.toFixed(1)}
+                  <strong>Avg Daily Completions:</strong>{' '}
+                  {userInsights.learning_trajectory.avg_daily_completions.toFixed(
+                    1
+                  )}
                 </p>
               </div>
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">AI Recommendations</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                AI Recommendations
+              </h4>
               <div className="space-y-3">
                 {userInsights.recommendations.intervention_needed && (
                   <div className="bg-red-50 border border-red-200 rounded-lg p-3">
-                    <p className="text-sm text-red-800 font-medium">⚠️ Intervention Needed</p>
-                    <p className="text-sm text-red-600">User shows high churn risk</p>
+                    <p className="text-sm text-red-800 font-medium">
+                      ⚠️ Intervention Needed
+                    </p>
+                    <p className="text-sm text-red-600">
+                      User shows high churn risk
+                    </p>
                   </div>
                 )}
-                
+
                 <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
-                  <p className="text-sm text-blue-800 font-medium">Suggested Content Type</p>
-                  <p className="text-sm text-blue-600">{userInsights.recommendations.suggested_content_type}</p>
+                  <p className="text-sm text-blue-800 font-medium">
+                    Suggested Content Type
+                  </p>
+                  <p className="text-sm text-blue-600">
+                    {userInsights.recommendations.suggested_content_type}
+                  </p>
                 </div>
-                
+
                 <div className="bg-green-50 border border-green-200 rounded-lg p-3">
-                  <p className="text-sm text-green-800 font-medium">Optimal Session Length</p>
-                  <p className="text-sm text-green-600">{userInsights.recommendations.optimal_session_length} minutes</p>
+                  <p className="text-sm text-green-800 font-medium">
+                    Optimal Session Length
+                  </p>
+                  <p className="text-sm text-green-600">
+                    {userInsights.recommendations.optimal_session_length}{' '}
+                    minutes
+                  </p>
                 </div>
               </div>
             </div>
@@ -280,22 +338,32 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
 
           {/* Learning Trajectory Chart */}
           <div className="bg-white rounded-lg shadow-sm border p-6">
-            <h4 className="text-lg font-semibold text-gray-900 mb-4">Learning Trajectory (Last 30 Days)</h4>
+            <h4 className="text-lg font-semibold text-gray-900 mb-4">
+              Learning Trajectory (Last 30 Days)
+            </h4>
             <div className="h-64 flex items-end space-x-2">
-              {userInsights.learning_trajectory.daily_progress.map((day, index) => (
-                <div key={index} className="flex-1 flex flex-col items-center">
+              {userInsights.learning_trajectory.daily_progress.map(
+                (day, index) => (
                   <div
-                    className="bg-indigo-500 rounded-t"
-                    style={{
-                      height: `${Math.max(4, (day.daily_completions / Math.max(...userInsights.learning_trajectory.daily_progress.map(d => d.daily_completions))) * 200)}px`,
-                      width: '100%'
-                    }}
-                  ></div>
-                  <span className="text-xs text-gray-500 mt-1 transform rotate-45">
-                    {new Date(day.date).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}
-                  </span>
-                </div>
-              ))}
+                    key={index}
+                    className="flex-1 flex flex-col items-center"
+                  >
+                    <div
+                      className="bg-indigo-500 rounded-t"
+                      style={{
+                        height: `${Math.max(4, (day.daily_completions / Math.max(...userInsights.learning_trajectory.daily_progress.map(d => d.daily_completions))) * 200)}px`,
+                        width: '100%',
+                      }}
+                    ></div>
+                    <span className="text-xs text-gray-500 mt-1 transform rotate-45">
+                      {new Date(day.date).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                      })}
+                    </span>
+                  </div>
+                )
+              )}
             </div>
           </div>
         </>
@@ -313,8 +381,12 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <UserGroupIcon className="h-8 w-8 text-blue-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Total Cohorts</p>
-                  <p className="text-2xl font-bold text-gray-900">{cohortData.summary.total_cohorts}</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Total Cohorts
+                  </p>
+                  <p className="text-2xl font-bold text-gray-900">
+                    {cohortData.summary.total_cohorts}
+                  </p>
                 </div>
               </div>
             </div>
@@ -323,7 +395,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <TrendingUpIcon className="h-8 w-8 text-green-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Avg Week 1 Retention</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Avg Week 1 Retention
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(cohortData.summary.avg_week_1_retention * 100)}%
                   </p>
@@ -335,9 +409,12 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <ChartBarIcon className="h-8 w-8 text-purple-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Avg Month 1 Retention</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Avg Month 1 Retention
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
-                    {Math.round(cohortData.summary.avg_month_1_retention * 100)}%
+                    {Math.round(cohortData.summary.avg_month_1_retention * 100)}
+                    %
                   </p>
                 </div>
               </div>
@@ -347,7 +424,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
               <div className="flex items-center">
                 <CheckCircleIcon className="h-8 w-8 text-indigo-500" />
                 <div className="ml-4">
-                  <p className="text-sm font-medium text-gray-600">Avg Completion Rate</p>
+                  <p className="text-sm font-medium text-gray-600">
+                    Avg Completion Rate
+                  </p>
                   <p className="text-2xl font-bold text-gray-900">
                     {Math.round(cohortData.summary.avg_completion_rate * 100)}%
                   </p>
@@ -359,7 +438,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           {/* Cohort Table */}
           <div className="bg-white rounded-lg shadow-sm border overflow-hidden">
             <div className="px-6 py-4 border-b border-gray-200">
-              <h4 className="text-lg font-semibold text-gray-900">Cohort Performance</h4>
+              <h4 className="text-lg font-semibold text-gray-900">
+                Cohort Performance
+              </h4>
             </div>
             <div className="overflow-x-auto">
               <table className="min-w-full divide-y divide-gray-200">
@@ -419,16 +500,25 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           <div className="bg-white rounded-lg shadow-sm border p-6">
             <div className="flex items-center justify-between">
               <div>
-                <h3 className="text-lg font-semibold text-gray-900">Model Status</h3>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Model Status
+                </h3>
                 <div className="flex items-center mt-2">
-                  <div className={`w-3 h-3 rounded-full mr-2 ${
-                    modelPerformance.model_status === 'healthy' ? 'bg-green-500' : 'bg-red-500'
-                  }`}></div>
-                  <span className="text-sm text-gray-600 capitalize">{modelPerformance.model_status}</span>
+                  <div
+                    className={`w-3 h-3 rounded-full mr-2 ${
+                      modelPerformance.model_status === 'healthy'
+                        ? 'bg-green-500'
+                        : 'bg-red-500'
+                    }`}
+                  ></div>
+                  <span className="text-sm text-gray-600 capitalize">
+                    {modelPerformance.model_status}
+                  </span>
                 </div>
                 {modelPerformance.last_update && (
                   <p className="text-sm text-gray-500 mt-1">
-                    Last updated: {new Date(modelPerformance.last_update).toLocaleString()}
+                    Last updated:{' '}
+                    {new Date(modelPerformance.last_update).toLocaleString()}
                   </p>
                 )}
               </div>
@@ -437,7 +527,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
                 disabled={isRetraining}
                 className="flex items-center px-4 py-2 bg-indigo-600 text-white rounded-md hover:bg-indigo-700 disabled:opacity-50"
               >
-                <RefreshIcon className={`h-4 w-4 mr-2 ${isRetraining ? 'animate-spin' : ''}`} />
+                <RefreshIcon
+                  className={`h-4 w-4 mr-2 ${isRetraining ? 'animate-spin' : ''}`}
+                />
                 {isRetraining ? 'Retraining...' : 'Retrain Models'}
               </button>
             </div>
@@ -446,34 +538,50 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           {/* Performance Metrics */}
           <div className="grid md:grid-cols-2 gap-6">
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Overall Performance</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Overall Performance
+              </h4>
               <div className="space-y-4">
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Performance Score</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Performance Score
+                    </span>
                     <span className="text-sm font-bold text-gray-900">
-                      {Math.round(modelPerformance.overall_performance_score * 100)}%
+                      {Math.round(
+                        modelPerformance.overall_performance_score * 100
+                      )}
+                      %
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-indigo-600 h-2 rounded-full"
-                      style={{ width: `${modelPerformance.overall_performance_score * 100}%` }}
+                      style={{
+                        width: `${modelPerformance.overall_performance_score * 100}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
-                
+
                 <div>
                   <div className="flex justify-between items-center mb-2">
-                    <span className="text-sm font-medium text-gray-600">Recommendation Accuracy</span>
+                    <span className="text-sm font-medium text-gray-600">
+                      Recommendation Accuracy
+                    </span>
                     <span className="text-sm font-bold text-gray-900">
-                      {Math.round(modelPerformance.recommendation_accuracy * 100)}%
+                      {Math.round(
+                        modelPerformance.recommendation_accuracy * 100
+                      )}
+                      %
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
                     <div
                       className="bg-green-600 h-2 rounded-full"
-                      style={{ width: `${modelPerformance.recommendation_accuracy * 100}%` }}
+                      style={{
+                        width: `${modelPerformance.recommendation_accuracy * 100}%`,
+                      }}
                     ></div>
                   </div>
                 </div>
@@ -481,19 +589,30 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
             </div>
 
             <div className="bg-white rounded-lg shadow-sm border p-6">
-              <h4 className="text-lg font-semibold text-gray-900 mb-4">Nudge Performance</h4>
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">
+                Nudge Performance
+              </h4>
               <div className="space-y-3">
                 {modelPerformance.nudge_performance.map((nudge, index) => (
-                  <div key={index} className="border-b border-gray-100 pb-3 last:border-b-0">
+                  <div
+                    key={index}
+                    className="border-b border-gray-100 pb-3 last:border-b-0"
+                  >
                     <div className="flex justify-between items-center mb-1">
                       <span className="text-sm font-medium text-gray-700 capitalize">
                         {nudge.nudge_type.replace('_', ' ')}
                       </span>
-                      <span className="text-sm text-gray-500">{nudge.total_sent} sent</span>
+                      <span className="text-sm text-gray-500">
+                        {nudge.total_sent} sent
+                      </span>
                     </div>
                     <div className="grid grid-cols-2 gap-2 text-xs text-gray-600">
-                      <span>Click Rate: {Math.round(nudge.click_rate * 100)}%</span>
-                      <span>Completion: {Math.round(nudge.completion_rate * 100)}%</span>
+                      <span>
+                        Click Rate: {Math.round(nudge.click_rate * 100)}%
+                      </span>
+                      <span>
+                        Completion: {Math.round(nudge.completion_rate * 100)}%
+                      </span>
                     </div>
                   </div>
                 ))}
@@ -509,7 +628,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="mb-8">
         <h1 className="text-3xl font-bold text-gray-900">Advanced Analytics</h1>
-        <p className="mt-2 text-gray-600">Real-time AI insights and performance metrics</p>
+        <p className="mt-2 text-gray-600">
+          Real-time AI insights and performance metrics
+        </p>
       </div>
 
       {/* Error Display */}
@@ -530,8 +651,8 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           {[
             { id: 'insights', name: 'User Insights', icon: TrendingUpIcon },
             { id: 'cohorts', name: 'Cohort Analysis', icon: UserGroupIcon },
-            { id: 'performance', name: 'Model Performance', icon: CogIcon }
-          ].map((tab) => (
+            { id: 'performance', name: 'Model Performance', icon: CogIcon },
+          ].map(tab => (
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}

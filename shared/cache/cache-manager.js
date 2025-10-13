@@ -4,8 +4,9 @@ exports.CacheManager = void 0;
 // shared/cache/cache-manager.ts
 const redis_client_1 = require("./redis-client");
 class CacheManager {
+    redis;
+    defaultTTL = 3600; // 1 hour default
     constructor(defaultTTL) {
-        this.defaultTTL = 3600; // 1 hour default
         this.redis = redis_client_1.RedisClient.getInstance();
         if (defaultTTL) {
             this.defaultTTL = defaultTTL;
