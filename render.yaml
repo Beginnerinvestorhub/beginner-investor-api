@@ -2,9 +2,8 @@ services:
   # Backend API Service
   - type: web
     name: backend-api
-    runtime: image
-    image:
-      url: docker.io/karingler/backend-api-service:latest
+    runtime: docker
+    repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -24,11 +23,13 @@ services:
         generateValue: true
       - key: CORS_ORIGIN
         value: https://your-frontend.vercel.app
+    dockerContext: .
+    dockerfilePath: services/backend-api/Dockerfile
     autoDeploy: true
 
-  # Market Data Service
+  # Market Data Ingestion Service
   - type: web
-    name: market-data
+    name: marketdata-ingestion
     runtime: docker
     repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
     plan: starter
@@ -49,12 +50,12 @@ services:
       - key: ALPHA_VANTAGE_API_KEY
         sync: false
     dockerContext: .
-    dockerfilePath: services/market-data-ingestion-service/Dockerfile
+    dockerfilePath: services/marketdata-ingestion/Dockerfile
     autoDeploy: true
 
-  # AI Nudge Engine
+  # AI Microservice Engine
   - type: web
-    name: ai-nudge-service
+    name: ai-microservice-engine
     runtime: docker
     repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
     plan: starter
@@ -82,9 +83,9 @@ services:
     dockerfilePath: services/ai-microservice-engine/Dockerfile
     autoDeploy: true
 
-  # Risk Engine
+  # Python Risk Engine
   - type: web
-    name: risk-engine
+    name: python-risk-engine
     runtime: docker
     repo: https://github.com/Beginnerinvestorhub/beginner-investor-api
     plan: starter
@@ -121,11 +122,11 @@ services:
       - key: PORT
         value: 3004
       - key: RISK_ENGINE_URL
-        value: https://risk-engine.onrender.com
+        value: https://python-risk-engine.onrender.com
       - key: MARKET_DATA_URL
-        value: https://market-data.onrender.com
+        value: https://marketdata-ingestion.onrender.com
       - key: AI_SERVICE_URL
-        value: https://ai-nudge-service.onrender.com
+        value: https://ai-microservice-engine.onrender.com
     dockerContext: .
     dockerfilePath: services/portfolio-simulation/Dockerfile
     autoDeploy: true

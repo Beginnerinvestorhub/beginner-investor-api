@@ -1,4 +1,4 @@
-import { BadgeType } from "@prisma/client";
+import type { BadgeType } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import BaseService from "../base.service";
 
@@ -112,7 +112,9 @@ export class BadgeService extends BaseService {
       cacheKey,
       async () => {
         const totalUsers = await prisma.user.count();
-        if (totalUsers === 0) return [];
+        if (totalUsers === 0) {
+          return [];
+        }
 
         const rareBadges = await prisma.$queryRaw<
           Array<{ type: BadgeType; count: number }>

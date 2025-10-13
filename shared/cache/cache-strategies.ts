@@ -42,10 +42,7 @@ export class WriteThroughStrategy<T> {
 
   async write(data: T): Promise<void> {
     // Write to both cache and database
-    await Promise.all([
-      this.cacheManager.set(this.key, data, this.options),
-      this.writer(data)
-    ]);
+    await Promise.all([this.cacheManager.set(this.key, data, this.options), this.writer(data)]);
   }
 
   async read(): Promise<T | null> {
@@ -74,7 +71,7 @@ export class WriteBehindStrategy<T> {
   async write(data: T): Promise<void> {
     // Write to cache immediately
     await this.cacheManager.set(this.key, data, this.options);
-    
+
     // Queue for async DB write
     this.writeQueue.set(this.key, data);
   }
@@ -89,9 +86,7 @@ export class WriteBehindStrategy<T> {
     const entries = Array.from(this.writeQueue.entries());
     this.writeQueue.clear();
 
-    await Promise.all(
-      entries.map(([_, data]) => this.writer(data))
-    );
+    await Promise.all(entries.map(([_, data]) => this.writer(data)));
   }
 
   async read(): Promise<T | null> {
@@ -130,7 +125,7 @@ export class DistributedLock {
 
   async withLock<T>(fn: () => Promise<T>): Promise<T> {
     const acquired = await this.acquire();
-    
+
     if (!acquired) {
       throw new Error(`Failed to acquire lock for ${this.key}`);
     }
@@ -164,10 +159,10 @@ export class CacheStampedeStrategy<T> {
 
     // Cache miss - acquire lock
     const lock = new DistributedLock(this.key);
-    
+
     try {
       const acquired = await lock.acquire();
-      
+
       if (!acquired) {
         // Another process is fetching, wait and try to read from cache
         await this.sleep(100);
@@ -188,7 +183,7 @@ export class CacheStampedeStrategy<T> {
   }
 
   private sleep(ms: number): Promise<void> {
-    return new Promise(resolve => setTimeout(resolve, ms));
+    return new Promise((resolve) => setTimeout(resolve, ms));
   }
 }
 

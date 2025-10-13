@@ -134,7 +134,9 @@ export class SafeQuery {
    * Sanitize WHERE clause to prevent SQL injection
    */
   private static sanitizeWhereClause(where: any): void {
-    if (!where) return;
+    if (!where) {
+      return;
+    }
 
     // Check for potential SQL injection in where clause
     const whereString = JSON.stringify(where).toLowerCase();
@@ -147,7 +149,9 @@ export class SafeQuery {
    * Sanitize data before insert/update
    */
   private static sanitizeData(data: any): void {
-    if (!data) return;
+    if (!data) {
+      return;
+    }
 
     // Check for potential SQL injection in data
     const dataString = JSON.stringify(data).toLowerCase();

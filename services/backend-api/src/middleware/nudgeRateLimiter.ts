@@ -1,7 +1,7 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { RedisService } from "../services/redis/redis.service";
 import logger from "../utils/logger";
-import { RedisClientType } from "redis";
+import type { RedisClientType } from "redis";
 
 const RATE_LIMIT = 10; // 10 requests
 const WINDOW_SECONDS = 60; // per minute

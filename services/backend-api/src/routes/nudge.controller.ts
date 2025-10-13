@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 
 export const getNudges = async (_req: Request, res: Response) => {
   try {

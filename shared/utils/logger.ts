@@ -4,11 +4,7 @@ import { Request, Response } from 'express';
 // Create Winston logger for Node.js/TypeScript services
 export const logger = createLogger({
   level: process.env.LOG_LEVEL || 'info',
-  format: format.combine(
-    format.timestamp(),
-    format.errors({ stack: true }),
-    format.json()
-  ),
+  format: format.combine(format.timestamp(), format.errors({ stack: true }), format.json()),
   defaultMeta: { service: 'shared-utils' },
   transports: [
     // Write all logs with importance level of `error` or less to `error.log`
@@ -20,12 +16,11 @@ export const logger = createLogger({
 
 // If we're not in production, log to the console as well
 if (process.env.NODE_ENV !== 'production') {
-  logger.add(new transports.Console({
-    format: format.combine(
-      format.colorize(),
-      format.simple()
-    )
-  }));
+  logger.add(
+    new transports.Console({
+      format: format.combine(format.colorize(), format.simple()),
+    })
+  );
 }
 
 // Middleware to add request context to logs
@@ -52,8 +47,7 @@ export const addRequestContext = (req: Request, _res: Response, next: any) => {
 };
 
 function generateRequestId(): string {
-  return Math.random().toString(36).substring(2, 15) +
-         Math.random().toString(36).substring(2, 15);
+  return Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
 }
 
 // Helper functions for common logging patterns

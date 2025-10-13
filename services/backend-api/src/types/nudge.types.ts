@@ -1,4 +1,4 @@
-import { Request } from "express";
+import type { Request } from "express";
 
 // User type from authentication
 export interface AuthUser {

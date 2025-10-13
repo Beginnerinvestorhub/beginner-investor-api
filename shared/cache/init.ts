@@ -18,7 +18,7 @@ export async function initializeCache(): Promise<void> {
         const delay = Math.min(times * 50, 2000);
         return delay;
       },
-      maxRetriesPerRequest: 3
+      maxRetriesPerRequest: 3,
     };
 
     // Use REDIS_URL if available, otherwise use individual config
@@ -43,7 +43,6 @@ export async function initializeCache(): Promise<void> {
       console.log(`📍 Redis server: ${redisConfig.host}:${redisConfig.port}`);
     }
     console.log(`🔑 Key prefix: ${redisConfig.keyPrefix}`);
-
   } catch (error) {
     console.error('❌ Failed to initialize Redis cache system:', error);
     console.log('⚠️  Falling back to in-memory caching');
@@ -82,10 +81,7 @@ let rateLimiter: RateLimiter | null = null;
 export async function initializeSystems(): Promise<void> {
   console.log('🚀 Initializing cache and rate limiting systems...');
 
-  await Promise.all([
-    initializeCache(),
-    initializeRateLimiting()
-  ]);
+  await Promise.all([initializeCache(), initializeRateLimiting()]);
 
   // Instantiate after Redis is initialized
   cacheManager = new CacheManager();
@@ -149,5 +145,5 @@ export default {
   initializeSystems,
   cleanup,
   getCacheManager,
-  getRateLimiter
+  getRateLimiter,
 };

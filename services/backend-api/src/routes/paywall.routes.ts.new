@@ -1,0 +1,192 @@
+import { Router, Request, Response, NextFunction } from "express";
+import { SubscriptionTier } from "@prisma/client";
+import { PaywallService } from "../services/paywall/paywall.service";
+import { StripeService } from "../services/paywall/stripe.service";
+import { requireAuth } from "../middleware/auth.middleware";
+import { RequestWithUser } from "../types/express";
+
+const router = Router();
+const paywallService = new PaywallService();
+const stripeService = new StripeService();
+
+// Error handling middleware
+const errorHandler = (
+  err: Error,
+  req: Request,
+  res: Response,
+  next: NextFunction
+) => {
+  console.error(`[${new Date().toISOString()}] ${err.stack}`);
+  
+  if ('statusCode' in err && typeof err.statusCode === 'number') {
+    return res.status(err.statusCode).json({
+      error: err.message,
+      code: 'code' in err ? err.code : 'UNKNOWN_ERROR',
+    });
+  }
+
+  res.status(500).json({
+    error: 'Internal Server Error',
+    code: 'INTERNAL_SERVER_ERROR'
+  });};
+
+// Get current user's subscription
+router.get("/subscription", requireAuth, async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    const userId = req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    const subscription = await paywallService.getUserSubscription(userId);
+    res.json({
+      subscription,
+      hasActiveSubscription: !!subscription,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create checkout session for new subscription
+router.post("/subscribe/checkout", requireAuth, async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    const { tier = "STARTER", billingInterval = "month" } = req.body as {
+      tier?: string;
+      billingInterval?: string;
+    };
+    
+    const userId = req.user?.uid;
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!['STARTER', 'PRO', 'ENTERPRISE'].includes(tier)) {
+      return res.status(400).json({ error: 'Invalid subscription tier' });
+    }
+
+    const session = await paywallService.createCheckoutSession(
+      userId,
+      tier as SubscriptionTier,
+      billingInterval as 'month' | 'year'
+    );
+
+    res.json({
+      success: true,
+      sessionId: session.sessionId,
+      url: session.url,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Retrieve checkout session status
+router.get("/session/:sessionId", requireAuth, async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    const { sessionId } = req.params;
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID is required' });
+    }
+
+    const sessionData = await stripeService.retrieveSession(sessionId);
+    res.json({
+      session: sessionData.session,
+      paymentStatus: sessionData.paymentStatus,
+      subscriptionId: sessionData.subscriptionId,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Handle webhooks from payment processor
+router.post("/webhooks/payment", async (req: Request, res: Response, next: NextFunction) => {
+  const sig = req.headers['stripe-signature'] as string;
+  const payload = req.body;
+
+  try {
+    if (!sig) {
+      return res.status(400).json({ error: 'Missing Stripe signature' });
+    }
+
+    const event = stripeService.verifyWebhookSignature(
+      JSON.stringify(payload),
+      sig
+    );
+
+    await paywallService.handleWebhookEvent(event);
+    res.json({ received: true, eventType: event.type, eventId: event.id });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create refund for a payment (admin only)
+router.post("/refund/:paymentId", requireAuth, async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    const { paymentId } = req.params;
+    const { amount } = req.body as { amount?: number };
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    // TODO: Add admin role check here
+    // if (!req.user.roles?.includes('admin')) {
+    //   return res.status(403).json({ error: 'Admin access required' });
+    // }
+
+    if (!paymentId) {
+      return res.status(400).json({ error: 'Payment ID is required' });
+    }
+
+    const refund = await paywallService.createRefund(paymentId, amount);
+
+    res.json({
+      success: true,
+      refundId: refund.id,
+      amount: refund.amount / 100, // Convert from cents to dollars
+      status: refund.status,
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Create customer portal session for billing management
+router.post("/create-portal-session", requireAuth, async (req: RequestWithUser, res: Response, next: NextFunction) => {
+  try {
+    const { session_id: sessionId } = req.body as { session_id?: string };
+    const userId = req.user?.uid;
+
+    if (!userId) {
+      return res.status(401).json({ error: "User not authenticated" });
+    }
+
+    if (!sessionId) {
+      return res.status(400).json({ error: 'Session ID is required' });
+    }
+
+    const portalSession = await stripeService.createPortalSession(sessionId);
+    
+    res.json({
+      success: true,
+      url: portalSession.url
+    });
+  } catch (error) {
+    next(error);
+  }
+});
+
+// Apply error handling middleware
+router.use(errorHandler);
+
+export default router;

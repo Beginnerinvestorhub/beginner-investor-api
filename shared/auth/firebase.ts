@@ -2,26 +2,21 @@ import { Request, Response, NextFunction } from 'express';
 import { initializeApp, cert, App, getApp, getApps } from 'firebase-admin/app';
 import { getAuth, DecodedIdToken } from 'firebase-admin/auth';
 import { logger } from '../utils/logger';
-import { redisManager } from '../redis';
 import { getFirebaseConfig } from '../config';
 import {
   AuthenticatedUser,
   AuthMiddlewareOptions,
   AuthenticationError,
-  AuthorizationError,
   FirebaseUser,
-  AuthMiddlewareResult,
-  TokenValidationResult
+  TokenValidationResult,
 } from './auth.types';
 
 // Extend Express Request type to include user
-declare global {
-  namespace Express {
-    interface Request {
-      user?: AuthenticatedUser;
-      firebaseUser?: FirebaseUser;
-      token?: DecodedIdToken;
-    }
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: AuthenticatedUser;
+    firebaseUser?: FirebaseUser;
+    token?: DecodedIdToken;
   }
 }
 
@@ -34,19 +29,24 @@ class FirebaseAdmin {
     try {
       const firebaseConfig = getFirebaseConfig();
 
-      if (!firebaseConfig.project_id || !firebaseConfig.client_email || !firebaseConfig.private_key) {
+      if (
+        !firebaseConfig.project_id ||
+        !firebaseConfig.client_email ||
+        !firebaseConfig.private_key
+      ) {
         throw new Error('Invalid Firebase configuration: missing required credentials');
       }
 
-      this.app = getApps().length === 0
-        ? initializeApp({
-            credential: cert({
-              projectId: firebaseConfig.project_id,
-              clientEmail: firebaseConfig.client_email,
-              privateKey: firebaseConfig.private_key,
-            }),
-          })
-        : getApp();
+      this.app =
+        getApps().length === 0
+          ? initializeApp({
+              credential: cert({
+                projectId: firebaseConfig.project_id,
+                clientEmail: firebaseConfig.client_email,
+                privateKey: firebaseConfig.private_key,
+              }),
+            })
+          : getApp();
 
       this.initialized = true;
       logger.info('Firebase Admin SDK initialized successfully');
@@ -67,7 +67,7 @@ class FirebaseAdmin {
     return this.initialized;
   }
 
-  public getAuth() {
+  public getAuth(): ReturnType<typeof getAuth> {
     if (!this.initialized) {
       throw new Error('Firebase Admin SDK not initialized');
     }
@@ -122,7 +122,9 @@ const firebaseAdmin = FirebaseAdmin.getInstance();
 /**
  * Enhanced middleware to verify Firebase token with comprehensive options
  */
-export const authenticate = (options: AuthMiddlewareOptions = {}) => {
+export const authenticate = (
+  options: AuthMiddlewareOptions = {}
+): ((req: Request, res: Response, next: NextFunction) => Promise<void>) => {
   return async (req: Request, res: Response, next: NextFunction) => {
     try {
       const authHeader = req.headers.authorization;
@@ -133,7 +135,7 @@ export const authenticate = (options: AuthMiddlewareOptions = {}) => {
         }
         return res.status(401).json({
           error: 'Unauthorized: No token provided',
-          code: 'MISSING_TOKEN'
+          code: 'MISSING_TOKEN',
         });
       }
 
@@ -145,7 +147,7 @@ export const authenticate = (options: AuthMiddlewareOptions = {}) => {
         }
         return res.status(401).json({
           error: 'Unauthorized: Invalid token format',
-          code: 'INVALID_TOKEN_FORMAT'
+          code: 'INVALID_TOKEN_FORMAT',
         });
       }
 
@@ -156,7 +158,7 @@ export const authenticate = (options: AuthMiddlewareOptions = {}) => {
         if (options.requireEmailVerified && !decodedToken.email_verified) {
           return res.status(403).json({
             error: 'Forbidden: Email verification required',
-            code: 'EMAIL_NOT_VERIFIED'
+            code: 'EMAIL_NOT_VERIFIED',
           });
         }
 
@@ -178,7 +180,7 @@ export const authenticate = (options: AuthMiddlewareOptions = {}) => {
 
         // Fetch additional user data if needed
         if (decodedToken.uid) {
-          req.firebaseUser = await firebaseAdmin.getUser(decodedToken.uid) || undefined;
+          req.firebaseUser = (await firebaseAdmin.getUser(decodedToken.uid)) || undefined;
         }
 
         next();
@@ -187,14 +189,14 @@ export const authenticate = (options: AuthMiddlewareOptions = {}) => {
           logger.error('Authentication error:', { error: error.message, code: error.code });
           return res.status(error.statusCode).json({
             error: error.message,
-            code: error.code
+            code: error.code,
           });
         }
 
         logger.error('Unexpected authentication error:', error);
         return res.status(401).json({
           error: 'Unauthorized: Invalid token',
-          code: 'INVALID_TOKEN'
+          code: 'INVALID_TOKEN',
         });
       }
     } catch (error) {
@@ -211,20 +213,23 @@ export const authenticateLegacy = async (
   req: Request,
   res: Response,
   next: NextFunction
-) => {
+): Promise<void> => {
   return authenticate()(req, res, next);
 };
 
 /**
  * Enhanced middleware to check user roles with better error handling
  */
-export const authorize = (roles: string[] = [], options: { requireAll?: boolean } = {}) => {
+export const authorize = (
+  roles: string[] = [],
+  options: { requireAll?: boolean } = {}
+): ((req: Request, res: Response, next: NextFunction) => void) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
       if (!req.user) {
         return res.status(401).json({
           error: 'Unauthorized: No user found',
-          code: 'USER_NOT_FOUND'
+          code: 'USER_NOT_FOUND',
         });
       }
 
@@ -238,10 +243,10 @@ export const authorize = (roles: string[] = [], options: { requireAll?: boolean 
 
       if (options.requireAll) {
         // User must have ALL specified roles
-        hasRole = roles.every(role => userRoles.includes(role));
+        hasRole = roles.every((role) => userRoles.includes(role));
       } else {
         // User must have at least ONE of the specified roles
-        hasRole = roles.some(role => userRoles.includes(role));
+        hasRole = roles.some((role) => userRoles.includes(role));
       }
 
       if (!hasRole) {
@@ -249,14 +254,14 @@ export const authorize = (roles: string[] = [], options: { requireAll?: boolean 
           userId: req.user.uid,
           userRoles,
           requiredRoles: roles,
-          requireAll: options.requireAll
+          requireAll: options.requireAll,
         });
 
         return res.status(403).json({
           error: 'Forbidden: Insufficient permissions',
           code: 'INSUFFICIENT_PERMISSIONS',
           required: roles,
-          provided: userRoles
+          provided: userRoles,
         });
       }
 
@@ -271,35 +276,36 @@ export const authorize = (roles: string[] = [], options: { requireAll?: boolean 
 /**
  * Enhanced service-to-service authentication middleware
  */
-export const serviceAuth = (req: Request, res: Response, next: NextFunction) => {
+export const serviceAuth = (req: Request, res: Response, next: NextFunction): void => {
   try {
     const serviceToken = req.headers['x-service-token'] || req.headers['authorization'];
 
     if (!serviceToken) {
       return res.status(401).json({
         error: 'Unauthorized: No service token provided',
-        code: 'MISSING_SERVICE_TOKEN'
+        code: 'MISSING_SERVICE_TOKEN',
       });
     }
 
     // Support both header formats
-    const token = typeof serviceToken === 'string' && serviceToken.startsWith('Bearer ')
-      ? serviceToken.split(' ')[1]
-      : serviceToken;
+    const token =
+      typeof serviceToken === 'string' && serviceToken.startsWith('Bearer ')
+        ? serviceToken.split(' ')[1]
+        : serviceToken;
 
     if (token === process.env.INTERNAL_SERVICE_SECRET) {
       // Add service context to request
       req.user = {
         uid: 'service-account',
         roles: ['service'],
-        customClaims: { service: true }
+        customClaims: { service: true },
       };
       return next();
     }
 
     return res.status(403).json({
       error: 'Forbidden: Invalid service token',
-      code: 'INVALID_SERVICE_TOKEN'
+      code: 'INVALID_SERVICE_TOKEN',
     });
   } catch (error) {
     logger.error('Service authentication error:', error);
@@ -322,7 +328,7 @@ export const requireEmailVerified = authenticate({ requireEmailVerified: true })
  */
 export const requireAdmin = authenticate({
   roles: ['admin'],
-  requireEmailVerified: true
+  requireEmailVerified: true,
 });
 
 /**
@@ -330,7 +336,7 @@ export const requireAdmin = authenticate({
  */
 export const requirePremium = authenticate({
   roles: ['premium', 'admin'],
-  requireEmailVerified: true
+  requireEmailVerified: true,
 });
 
 /**
@@ -344,7 +350,7 @@ export async function validateToken(token: string): Promise<TokenValidationResul
     if (!firebaseUser) {
       return {
         isValid: false,
-        error: new AuthenticationError('User not found', 'USER_NOT_FOUND')
+        error: new AuthenticationError('User not found', 'USER_NOT_FOUND'),
       };
     }
 
@@ -363,19 +369,19 @@ export async function validateToken(token: string): Promise<TokenValidationResul
 
     return {
       isValid: true,
-      user
+      user,
     };
   } catch (error) {
     if (error instanceof AuthenticationError) {
       return {
         isValid: false,
-        error
+        error,
       };
     }
 
     return {
       isValid: false,
-      error: new AuthenticationError('Token validation failed', 'VALIDATION_FAILED')
+      error: new AuthenticationError('Token validation failed', 'VALIDATION_FAILED'),
     };
   }
 }

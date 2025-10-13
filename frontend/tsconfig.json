@@ -1,12 +1,18 @@
 {
   "compilerOptions": {
     "target": "ES2022",
-    "lib": ["ES2022"],
+    "lib": [
+      "ES2022"
+    ],
     "module": "commonjs",
     "baseUrl": "./",
     "paths": {
-      "@/*": ["src/*"],
-      "@tests/*": ["__tests__/*"]
+      "@/*": [
+        "src/*"
+      ],
+      "@tests/*": [
+        "__tests__/*"
+      ]
     },
     "outDir": "./dist",
     "rootDir": "./src",
@@ -23,15 +29,27 @@
     "sourceMap": true,
     "incremental": true,
     "tsBuildInfoFile": "./dist/.tsbuildinfo",
-    "typeRoots": ["./node_modules/@types", "./src/types"],
-    "types": ["node", "jest", "@testing-library/jest-dom"],
+    "typeRoots": [
+      "./node_modules/@types",
+      "./src/types"
+    ],
+    "types": [
+      "node",
+      "jest",
+      "@testing-library/jest-dom"
+    ],
     "allowJs": true,
     "noEmit": true,
     "moduleResolution": "node",
     "isolatedModules": true,
-    "jsx": "react-jsx"
+    "jsx": "preserve"
   },
-  "include": ["src/**/*", "src/**/*.json", "__tests__/**/*", "prisma/**/*"],
+  "include": [
+    "src/**/*",
+    "src/**/*.json",
+    "__tests__/**/*",
+    "prisma/**/*"
+  ],
   "exclude": [
     "node_modules",
     "dist",

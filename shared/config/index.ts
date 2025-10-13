@@ -36,7 +36,7 @@ export function getDatabaseConfig(): DatabaseConfig {
     max_overflow: 10,
     pool_timeout: 30,
     pool_recycle: 3600,
-    echo: process.env.NODE_ENV === 'development'
+    echo: process.env.NODE_ENV === 'development',
   };
 }
 
@@ -46,7 +46,7 @@ export function getDatabaseConfig(): DatabaseConfig {
 export function getRedisConfig(): RedisConfig {
   return {
     url: process.env.REDIS_URL || 'redis://localhost:6379',
-    retry_strategy: (retries: number) => Math.min(retries * 100, 3000)
+    retry_strategy: (retries: number) => Math.min(retries * 100, 3000),
   };
 }
 
@@ -59,8 +59,16 @@ export function getFirebaseConfig(): FirebaseConfig {
   return {
     project_id: process.env.FIREBASE_PROJECT_ID || '',
     client_email: process.env.FIREBASE_CLIENT_EMAIL || '',
-    private_key: privateKey
+    private_key: privateKey,
   };
+}
+
+/**
+ * Check if Firebase is properly configured
+ */
+export function isFirebaseConfigured(): boolean {
+  const config = getFirebaseConfig();
+  return !!(config.project_id && config.client_email && config.private_key);
 }
 
 /**
@@ -70,7 +78,7 @@ export function getLoggingConfig(): LoggingConfig {
   return {
     level: process.env.LOG_LEVEL || 'INFO',
     format: process.env.LOG_FORMAT || 'text',
-    json_format: process.env.LOG_FORMAT === 'json'
+    json_format: process.env.LOG_FORMAT === 'json',
   };
 }
 
@@ -83,10 +91,10 @@ export function validateEnvironment(): boolean {
     'FIREBASE_PROJECT_ID',
     'FIREBASE_CLIENT_EMAIL',
     'FIREBASE_PRIVATE_KEY',
-    'JWT_SECRET_KEY'
+    'JWT_SECRET_KEY',
   ];
 
-  const missing = required.filter(key => !process.env[key]);
+  const missing = required.filter((key) => !process.env[key]);
 
   if (missing.length > 0) {
     console.error(`Missing required environment variables: ${missing.join(', ')}`);

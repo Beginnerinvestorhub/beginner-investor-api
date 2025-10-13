@@ -1,12 +1,14 @@
 import cors from "cors";
-import { NextFunction, Request, RequestHandler, Response } from "express";
+import type { NextFunction, Request, RequestHandler, Response } from "express";
 import rateLimit from "express-rate-limit";
 import helmet from "helmet";
 import { env } from "../config/env.schema";
 
 // Security headers middleware
 const securityHeaders: RequestHandler = (req, res, next) => {
-  if (!env.SECURITY_HEADERS_ENABLED) return next();
+  if (!env.SECURITY_HEADERS_ENABLED) {
+    return next();
+  }
 
   // Set security headers using helmet
   helmet({
@@ -103,7 +105,9 @@ export const securityMiddleware = [
   (req: Request, res: Response, next: NextFunction) => {
     // Clean request query, body, and params
     const clean = (obj: any) => {
-      if (!obj) return obj;
+      if (!obj) {
+        return obj;
+      }
       Object.keys(obj).forEach((key) => {
         if (Array.isArray(obj[key]) && obj[key].length > 0) {
           obj[key] = obj[key][0]; // Take first value

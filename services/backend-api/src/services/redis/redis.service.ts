@@ -1,4 +1,5 @@
-import { createClient, RedisClientType, RedisClientOptions } from "redis";
+import type { RedisClientType, RedisClientOptions } from "redis";
+import { createClient } from "redis";
 import logger from "../../utils/logger";
 import { env } from "../../config/env.schema";
 
@@ -61,7 +62,9 @@ export class RedisService {
   }
 
   public async connect(): Promise<void> {
-    if (this.isConnected) return;
+    if (this.isConnected) {
+      return;
+    }
 
     try {
       await this.client.connect();
@@ -73,7 +76,9 @@ export class RedisService {
   }
 
   public async disconnect(): Promise<void> {
-    if (!this.isConnected) return;
+    if (!this.isConnected) {
+      return;
+    }
 
     try {
       await this.client.quit();
@@ -161,7 +166,9 @@ export class RedisService {
     try {
       await this.ensureConnected();
       const keys = await this.client.keys(pattern);
-      if (keys.length === 0) return 0;
+      if (keys.length === 0) {
+        return 0;
+      }
 
       const deleted = await this.client.del(keys);
       logger.info(`Invalidated ${deleted} keys matching pattern: ${pattern}`);

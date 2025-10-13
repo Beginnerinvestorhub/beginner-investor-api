@@ -29,7 +29,9 @@ export class CacheOptimizer {
     callback: () => Promise<T>,
     options: CacheOptions = {},
   ): Promise<T> {
-    if (!this.enabled || options.skipCache) return callback();
+    if (!this.enabled || options.skipCache) {
+      return callback();
+    }
 
     const cacheKey = this.generateKey(key);
 
@@ -58,7 +60,9 @@ export class CacheOptimizer {
   }
 
   public async invalidate(pattern: string | string[]): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     try {
       if (Array.isArray(pattern)) {
@@ -78,7 +82,9 @@ export class CacheOptimizer {
     tags: string[],
     ttl: number,
   ): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     try {
       await Promise.all(
@@ -94,7 +100,9 @@ export class CacheOptimizer {
   }
 
   private async invalidateByTag(tag: string): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     try {
       const tagKey = `tag:${tag}`;
@@ -111,7 +119,9 @@ export class CacheOptimizer {
   }
 
   public async clearAll(): Promise<void> {
-    if (!this.enabled) return;
+    if (!this.enabled) {
+      return;
+    }
 
     try {
       await this.redisService.flushDb();

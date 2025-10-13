@@ -11,8 +11,10 @@
         "appId": "${FIREBASE_APP_ID}"
       },
       "NEXT_PUBLIC_API_URL": "https://backend-api.onrender.com",
-      "NEXT_PUBLIC_AI_SERVICE_URL": "https://ai-engine.onrender.com",
-      "NEXT_PUBLIC_INVESTMENT_ENGINE_URL": "https://investment-engine.onrender.com"
+      "NEXT_PUBLIC_AI_SERVICE_URL": "https://ai-microservice-engine.onrender.com",
+      "NEXT_PUBLIC_MARKET_DATA_URL": "https://marketdata-ingestion.onrender.com",
+      "NEXT_PUBLIC_RISK_ENGINE_URL": "https://python-risk-engine.onrender.com",
+      "NEXT_PUBLIC_PORTFOLIO_SIMULATION_URL": "https://portfolio-simulation.onrender.com"
     }
   },
   "services": {
@@ -30,7 +32,7 @@
         "database"
       ]
     },
-    "investment-engine": {
+    "marketdata-ingestion": {
       "platform": "render",
       "type": "web",
       "plan": "starter",
@@ -44,7 +46,7 @@
         "market-data"
       ]
     },
-    "ai-engine": {
+    "ai-microservice-engine": {
       "platform": "render",
       "type": "web",
       "plan": "starter",
@@ -56,6 +58,32 @@
         "redis",
         "openai",
         "behavioral"
+      ]
+    },
+    "python-risk-engine": {
+      "platform": "render",
+      "type": "web",
+      "plan": "starter",
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 2
+      },
+      "environmentGroups": [
+        "redis",
+        "database"
+      ]
+    },
+    "portfolio-simulation": {
+      "platform": "render",
+      "type": "web",
+      "plan": "starter",
+      "scaling": {
+        "minInstances": 1,
+        "maxInstances": 2
+      },
+      "environmentGroups": [
+        "redis",
+        "database"
       ]
     }
   },
@@ -85,7 +113,7 @@
     "database": {
       "platform": "render",
       "type": "postgresql",
-      "version": "15",
+      "version": "17",
       "plan": "starter"
     }
   }

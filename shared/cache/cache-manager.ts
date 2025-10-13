@@ -26,7 +26,7 @@ export class CacheManager {
       const fullKey = this.buildKey(key, options?.namespace);
       const ttl = options?.ttl ?? this.defaultTTL;
       const serialized = JSON.stringify(value);
-      
+
       if (ttl > 0) {
         await this.redis.setEx(fullKey, ttl, serialized);
       } else {
@@ -45,9 +45,9 @@ export class CacheManager {
     try {
       const fullKey = this.buildKey(key, options?.namespace);
       const cached = await this.redis.get(fullKey);
-      
+
       if (!cached) return null;
-      
+
       return JSON.parse(cached) as T;
     } catch (error) {
       console.error(`Failed to get cache key ${key}:`, error);
@@ -90,19 +90,19 @@ export class CacheManager {
     options?: CacheOptions
   ): Promise<void> {
     const pipeline = this.redis.multi();
-    
+
     for (const entry of entries) {
       const fullKey = this.buildKey(entry.key, options?.namespace);
       const serialized = JSON.stringify(entry.value);
       const ttl = entry.ttl ?? options?.ttl ?? this.defaultTTL;
-      
+
       if (ttl > 0) {
         pipeline.setEx(fullKey, ttl, serialized);
       } else {
         pipeline.set(fullKey, serialized);
       }
     }
-    
+
     await pipeline.exec();
   }
 
@@ -110,11 +110,11 @@ export class CacheManager {
    * Get multiple keys at once
    */
   async getMany<T>(keys: string[], options?: CacheOptions): Promise<Map<string, T>> {
-    const fullKeys = keys.map(k => this.buildKey(k, options?.namespace));
+    const fullKeys = keys.map((k) => this.buildKey(k, options?.namespace));
     const results = await this.redis.mGet(fullKeys as any);
-    
+
     const map = new Map<string, T>();
-    
+
     results.forEach((result, idx) => {
       if (result) {
         try {
@@ -124,7 +124,7 @@ export class CacheManager {
         }
       }
     });
-    
+
     return map;
   }
 
@@ -135,10 +135,10 @@ export class CacheManager {
     try {
       const fullPattern = this.buildKey(pattern, options?.namespace);
       const keys = await this.redis.keys(fullPattern);
-      
+
       if (keys.length === 0) return 0;
-      
-      await this.redis.del(...keys);
+
+      await this.redis.del(keys);
       return keys.length;
     } catch (error) {
       console.error(`Failed to delete keys matching pattern ${pattern}:`, error);
@@ -149,17 +149,13 @@ export class CacheManager {
   /**
    * Get or set pattern - fetch from cache or compute and cache
    */
-  async getOrSet<T>(
-    key: string,
-    fetcher: () => Promise<T>,
-    options?: CacheOptions
-  ): Promise<T> {
+  async getOrSet<T>(key: string, fetcher: () => Promise<T>, options?: CacheOptions): Promise<T> {
     const cached = await this.get<T>(key, options);
-    
+
     if (cached !== null) {
       return cached;
     }
-    
+
     const fresh = await fetcher();
     await this.set(key, fresh, options);
     return fresh;

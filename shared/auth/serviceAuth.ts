@@ -107,7 +107,7 @@ class ServiceAuth {
    */
   public signOutgoingRequest(req: Request, res: Response, next: NextFunction) {
     const originalSend = res.send;
-    
+
     // Override the response send method to sign the response
     res.send = (body?: any): Response => {
       if (body) {

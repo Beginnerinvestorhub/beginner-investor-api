@@ -31,7 +31,7 @@ export class CacheKeys {
   // Market Data Keys
   static marketData = {
     quote: (symbol: string) => `${CacheNamespaces.MARKET_DATA}:quote:${symbol}`,
-    historicalPrices: (symbol: string, range: string) => 
+    historicalPrices: (symbol: string, range: string) =>
       `${CacheNamespaces.MARKET_DATA}:historical:${symbol}:${range}`,
     tickerSearch: (query: string) => `${CacheNamespaces.MARKET_DATA}:search:${query}`,
     companyInfo: (symbol: string) => `${CacheNamespaces.MARKET_DATA}:company:${symbol}`,
@@ -49,7 +49,7 @@ export class CacheKeys {
   // Portfolio Keys
   static portfolio = {
     holdings: (userId: string) => `${CacheNamespaces.PORTFOLIO}:holdings:${userId}`,
-    performance: (userId: string, period: string) => 
+    performance: (userId: string, period: string) =>
       `${CacheNamespaces.PORTFOLIO}:perf:${userId}:${period}`,
     allocation: (userId: string) => `${CacheNamespaces.PORTFOLIO}:allocation:${userId}`,
     transactions: (userId: string) => `${CacheNamespaces.PORTFOLIO}:txns:${userId}`,
@@ -65,9 +65,8 @@ export class CacheKeys {
 
   // AI Service Keys
   static ai = {
-    nudge: (userId: string, context: string) => 
-      `${CacheNamespaces.AI}:nudge:${userId}:${context}`,
-    recommendation: (userId: string, symbol: string) => 
+    nudge: (userId: string, context: string) => `${CacheNamespaces.AI}:nudge:${userId}:${context}`,
+    recommendation: (userId: string, symbol: string) =>
       `${CacheNamespaces.AI}:rec:${userId}:${symbol}`,
     analysis: (symbol: string) => `${CacheNamespaces.AI}:analysis:${symbol}`,
   };
@@ -75,7 +74,7 @@ export class CacheKeys {
   // Simulation Keys
   static simulation = {
     result: (simulationId: string) => `${CacheNamespaces.SIMULATION}:result:${simulationId}`,
-    scenario: (userId: string, scenarioId: string) => 
+    scenario: (userId: string, scenarioId: string) =>
       `${CacheNamespaces.SIMULATION}:scenario:${userId}:${scenarioId}`,
   };
 
@@ -89,7 +88,7 @@ export class CacheKeys {
   // Rate Limiting Keys
   static rateLimit = {
     ip: (ip: string, endpoint: string) => `${CacheNamespaces.RATE_LIMIT}:ip:${ip}:${endpoint}`,
-    user: (userId: string, endpoint: string) => 
+    user: (userId: string, endpoint: string) =>
       `${CacheNamespaces.RATE_LIMIT}:user:${userId}:${endpoint}`,
     api: (apiKey: string) => `${CacheNamespaces.RATE_LIMIT}:api:${apiKey}`,
   };

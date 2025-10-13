@@ -2,7 +2,7 @@
 // This file contains the basic Stripe integration code provided as reference
 // The actual implementation uses the enhanced services in the backend-api
 
-const stripe = require('stripe')('sk_test_51Rkh64E7ZMEmFQwbhyCtyIVOnDLs8vkFJ0jplGzdgtMaSm7pq101opdu5U8Zx3Js7MR6vilg9mPdQocyR0ELm7u500NamF8MyS');
+const stripe = require('stripe')('sk_test_xxxxxxxxxxxxxxxxxx');
 const express = require('express');
 const app = express();
 

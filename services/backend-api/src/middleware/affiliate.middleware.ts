@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { affiliateService } from "../services/affiliate/affiliate.service";
 import { SessionData } from "express-session";
 

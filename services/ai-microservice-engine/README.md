@@ -108,7 +108,7 @@ pip install -r requirements.txt
 
 ### Running the Service
 ```bash
-uvicorn src.main:app --reload --port 8002
+ src.main:app --reload --port 8002
 ```
 
 ### Testing
@@ -118,7 +118,7 @@ pytest tests/
 
 ## Integration Example
 
-```python
+```pythonuvicorn
 from httpx import AsyncClient
 
 async def get_investment_nudge(user_context):

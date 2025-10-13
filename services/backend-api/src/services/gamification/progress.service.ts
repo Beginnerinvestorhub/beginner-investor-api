@@ -1,4 +1,4 @@
-import { Prisma } from "@prisma/client";
+import type { Prisma } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import BaseService from "../base.service";
 
@@ -31,7 +31,9 @@ export class ProgressService extends BaseService {
     userId: string,
     xpToAdd: number,
   ): Promise<UserProgressWithRank> {
-    if (xpToAdd <= 0) return this.getUserProgress(userId);
+    if (xpToAdd <= 0) {
+      return this.getUserProgress(userId);
+    }
 
     return prisma.$transaction(async (tx) => {
       let progress = await tx.userProgress.upsert({
@@ -90,7 +92,9 @@ export class ProgressService extends BaseService {
         where: { userId },
       });
 
-      if (!progress) return this.createDefaultProgress(userId);
+      if (!progress) {
+        return this.createDefaultProgress(userId);
+      }
 
       const rank = await this.getUserRank(userId);
 

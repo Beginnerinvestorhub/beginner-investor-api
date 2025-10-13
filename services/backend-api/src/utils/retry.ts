@@ -25,7 +25,9 @@ export async function withRetry<T>(
       lastError = error as Error;
       attempts++;
 
-      if (attempts > maxRetries) break;
+      if (attempts > maxRetries) {
+        break;
+      }
 
       // Calculate delay with exponential backoff
       const delay = Math.min(
@@ -41,7 +43,7 @@ export async function withRetry<T>(
     }
   }
 
-  throw lastError;
+  throw 'lastError';
 }
 
 /**
@@ -67,3 +69,4 @@ export function createRetryable<T>(
 const fetchWithRetry = createRetryable({ maxRetries: 3, initialDelay: 200 });
 const result = await fetchWithRetry(() => fetchData(params));
 */
+}

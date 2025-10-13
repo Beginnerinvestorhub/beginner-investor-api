@@ -1,4 +1,4 @@
-// Import the improved authentication middleware from shared library
+// Import from shared auth implementation using @shared alias
 export {
   authenticate,
   authorize,
@@ -7,7 +7,15 @@ export {
   requireAdmin,
   requirePremium,
   serviceAuth,
-} from "/../shared/auth/firebase.js";
+  authenticate as requireAuth
+} from '@shared/auth/firebase';
 
-// Re-export for backward compatibility and convenience
-export { authenticate as requireAuth } from "../../../shared/auth/firebase.js";
+// Re-export types for backward compatibility
+export type {
+  AuthenticatedUser,
+  FirebaseUser,
+  AuthMiddlewareOptions,
+  TokenValidationResult,
+  AuthenticationError,
+  AuthorizationError
+} from '@shared/auth/firebase';

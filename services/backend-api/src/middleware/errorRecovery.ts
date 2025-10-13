@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { NudgeCacheService } from "../services/nudge/cache.service";
 import logger from "../utils/logger";
 

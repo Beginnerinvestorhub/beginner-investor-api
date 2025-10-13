@@ -1,16 +1,16 @@
-import type { Response, NextFunction } from 'express';
-import { v4 as uuidv4 } from 'uuid';
-import { logger } from '../utils/logger';
-import type { 
-  AuthenticatedRequest, 
-  AiNudgeRequest, 
-  CreateNudgeRequest, 
-  NudgeResponse, 
+import type { Response, NextFunction } from "express";
+import { v4 as uuidv4 } from "uuid";
+import { logger } from "../utils/logger";
+import type {
+  AuthenticatedRequest,
+  AiNudgeRequest,
+  CreateNudgeRequest,
+  NudgeResponse,
   AiNudgeResponse,
   ErrorResponse,
   PaginationParams,
-  PaginatedResponse
-} from '../types/nudge.types';
+  PaginatedResponse,
+} from "../types/nudge.types";
 
 class ApiError extends Error {
   constructor(
@@ -28,7 +28,7 @@ class ApiError extends Error {
 // Helper function to validate IDs
 const validateId = (id: string | undefined): string => {
   if (!id) {
-    throw new ApiError(400, 'ID is required', 'MISSING_ID');
+    throw new ApiError(400, "ID is required", "MISSING_ID");
   }
   // Add more ID validation if needed (e.g., UUID format)
   return id;
@@ -47,14 +47,11 @@ export const getNudges = async (
 ): Promise<void> => {
   try {
     const userId = req.params.userId || req.user?.id;
-    
+
     if (!userId) {
-      throw new ApiError(
-        400, 
-        'User ID is required',
-        'MISSING_USER_ID',
-        { source: req.params.userId ? 'params' : 'auth' }
-      );
+      throw new ApiError(400, "User ID is required", "MISSING_USER_ID", {
+        source: req.params.userId ? "params" : "auth",
+      });
     }
 
     // TODO: Implement pagination
@@ -65,7 +62,7 @@ export const getNudges = async (
 
     // TODO: Implement actual nudge fetching logic
     // const { data, total } = await nudgeService.getNudgesForUser(userId, pagination);
-    
+
     res.status(200).json({
       data: [], // Replace with actual data
       pagination: {
@@ -91,7 +88,7 @@ export const getNudgeById = async (
 ): Promise<void> => {
   try {
     const id = validateId(req.params.id);
-    
+
     // TODO: Implement actual nudge fetching logic
     // const nudge = await nudgeService.getNudgeById(id);
     // if (!nudge) {
@@ -100,10 +97,10 @@ export const getNudgeById = async (
 
     res.status(200).json({
       id,
-      userId: req.user?.id || 'system',
-      message: 'Sample nudge message',
-      type: 'info',
-      priority: 'medium',
+      userId: req.user?.id || "system",
+      message: "Sample nudge message",
+      type: "info",
+      priority: "medium",
       isRead: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -154,7 +151,7 @@ export const createNudge = async (
 ): Promise<void> => {
   try {
     const nudgeData = req.body;
-    
+
     // TODO: Implement actual nudge creation
     // const newNudge = await nudgeService.createNudge({
     //   ...nudgeData,
@@ -165,8 +162,8 @@ export const createNudge = async (
       id: uuidv4(),
       userId: nudgeData.userId,
       message: nudgeData.message,
-      type: nudgeData.type || 'info',
-      priority: nudgeData.priority || 'medium',
+      type: nudgeData.type || "info",
+      priority: nudgeData.priority || "medium",
       isRead: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -194,10 +191,10 @@ export const updateNudge = async (
 
     res.status(200).json({
       id,
-      userId: updateData.userId || 'system',
-      message: updateData.message || 'Updated nudge message',
-      type: updateData.type || 'info',
-      priority: updateData.priority || 'medium',
+      userId: updateData.userId || "system",
+      message: updateData.message || "Updated nudge message",
+      type: updateData.type || "info",
+      priority: updateData.priority || "medium",
       isRead: false,
       createdAt: new Date(),
       updatedAt: new Date(),
@@ -218,13 +215,13 @@ export const deleteNudge = async (
 ): Promise<void> => {
   try {
     const id = validateId(req.params.id);
-    
+
     // TODO: Implement actual delete logic
     // await nudgeService.deleteNudge(id);
 
     res.status(200).json({
       success: true,
-      message: 'Nudge deleted successfully',
+      message: "Nudge deleted successfully",
     });
   } catch (error) {
     next(error);
@@ -242,13 +239,13 @@ export const markNudgeAsViewed = async (
 ): Promise<void> => {
   try {
     const id = validateId(req.params.id);
-    
+
     // TODO: Implement actual view marking logic
     // await nudgeService.markAsViewed(id, req.user?.id);
 
     res.status(200).json({
       success: true,
-      message: 'Nudge marked as viewed',
+      message: "Nudge marked as viewed",
     });
   } catch (error) {
     next(error);
@@ -266,9 +263,9 @@ export const getNudgeStats = async (
 ): Promise<void> => {
   try {
     const userId = req.params.userId || req.user?.id;
-    
+
     if (!userId) {
-      throw new ApiError(400, 'User ID is required', 'MISSING_USER_ID');
+      throw new ApiError(400, "User ID is required", "MISSING_USER_ID");
     }
 
     // TODO: Implement actual statistics logic
@@ -292,12 +289,12 @@ export const errorHandler = (
   res: Response<ErrorResponse>,
   _next: NextFunction,
 ): void => {
-  logger.error('Error in nudge controller:', err);
+  logger.error("Error in nudge controller:", err);
 
   if (err instanceof ApiError) {
     res.status(err.statusCode).json({
       error: {
-        code: err.code || 'API_ERROR',
+        code: err.code || "API_ERROR",
         message: err.message,
         details: err.details,
         timestamp: new Date().toISOString(),
@@ -309,12 +306,12 @@ export const errorHandler = (
   // Handle other types of errors
   const errorId = uuidv4();
   logger.error(`[${errorId}] Unhandled error:`, err);
-  
+
   res.status(500).json({
     error: {
       id: errorId,
-      code: 'INTERNAL_SERVER_ERROR',
-      message: 'An unexpected error occurred',
+      code: "INTERNAL_SERVER_ERROR",
+      message: "An unexpected error occurred",
       timestamp: new Date().toISOString(),
     },
   });

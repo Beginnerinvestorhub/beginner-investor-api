@@ -29,18 +29,18 @@ class RedisClient {
         this.instance = createClient({
           url: config.url,
           socket: {
-            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
-          }
+            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy,
+          },
         });
       } else {
         this.instance = createClient({
           socket: {
             host: config.host || 'localhost',
             port: config.port || 6379,
-            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy
+            reconnectStrategy: config.retryStrategy || this.defaultRetryStrategy,
           },
           password: config.password,
-          database: config.db || 0
+          database: config.db || 0,
         });
       }
 

@@ -161,7 +161,13 @@ export interface UserSession {
 export interface AuthEvent {
   eventId: string;
   userId?: string;
-  eventType: 'login' | 'logout' | 'token_refresh' | 'password_reset' | 'account_locked' | 'suspicious_activity';
+  eventType:
+    | 'login'
+    | 'logout'
+    | 'token_refresh'
+    | 'password_reset'
+    | 'account_locked'
+    | 'suspicious_activity';
   timestamp: Date;
   ipAddress?: string;
   userAgent?: string;

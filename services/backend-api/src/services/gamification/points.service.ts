@@ -1,4 +1,4 @@
-import { PointTransactionType } from "@prisma/client";
+import type { PointTransactionType } from "@prisma/client";
 import { prisma } from "../../config/prisma";
 import BaseService from "../base.service";
 
@@ -40,7 +40,9 @@ export class PointsService extends BaseService {
       metadata = {},
       expiresInDays = 30,
     } = input;
-    if (points <= 0) return null;
+    if (points <= 0) {
+      return null;
+    }
 
     const expiresAt = new Date();
     expiresAt.setDate(expiresAt.getDate() + expiresInDays);

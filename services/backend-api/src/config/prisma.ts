@@ -19,7 +19,9 @@ export const prisma =
   });
 
 // 3. In development, attach the instance to the global object.
-if (process.env.NODE_ENV !== "production") globalForPrisma.prisma = prisma;
+if (process.env.NODE_ENV !== "production") {
+  globalForPrisma.prisma = prisma;
+}
 
 /**
  * ⚠️ IMPORTANT: This function is for a manual health check or test script,

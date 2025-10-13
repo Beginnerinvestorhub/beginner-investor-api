@@ -1,0 +1,41 @@
+import { Request } from 'express';
+import { SessionData } from 'express-session';
+import { SubscriptionTier } from '@prisma/client';
+
+declare global {
+  namespace Express {
+    interface Request {
+      session?: SessionData & {
+        referrerId?: string;
+        campaign?: string;
+      };
+      user?: {
+        id: string;
+        uid: string;
+        email?: string;
+        roles?: string[];
+        subscription?: {
+          id: string;
+          status: string;
+          tier: SubscriptionTier;
+          currentPeriodEnd: Date;
+        };
+      };
+    }
+  }
+}
+
+export interface RequestWithUser extends Request {
+  user: {
+    uid: string;
+    email?: string;
+    roles?: string[];
+    subscription?: {
+      id: string;
+      status: string;
+      tier: SubscriptionTier;
+    };
+  };
+}
+
+export {};

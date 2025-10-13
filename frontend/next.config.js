@@ -88,7 +88,18 @@ const nextConfig = withBundleAnalyzer(
       return config;
     },
 
-    // Headers for caching and security
+    // Turbopack configuration
+    turbopack: {
+      // Enable Turbopack for faster builds
+      resolveAlias: {
+        '@': require('path').resolve(__dirname),
+        '@/components': require('path').resolve(__dirname, 'components'),
+        '@/store': require('path').resolve(__dirname, 'store'),
+        '@/hooks': require('path').resolve(__dirname, 'hooks'),
+        '@/lib': require('path').resolve(__dirname, 'lib'),
+        '@/styles': require('path').resolve(__dirname, 'styles'),
+      },
+    },
     async headers() {
       return [
         {

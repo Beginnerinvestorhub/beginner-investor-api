@@ -1,6 +1,6 @@
-import type { Request, Response, NextFunction } from 'express';
-import { z } from 'zod';
-import { logger } from '../utils/logger';
+import type { Request, Response, NextFunction } from "express";
+import { z } from "zod";
+import { logger } from "../utils/logger";
 
 // Request body type
 export type NudgeRequest = {
@@ -8,7 +8,7 @@ export type NudgeRequest = {
   context?: {
     userId?: string;
     deviceInfo?: {
-      type?: 'mobile' | 'desktop' | 'tablet';
+      type?: "mobile" | "desktop" | "tablet";
       os?: string;
     };
   };
@@ -18,25 +18,26 @@ export type NudgeRequest = {
 const nudgeRequestSchema = z.object({
   message: z
     .string({
-      required_error: 'Message is required',
-      invalid_type_error: 'Message must be a string',
+      required_error: "Message is required",
+      invalid_type_error: "Message must be a string",
     })
-    .min(1, 'Message cannot be empty')
-    .max(500, 'Message cannot exceed 500 characters')
+    .min(1, "Message cannot be empty")
+    .max(500, "Message cannot exceed 500 characters")
     .regex(
       /^[\w\s\d.,!?@#$%^&*()_+\-=[\]{};':"\\|,.<>/?]+$/,
-      'Contains invalid characters',
+      "Contains invalid characters",
     ),
   context: z
     .object({
       userId: z
-        .string({ required_error: 'User ID is required in context' })
-        .uuid('Invalid UUID format for user ID'),
+        .string({ required_error: "User ID is required in context" })
+        .uuid("Invalid UUID format for user ID"),
       deviceInfo: z
         .object({
           type: z
-            .enum(['mobile', 'desktop', 'tablet'], {
-              invalid_type_error: 'Device type must be mobile, desktop, or tablet',
+            .enum(["mobile", "desktop", "tablet"], {
+              invalid_type_error:
+                "Device type must be mobile, desktop, or tablet",
             })
             .optional(),
           os: z.string().optional(),
@@ -61,17 +62,17 @@ export const validateNudgeRequest = (
 
     if (!validationResult.success) {
       const errors = validationResult.error.errors.map((err) => ({
-        field: err.path.join('.'),
+        field: err.path.join("."),
         message: err.message,
-        code: 'VALIDATION_ERROR',
+        code: "VALIDATION_ERROR",
       }));
 
-      logger.warn('Nudge validation failed', { errors });
+      logger.warn("Nudge validation failed", { errors });
 
       res.status(400).json({
         error: {
-          code: 'INVALID_INPUT',
-          message: 'Validation failed',
+          code: "INVALID_INPUT",
+          message: "Validation failed",
           details: errors,
           timestamp: new Date().toISOString(),
         },
@@ -83,15 +84,15 @@ export const validateNudgeRequest = (
     req.body = validationResult.data as NudgeRequest;
     next();
   } catch (error) {
-    logger.error('Unexpected error in validateNudgeRequest', { 
-      error: error instanceof Error ? error.message : 'Unknown error',
+    logger.error("Unexpected error in validateNudgeRequest", {
+      error: error instanceof Error ? error.message : "Unknown error",
       stack: error instanceof Error ? error.stack : undefined,
     });
 
     res.status(500).json({
       error: {
-        code: 'INTERNAL_SERVER_ERROR',
-        message: 'An unexpected error occurred during validation',
+        code: "INTERNAL_SERVER_ERROR",
+        message: "An unexpected error occurred during validation",
         timestamp: new Date().toISOString(),
       },
     });

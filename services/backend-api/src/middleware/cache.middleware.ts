@@ -1,5 +1,5 @@
-import { Request, Response, NextFunction } from "express";
-import { getCacheManager } from "../../../shared/cache/init.js";
+import type { Request, Response, NextFunction } from "express";
+import { getCacheManager } from "../../../shared/cache/init";
 import logger from "../utils/logger";
 
 /**

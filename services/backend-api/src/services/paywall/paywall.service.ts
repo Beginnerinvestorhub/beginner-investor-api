@@ -23,7 +23,9 @@ export class PaywallService extends BaseService {
     requiredTier: SubscriptionTier,
   ): Promise<boolean> {
     const subscription = await this.getUserSubscription(userId);
-    if (!subscription || !subscription.tier?.name) return false;
+    if (!subscription || !subscription.tier?.name) {
+      return false;
+    }
 
     const tierOrder: SubscriptionTier[] = [
       SubscriptionTier.FREE,

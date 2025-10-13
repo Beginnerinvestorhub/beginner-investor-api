@@ -49,7 +49,7 @@ export async function warmCache(config: WarmCacheConfig): Promise<void> {
  */
 export async function getCacheHealth(): Promise<CacheHealth> {
   const redis = RedisClient.getInstance();
-  
+
   try {
     const startTime = Date.now();
     await redis.ping();
@@ -57,7 +57,7 @@ export async function getCacheHealth(): Promise<CacheHealth> {
 
     const info = await redis.info('memory');
     const statsInfo = await redis.info('stats');
-    
+
     // Parse memory usage
     const usedMemoryMatch = info.match(/used_memory:(\d+)/);
     const maxMemoryMatch = info.match(/maxmemory:(\d+)/);

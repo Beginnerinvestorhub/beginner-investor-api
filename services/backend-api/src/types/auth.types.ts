@@ -1,7 +1,7 @@
 // services/backend-api/src/types/auth.types.ts
 
 import { Request } from "express";
-import { DecodedIdToken } from "firebase-admin/auth";
+import type { DecodedIdToken } from "firebase-admin/auth";
 
 // Firebase Admin SDK types
 export interface FirebaseUser {

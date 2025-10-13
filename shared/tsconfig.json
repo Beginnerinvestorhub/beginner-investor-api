@@ -1,29 +1,54 @@
 {
   "compilerOptions": {
-    "target": "ES2020",
+    "target": "ES2022",
+    "lib": ["ES2022"],
     "module": "commonjs",
-    "lib": ["ES2020"],
+    "moduleResolution": "node",
+    "baseUrl": "../",
+    "paths": {
+      "@/*": ["shared/*"],
+      "@/shared/*": ["shared/*"],
+      "@/config/*": ["config/*"]
+    },
     "outDir": "./dist",
-    "rootDir": ".",
-    "declaration": true,
-    "declarationMap": true,
-    "sourceMap": true,
+    "rootDir": "../",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
     "forceConsistentCasingInFileNames": true,
     "resolveJsonModule": true,
-    "moduleResolution": "node",
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "removeComments": true,
+    "noImplicitAny": true,
+    "strictNullChecks": true,
+    "strictFunctionTypes": true,
+    "noImplicitThis": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
     "allowSyntheticDefaultImports": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "typeRoots": [
+      "../node_modules/@types",
+      "./types"
+    ],
     "types": ["node"]
   },
   "include": [
-    "**/*.ts"
+    "shared/**/*",
+    "config/**/*",
+    "scripts/**/*"
   ],
   "exclude": [
     "node_modules",
     "dist",
+    "coverage",
+    "**/*.test.ts",
     "**/*.spec.ts",
-    "**/*.test.ts"
+    "frontend/**/*",
+    "services/**/*",
+    "clean-build/**/*"
   ]
 }

@@ -1,11 +1,11 @@
 import { Router } from "express";
 import { SubscriptionTier } from "@prisma/client";
-import { paywallService } from "../services/paywall/paywall.service";
+import { PaywallService } from "../services/paywall/paywall.service";
 import { stripeService } from "../services/paywall/stripe.service";
 import { requireAuth } from "../middleware/auth.middleware";
-import { requireSubscription } from "../middleware/paywall.middleware";
 
 const router = Router();
+const paywallService = new PaywallService();
 
 // Get current user's subscription
 router.get("/subscription", requireAuth, async (req, res) => {

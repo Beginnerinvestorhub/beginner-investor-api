@@ -16,15 +16,16 @@ export class RateLimiter {
     this.cacheManager = new CacheManager();
   }
 
-  async check(req: any, options: RateLimitOptions): Promise<{
+  async check(
+    req: any,
+    options: RateLimitOptions
+  ): Promise<{
     success: boolean;
     limit: number;
     remaining: number;
     resetTime: number;
   }> {
-    const key = options.keyGenerator
-      ? options.keyGenerator(req)
-      : this.defaultKeyGenerator(req);
+    const key = options.keyGenerator ? options.keyGenerator(req) : this.defaultKeyGenerator(req);
 
     const now = Date.now();
     const windowStart = now - options.windowMs;
@@ -32,17 +33,17 @@ export class RateLimiter {
 
     try {
       // Get current request count for this window
-      const requests = await this.cacheManager.get<number[]>(cacheKey) || [];
+      const requests = (await this.cacheManager.get<number[]>(cacheKey)) || [];
 
       // Filter requests within the current window
-      const validRequests = requests.filter(timestamp => timestamp > windowStart);
+      const validRequests = requests.filter((timestamp) => timestamp > windowStart);
 
       if (validRequests.length >= options.maxRequests) {
         return {
           success: false,
           limit: options.maxRequests,
           remaining: 0,
-          resetTime: validRequests[0] + options.windowMs
+          resetTime: validRequests[0] + options.windowMs,
         };
       }
 
@@ -51,14 +52,14 @@ export class RateLimiter {
 
       // Update cache with new request count
       await this.cacheManager.set(cacheKey, validRequests, {
-        ttl: Math.ceil(options.windowMs / 1000)
+        ttl: Math.ceil(options.windowMs / 1000),
       });
 
       return {
         success: true,
         limit: options.maxRequests,
         remaining: options.maxRequests - validRequests.length,
-        resetTime: validRequests[0] + options.windowMs
+        resetTime: validRequests[0] + options.windowMs,
       };
     } catch (error) {
       console.error('Rate limiter error:', error);
@@ -67,7 +68,7 @@ export class RateLimiter {
         success: true,
         limit: options.maxRequests,
         remaining: options.maxRequests - 1,
-        resetTime: now + options.windowMs
+        resetTime: now + options.windowMs,
       };
     }
   }
@@ -85,13 +86,13 @@ export class RateLimiter {
       res.set({
         'X-RateLimit-Limit': result.limit,
         'X-RateLimit-Remaining': result.remaining,
-        'X-RateLimit-Reset': result.resetTime
+        'X-RateLimit-Reset': result.resetTime,
       });
 
       if (!result.success) {
         return res.status(429).json({
           error: 'Too many requests',
-          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000)
+          retryAfter: Math.ceil((result.resetTime - Date.now()) / 1000),
         });
       }
 
@@ -107,18 +108,18 @@ export const rateLimiter = new RateLimiter();
 export const RATE_LIMITS = {
   API: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 100
+    maxRequests: 100,
   },
   AUTH: {
     windowMs: 15 * 60 * 1000, // 15 minutes
-    maxRequests: 5
+    maxRequests: 5,
   },
   MARKET_DATA: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 30
+    maxRequests: 30,
   },
   AI_ENGINE: {
     windowMs: 60 * 1000, // 1 minute
-    maxRequests: 10
-  }
+    maxRequests: 10,
+  },
 };

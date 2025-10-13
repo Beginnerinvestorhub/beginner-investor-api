@@ -34,7 +34,7 @@ export interface WarmCacheConfig {
   batchSize?: number;
 }
 
-export type CacheStrategy = 
+export type CacheStrategy =
   | 'cache-aside'
   | 'write-through'
   | 'write-behind'

@@ -1,9 +1,6 @@
-import { Request, Response, NextFunction } from "express";
-import {
-  getRateLimiter,
-  RATE_LIMITS,
-  RateLimitOptions,
-} from "../../../shared/cache/init.js";
+import type { Request, Response, NextFunction } from "express";
+import type { RateLimitOptions } from "../../../shared/cache/init.js";
+import { getRateLimiter, RATE_LIMITS } from "../../../shared/cache/init.js";
 import logger from "../utils/logger";
 
 /**

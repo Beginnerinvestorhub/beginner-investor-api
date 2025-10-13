@@ -27,7 +27,9 @@ class RateLimiter {
     this.config = { ...defaultConfig, ...config } as Required<RateLimitConfig>;
   }
 
-  public static getInstance(config: RateLimitConfig = defaultConfig as RateLimitConfig): RateLimiter {
+  public static getInstance(
+    config: RateLimitConfig = defaultConfig as RateLimitConfig
+  ): RateLimiter {
     if (!RateLimiter.instance) {
       RateLimiter.instance = new RateLimiter(config);
     }
@@ -100,11 +102,7 @@ class RateLimiter {
 
         // Get all requests in the current window
         const client = redisManager.getClient();
-        const requests = await client.zRangeByScore(
-          key,
-          windowStart,
-          now
-        );
+        const requests = await client.zRangeByScore(key, windowStart, now);
 
         // Remove old requests
         await client.zRemRangeByScore(key, 0, windowStart - 1);
@@ -112,12 +110,12 @@ class RateLimiter {
         // Check if rate limit is exceeded
         if (requests.length / 2 >= this.config.maxRequests) {
           const retryAfter = Math.ceil((parseInt(requests[1]) + this.config.windowMs - now) / 1000);
-          
+
           res.setHeader('Retry-After', retryAfter);
           res.setHeader('X-RateLimit-Limit', this.config.maxRequests.toString());
           res.setHeader('X-RateLimit-Remaining', '0');
           res.setHeader('X-RateLimit-Reset', new Date(now + this.config.windowMs).toISOString());
-          
+
           return res.status(this.config.statusCode).json({
             error: 'Too Many Requests',
             message: this.config.message,
@@ -127,12 +125,12 @@ class RateLimiter {
 
         // Add current request to the sorted set
         await client.zAdd(key, { score: now, value: now.toString() });
-        
+
         // Set TTL for the key
         await client.expire(key, Math.ceil(this.config.windowMs / 1000));
 
         // Set response headers
-        const remaining = Math.max(0, this.config.maxRequests - (requests.length / 2) - 1);
+        const remaining = Math.max(0, this.config.maxRequests - requests.length / 2 - 1);
         res.setHeader('X-RateLimit-Limit', this.config.maxRequests.toString());
         res.setHeader('X-RateLimit-Remaining', remaining.toString());
         res.setHeader('X-RateLimit-Reset', new Date(now + this.config.windowMs).toISOString());

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction } from "express";
+import type { Request, Response, NextFunction } from "express";
 import { performance } from "perf_hooks";
 import logger from "../utils/logger";
 import { env } from "../config/env.schema";

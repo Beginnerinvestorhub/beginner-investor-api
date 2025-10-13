@@ -14,7 +14,7 @@
     "type-check": "tsc --noEmit",
     "validate": "npm run type-check && npm run lint",
     "validate:all": "ts-node scripts/validate-all.ts",
-    "test": "jest",
+    "test": "node test-with-coverage.js",
     "test:watch": "jest --watch",
     "health-check": "ts-node scripts/health-check.ts",
     "clean": "rm -rf node_modules .next && npm cache clean --force && npm install"
@@ -69,6 +69,7 @@
     "@typescript-eslint/eslint-plugin": "^6.21.0",
     "@typescript-eslint/parser": "^6.21.0",
     "autoprefixer": "^10.4.17",
+    "coveralls": "^3.1.1",
     "eslint": "8.57.0",
     "eslint-config-next": "14.2.3",
     "eslint-config-prettier": "^9.1.0",

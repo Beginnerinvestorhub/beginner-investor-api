@@ -1,5 +1,5 @@
 // src/utils/secure-cookies.ts
-import { Request, Response } from "express";
+import type { Request, Response } from "express";
 import { env } from "../config/env.schema";
 
 type CookieOptions = {

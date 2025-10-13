@@ -1,4 +1,5 @@
-import express, { Application, Request, Response, NextFunction } from "express";
+import type { Application, Request, Response, NextFunction } from "express";
+import express from "express";
 import cors from "cors";
 import helmet from "helmet";
 import compression from "compression";
@@ -37,7 +38,9 @@ app.use(
   cors({
     origin: (origin, callback) => {
       // Allow requests with no origin (mobile apps, Postman, etc.)
-      if (!origin) return callback(null, true);
+      if (!origin) {
+        return callback(null, true);
+      }
 
       if (allowedOrigins.includes(origin)) {
         callback(null, true);

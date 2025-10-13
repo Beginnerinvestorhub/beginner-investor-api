@@ -1,11 +1,21 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 
 export default function HomePage() {
   const [statsAnimated, setStatsAnimated] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  const observerRef = useRef<IntersectionObserver | null>(null);
+
+  // Ensure we only run client-side code after hydration
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   useEffect(() => {
+    // Only run on client side after hydration
+    if (!isClient) return;
+
     // Trigger counter animations when stats section is in view
     const observer = new IntersectionObserver(
       (entries) => {
@@ -19,34 +29,45 @@ export default function HomePage() {
       { threshold: 0.5 }
     );
 
+    observerRef.current = observer;
+
     const statsSection = document.querySelector('.stats-grid');
     if (statsSection) {
       observer.observe(statsSection);
     }
 
-    return () => observer.disconnect();
-  }, [statsAnimated]);
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [statsAnimated, isClient]);
 
   const animateCounters = () => {
-    const counters = document.querySelectorAll('.stat-number[data-target]');
-    counters.forEach((counter) => {
-      const target = parseInt(counter.getAttribute('data-target') || '0');
-      const duration = 2000;
-      const step = target / (duration / 16);
-      let current = 0;
+    if (!isClient) return;
 
-      const updateCounter = () => {
-        current += step;
-        if (current < target) {
-          counter.textContent = Math.floor(current).toLocaleString();
-          requestAnimationFrame(updateCounter);
-        } else {
-          counter.textContent = target.toLocaleString();
-        }
-      };
+    // Add a small delay to ensure hydration is complete
+    setTimeout(() => {
+      const counters = document.querySelectorAll('.stat-number[data-target]');
+      counters.forEach((counter) => {
+        const target = parseInt(counter.getAttribute('data-target') || '0');
+        const duration = 2000;
+        const step = target / (duration / 16);
+        let current = 0;
 
-      updateCounter();
-    });
+        const updateCounter = () => {
+          current += step;
+          if (current < target) {
+            counter.textContent = Math.floor(current).toLocaleString();
+            requestAnimationFrame(updateCounter);
+          } else {
+            counter.textContent = target.toLocaleString();
+          }
+        };
+
+        updateCounter();
+      });
+    }, 100);
   };
 
   return (
@@ -55,23 +76,9 @@ export default function HomePage() {
         <title>Beginner Investor Hub - Build Your Financial Future</title>
         <meta name="description" content="Master investing with portfolio simulation, AI-powered coaching, and real-time market insights. Learn risk-free with institutional-grade tools." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
-
-      {/* Market Ticker */}
-      <div className="market-ticker">
-        <div className="ticker-content">
-          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
-          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
-          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
-          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
-          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
-          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
-          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
-          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
-          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
-          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
-        </div>
-      </div>
 
       {/* Hero Section */}
       <section className="hero">
@@ -93,7 +100,7 @@ export default function HomePage() {
         </nav>
 
         <div className="hero-content">
-          <h1>Build Your <span className="accent">Financial Future</span></h1>
+          <h1>Build Your <span className="accent">Financial Freedom</span></h1>
           <p className="hero-subtitle">
             Master the mechanics of investing through hands-on portfolio simulation, AI-powered guidance, and institutional-grade market insights. Where precision engineering meets financial education.
           </p>
@@ -103,6 +110,22 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+
+      {/* Market Ticker */}
+      <div className="market-ticker">
+        <div className="ticker-content">
+          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
+          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
+          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
+          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
+          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
+          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
+          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
+          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
+          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
+          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
+        </div>
+      </div>
 
       {/* Features Section */}
       <section className="features" id="features">
@@ -163,19 +186,19 @@ export default function HomePage() {
 
             <div className="stats-grid">
               <div className="stat-card">
-                <div className="stat-number" data-target="12847">0</div>
+                <div className="stat-number" data-target="12847" suppressHydrationWarning={true}>0</div>
                 <div className="stat-label">Portfolios Built</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number" data-target="45392">0</div>
+                <div className="stat-number" data-target="45392" suppressHydrationWarning={true}>0</div>
                 <div className="stat-label">Simulations Run</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">$2.1M+</div>
+                <div className="stat-number" suppressHydrationWarning={true}>$2.1M+</div>
                 <div className="stat-label">Simulated Value</div>
               </div>
               <div className="stat-card">
-                <div className="stat-number">95%</div>
+                <div className="stat-number" suppressHydrationWarning={true}>95%</div>
                 <div className="stat-label">User Satisfaction</div>
               </div>
             </div>
@@ -826,4 +849,9 @@ export default function HomePage() {
         .cta-section h2 {
           font-size: clamp(2rem, 4vw, 3rem);
           color: var(--nyse-color-background);
-          margin-bottom
+          margin-bottom: 1rem;
+        }
+      `}</style>
+    </>
+  );
+}
