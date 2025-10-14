@@ -5,10 +5,19 @@ cancel-in-progress: true
 on:
 schedule:
 
-Run every 6 hours (0 */6 * * *). Changed from daily (0 2 * * *) to increase frequency.
-cron: '0 */6 * * *'
+cron: "0 8 * * 1-5"
+
+on:
+schedule:
+
+cron: "0 2 * * 1-5"
 push:
 
+on:
+  push:
+    branches:
+    - main
+    - release/*
 Run on all branches (**) to increase scope. Changed from [ main, develop ].
 branches: [ '**' ]
 pull_request:
