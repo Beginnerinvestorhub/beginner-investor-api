@@ -24,8 +24,9 @@ export default function AuthForm({ mode }: AuthFormProps) {
       const authAction = mode === 'login' ? login : signup;
       await authAction(email, password);
       router.push('/dashboard');
-    } catch (err: any) {
-      setFormError(err.message || 'Authentication failed');
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'Authentication failed';
+      setFormError(errorMessage);
     }
   };
 
