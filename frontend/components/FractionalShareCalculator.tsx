@@ -46,7 +46,7 @@ const brokers = [
  * select a broker to see the specific number of shares they can purchase with the investment amount minus
  * the broker's fee.
  */
-export default function FractionalShareCalculator(): JSX.Element {
+export default function FractionalShareCalculator() {
   useRegisterChartJS();
   const [amount, setAmount] = useState<string>('');
   const [symbol, setSymbol] = useState<string>('');

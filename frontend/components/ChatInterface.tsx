@@ -27,7 +27,7 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
   const [error, setError] = useState<string | null>(null);
   const { loading, sendNudge } = useNudgeApi();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const errorTimeoutRef = useRef<NodeJS.Timeout>();
+  const errorTimeoutRef = useRef<number>();
 
   const scrollToBottom = useCallback(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -127,8 +127,6 @@ export const ChatInterface: React.FC<ChatInterfaceProps> = ({ onClose }) => {
       setMessages(prev => [...prev, botMessage]);
       setError(null);
     } catch (err) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'Failed to send message';
       showError('Failed to send message. Please try again.');
 
       setMessages(prev =>

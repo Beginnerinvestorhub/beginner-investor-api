@@ -471,7 +471,7 @@ export default function PrivacyPolicy() {
                 <ul className="styled-list">
                   <li>
                     Posting the updated policy on our website with a new &quot;Last
-                    Updated" date
+                    Updated&quot; date
                   </li>
                   <li>Sending an email notification to registered users</li>
                   <li>

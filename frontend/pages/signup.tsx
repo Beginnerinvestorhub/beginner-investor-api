@@ -28,7 +28,7 @@ export default function SignupPage() {
           <div className="nyse-spinner"></div>
           <p className="nyse-loading-text">Loading...</p>
         </div>
-        <style jsx>{`
+        <style>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;

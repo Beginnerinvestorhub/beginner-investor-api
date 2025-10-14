@@ -35,7 +35,7 @@ type ESGData = {
   marketCap: number;
 };
 
-export default function ESGScreener(): JSX.Element {
+export default function ESGScreener() {
   useRegisterChartJS();
   const [data, setData] = useState<ESGData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);

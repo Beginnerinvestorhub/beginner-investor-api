@@ -156,9 +156,9 @@ export default function AchievementNotification({
           <div className="h-full bg-white transition-all ease-linear animate-shrink" />
         </div>
       </div>
-     
-      </div>
-          animate-shrink {
+
+      <style jsx>{`
+        .animate-shrink {
           animation: shrink ${duration}ms linear forwards;
         }
 
@@ -194,7 +194,7 @@ export default function AchievementNotification({
         .animate-bounce-subtle {
           animation: bounce-subtle 1s ease-in-out;
         }
-      }
+      `}</style>
     </div>
   );
 } 

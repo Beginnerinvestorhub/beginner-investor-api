@@ -211,7 +211,7 @@ export default function ToolsOverview() {
         </main>
       </div>
 
-      <style jsx>{`
+      <style>{`
         .tools-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);
