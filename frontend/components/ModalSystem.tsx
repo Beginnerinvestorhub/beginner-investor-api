@@ -106,10 +106,14 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 // Modal component props type
 type ModalComponentProps = Record<string, any>;
 
-const modalComponents: Record<string, React.ComponentType<ModalComponentProps>> = {
+const ModalComponentsRegistry: Record<string, React.ComponentType<ModalComponentProps>> = {
   ConfirmModal,
-  // Add more modal components here as needed
 };
+
+/**
+ * @typedef {Record<string, React.ComponentType<ModalComponentProps>>} ModalComponentsRegistry
+ * A registry of available modal components.
+ */
 
 // --- Individual Modal Component Wrapper ---
 
@@ -124,96 +128,27 @@ const ModalItem: React.FC<{
   modal: Modal;
   isTopmost: boolean;
   zIndexOffset: number;
-}> = ({ modal, isTopmost, zIndexOffset }) => {
-  const { closeModal } = useUI();
+}> = ({ modal, isTopmost, zIndexOffset: modalZIndexOffset }) => {
+  const { closeModal: closeModalModal } = useUI();
 
-  const isClosable = modal.closable !== false;
+  const isModalClosable = modal.closable !== false;
 
-  // onClose is triggered by backdrop click or escape key
-  const handleClose = (_value: boolean) => {
-    // Only close if it's the topmost modal and it's allowed to be closed
-    if (isTopmost && isClosable) {
-      closeModal(modal.id);
+  const handleModalClose = (_value: boolean) => {
+    if (isTopmost && isModalClosable) {
+      closeModalModal(modal.id);
     }
   };
 
   const ModalComponent = modalComponents[modal.component];
 
   if (!ModalComponent) {
-    console.error(`Modal component "${modal.component}" not found`);
-    return null;
+    throw new Error(`Modal component "${modal.component}" not found`);
   }
 
   return (
-    // We use `show={true}` and rely on the ModalSystem parent to conditionally mount/unmount
-    // when the modal is added/removed from the store, allowing the Transition to work.
     <Transition appear show={true}>
       <Dialog
-        open={true} // Dialog is open as long as it's mounted
-        as="div"
-        // Use inline style for dynamic z-index for proper stacking
-        className="relative"
-        /**
-         * Dynamic z-index for proper stacking of modals.
-         * The z-index is offset by 50 to ensure it's above the main content.
-         * The additional zIndexOffset is used to stack modals on top of each other.
-         */
-        style={{ zIndex: 50 + zIndexOffset }}
-        // Only allow closing on the topmost modal via backdrop/ESC
-        {...(isTopmost ? { onClose: handleClose } : {})}>
-      
-        {/* Backdrop: Only the topmost modal has a visible backdrop */}
-        <Transition.Child
-          as={Fragment}
-          enter="ease-out duration-300"
-          enterFrom="opacity-0"
-          enterTo="opacity-100"
-          leave="ease-in duration-200"
-          leaveFrom="opacity-100"
-          leaveTo="opacity-0"
-        >
-          <div
-            className={`fixed inset-0 bg-black transition-opacity ${isTopmost ? 'bg-opacity-25 dark:bg-opacity-50' : 'bg-opacity-0'}`}
-          />
-        </Transition.Child>
-
-        <div className="fixed inset-0 overflow-y-auto">
-          <div className="flex min-h-full items-center justify-center p-4 text-center">
-            <Transition.Child
-              as={Fragment}
-              enter="ease-out duration-300"
-              enterFrom="opacity-0 scale-95"
-              enterTo="opacity-100 scale-100"
-              leave="ease-in duration-200"
-              leaveFrom="opacity-100 scale-100"
-              leaveTo="opacity-0 scale-95"
-            >
-              <Dialog.Panel
-                // Only the topmost modal should accept pointer events
-                className={`w-full ${modalSizes[modal.size || 'md']} transform overflow-hidden rounded-2xl bg-white dark:bg-gray-800 text-left align-middle shadow-xl transition-all ${isTopmost ? 'pointer-events-auto' : 'pointer-events-none'}`}
-              >
-                {/* Close Button: Only show/enable for the topmost, closable modal */}
-                {isTopmost && isClosable && (
-                  <div className="absolute right-0 top-0 pr-4 pt-4">
-                    <button
-                      type="button"
-                      onClick={() => handleClose(true)}
-                      className="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                    >
-                      <span className="sr-only">Close</span>
-                      <XMarkIcon className="h-6 w-6" />
-                    </button>
-                  </div>
-                )}
-                <ModalComponent {...modal.props} />
-              </Dialog.Panel>
-            </Transition.Child>
-          </div>
-        </div>
-      </Dialog>
-    </Transition>
-  );
-};
+        open={true}
 
 // --- Main Modal System Component ---
 
