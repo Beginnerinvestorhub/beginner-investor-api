@@ -28,7 +28,7 @@ pydantic = "^2.4.2"
 pydantic-settings = "^2.0.3"
 python-jose = {extras = ["cryptography"], version = "^3.3.0"}
 passlib = {extras = ["bcrypt"], version = "^1.7.4"}
-prometheus-client = "^0.18.0"
+prometheus-client = "^0.23.1"
 sentry-sdk = {extras = ["fastapi"], version = "^1.31.1"}
 structlog = "^23.1.0"
 
