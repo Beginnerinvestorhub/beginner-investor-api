@@ -9,10 +9,8 @@ import { env } from "../config/env.schema";
 
 type SecurityHeadersConfig = {
   enableHSTS?: boolean;
-  enableCSP?: boolean;
   enableXSSFilter?: boolean;
   enableNoSniff?: boolean;
-  enableFrameGuard?: boolean;
   enableIENoOpen?: boolean;
   enableReferrerPolicy?: boolean;
   enableDnsPrefetchControl?: boolean;
@@ -26,10 +24,8 @@ type SecurityHeadersConfig = {
 export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
   const {
     enableHSTS = true,
-    enableCSP = true,
     enableXSSFilter = true,
     enableNoSniff = true,
-    enableFrameGuard = true,
     enableIENoOpen = true,
     enableReferrerPolicy = true,
     enableDnsPrefetchControl = true,
@@ -43,29 +39,27 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
   middlewares.push(
     helmet({
       // Content Security Policy
-      contentSecurityPolicy: enableCSP
-        ? {
-            directives: {
-              defaultSrc: ["'self'"],
-              scriptSrc: [
-                "'self'",
-                "'unsafe-inline'",
-                "'unsafe-eval'", // Only for development, should be removed in production
-              ],
-              styleSrc: ["'self'", "'unsafe-inline'"],
-              imgSrc: ["'self'", "data:", "https:"],
-              connectSrc: ["'self'"],
-              fontSrc: ["'self'", "data:"],
-              objectSrc: ["'none'"],
-              mediaSrc: ["'self'"],
-              frameSrc: ["'self'"],
-              formAction: ["'self'"],
-              frameAncestors: ["'self'"],
-              upgradeInsecureRequests: [],
-            },
-            reportOnly: env.SECURITY_CSP_REPORT_ONLY,
-          }
-        : false,
+      contentSecurityPolicy: {
+        directives: {
+          defaultSrc: ["'self'"],
+          scriptSrc: [
+            "'self'",
+            "'unsafe-inline'",
+            "'unsafe-eval'", // Only for development, should be removed in production
+          ],
+          styleSrc: ["'self'", "'unsafe-inline'"],
+          imgSrc: ["'self'", "data:", "https:"],
+          connectSrc: ["'self'"],
+          fontSrc: ["'self'", "data:"],
+          objectSrc: ["'none'"],
+          mediaSrc: ["'self'"],
+          frameSrc: ["'self'"],
+          formAction: ["'self'"],
+          frameAncestors: ["'self'"],
+          upgradeInsecureRequests: [],
+        },
+        reportOnly: env.SECURITY_CSP_REPORT_ONLY,
+      },
 
       // HTTP Strict Transport Security
       hsts: enableHSTS
@@ -83,11 +77,9 @@ export const securityHeaders = (config: SecurityHeadersConfig = {}) => {
       noSniff: enableNoSniff,
 
       // Frame options
-      frameguard: enableFrameGuard
-        ? {
-            action: "deny",
-          }
-        : false,
+      frameguard: {
+        action: "deny",
+      },
 
       // HPKP (HTTP Public Key Pinning) - Deprecated and removed from modern browsers
       // This configuration is intentionally omitted as HPKP is deprecated
