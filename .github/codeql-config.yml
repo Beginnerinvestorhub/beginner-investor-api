@@ -18,6 +18,7 @@ paths-ignore:
   - "**/*.pyc"
 
 paths:
+  - frontend/src
   - services/backend-api/src
   - services/ai-microservice-engine
   - services/marketdata-ingestion
