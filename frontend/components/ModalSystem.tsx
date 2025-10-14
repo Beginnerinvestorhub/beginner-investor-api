@@ -103,7 +103,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
 // --- Modal Components Registry ---
 
-const modalComponents: Record<string, React.ComponentType<unknown>> = {
+const modalComponents: Record<string, React.ComponentType<any>> = {
   ConfirmModal,
   // Add more modal components here as needed
 };
@@ -120,7 +120,7 @@ const ModalItem: React.FC<{
   const isClosable = modal.closable !== false;
 
   // onClose is triggered by backdrop click or escape key
-  const handleClose = (_open: boolean) => {
+  const handleClose = (open: boolean) => {
     // Only close if it's the topmost modal and it's allowed to be closed
     if (isTopmost && isClosable) {
       closeModal(modal.id);
@@ -145,7 +145,7 @@ const ModalItem: React.FC<{
         className="relative"
         style={{ zIndex: 50 + zIndexOffset }}
         // Only allow closing on the topmost modal via backdrop/ESC
-        {...(isTopmost ? { onClose: handleClose } : {})}
+        onClose={isTopmost ? handleClose : undefined}
       >
         {/* Backdrop: Only the topmost modal has a visible backdrop */}
         <Transition.Child
