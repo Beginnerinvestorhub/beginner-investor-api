@@ -503,7 +503,7 @@ export default function PrivacyPolicy() {
         </main>
       </div>
 
-      <style jsx>{css}</style>{`
+      <style jsx>{`
         .privacy-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);
