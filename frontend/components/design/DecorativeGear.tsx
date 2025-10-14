@@ -4,7 +4,6 @@ interface DecorativeGearProps {
   size?: string;
   position?: string;
   animation?: string;
-  pattern?: 'gear-large' | 'gear-medium' | 'gear-small';
   className?: string;
 }
 
@@ -12,15 +11,8 @@ const DecorativeGear: React.FC<DecorativeGearProps> = ({
   size = 'w-16 h-16',
   position = '',
   animation = '',
-  pattern = 'gear-large',
   className = ''
 }) => {
-  const gearPatterns = {
-    'gear-large': 'border-4 border-blue-200 border-opacity-30',
-    'gear-medium': 'border-3 border-blue-300 border-opacity-40',
-    'gear-small': 'border-2 border-blue-400 border-opacity-50'
-  };
-
   return (
     <div
       className={`absolute ${size} ${position} ${animation} ${className}`}
