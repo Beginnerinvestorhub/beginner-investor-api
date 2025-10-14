@@ -89,7 +89,7 @@ const NudgeChatWidget: React.FC = () => {
             <div className="space-y-3">
               <div className="bg-gray-100 rounded-lg p-3 max-w-xs">
                 <p className="text-sm text-gray-700">
-                  Hi! I'm here to help you with your investment questions. What
+                  Hi! I&apos;m here to help you with your investment questions. What
                   would you like to know?
                 </p>
               </div>

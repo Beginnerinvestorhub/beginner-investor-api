@@ -7,8 +7,8 @@ import React, { Fragment } from 'react';
 import { Dialog, Transition } from '@headlessui/react';
 import { XMarkIcon } from '@heroicons/react/24/outline';
 // NOTE: Assuming your store exports these correctly
-import { useModals, useUI } from '../store';
-import { Modal } from '../store/types';
+import { useModals, useUI } from '../src/store/modalStore';
+import { Modal } from '../src/store/types';
 
 // --- Configuration ---
 
