@@ -1,13 +1,32 @@
-name: "CodeQL Configuration"
+# ==========================================
+# CodeQL Configuration
+# ==========================================
+# Documentation: https://docs.github.com/en/code-security/codeql-cli
+# This configuration defines which queries to run and which paths to include/exclude.
+
+name: "Advanced CodeQL Analysis"
 
 disable-default-queries: false
 
 queries:
+  # Default security and quality queries
   - uses: security-and-quality
+  # Experimental security queries for enhanced detection
   - uses: security-experimental
 
+# Paths to include for analysis
+paths:
+  - frontend/src
+  - services/backend-api/src
+  - services/ai-microservice-engine
+  - services/market-data-ingestion
+  - services/python-risk-engine
+  - services/portfolio-simulation
+  - shared
+
+# Paths to ignore (to improve performance and reduce noise)
 paths-ignore:
-  - node_modules
+  - node_modules/
   - "**/*.min.js"
   - "**/*.min.css"
   - "**/dist/**"
@@ -16,11 +35,21 @@ paths-ignore:
   - "**/coverage/**"
   - "**/__pycache__/**"
   - "**/*.pyc"
+  - "**/*.egg-info/**"
+  - "**/migrations/**"
+  - "**/.venv/**"
+  - "**/.pytest_cache/**"
+  - "**/tmp/**"
+  - "**/logs/**"
 
-paths:
-  - services/backend-api/src
-  - services/ai-microservice-engine
-  - services/marketdata-ingestion
-  - services/python-risk-engine
-  - services/portfolio-simulation
-  - shared
+# Optional: Specify which languages to analyze explicitly
+# Helps CodeQL focus analysis and improve performance
+# (remove or add as needed)
+languages:
+  - javascript
+  - python
+  - typescript
+
+# ==========================================
+# End of Configuration
+# ==========================================

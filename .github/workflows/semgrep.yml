@@ -1,0 +1,346 @@
+# This workflow uses Semgrep for static application security testing (SAST).
+# Semgrep is a fast, open-source static analysis tool that finds bugs and enforces
+# code standards. Learn more at https://semgrep.dev
+#
+# Note: This workflow requires a free Semgrep account to manage rules and view results.
+# Sign up at https://semgrep.dev/login
+
+name: Semgrep Security Scan
+
+on:
+  push:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+      - 'docs/**'
+      - '.github/**'
+      - '!.github/workflows/semgrep.yml'
+  pull_request:
+    branches: [main, develop]
+    paths-ignore:
+      - '**.md'
+      - '**.txt'
+      - 'docs/**'
+  schedule:
+    - cron: '15 11 * * 5'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  semgrep:
+    name: Semgrep Scan
+    runs-on: ubuntu-latest
+    
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+      pull-requests: write
+    
+    container:
+      image: semgrep/semgrep:latest
+    
+    # Skip duplicate scans for Dependabot PRs
+    if: github.actor != 'dependabot[bot]'
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Validate Semgrep configuration
+        id: validate
+        run: |
+          if [ -z "${{ secrets.SEMGREP_APP_TOKEN }}" ]; then
+            echo "⚠️ SEMGREP_APP_TOKEN not configured"
+            echo "configured=false" >> $GITHUB_OUTPUT
+            echo "mode=local" >> $GITHUB_OUTPUT
+          else
+            echo "✅ Semgrep Cloud configured"
+            echo "configured=true" >> $GITHUB_OUTPUT
+            echo "mode=cloud" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Run Semgrep scan (Cloud)
+        if: steps.validate.outputs.configured == 'true'
+        id: semgrep-cloud
+        uses: returntocorp/semgrep-action@v1
+        with:
+          publishToken: ${{ secrets.SEMGREP_APP_TOKEN }}
+          publishDeployment: ${{ secrets.SEMGREP_DEPLOYMENT_ID }}
+          generateSarif: "1"
+          auditOn: push
+        env:
+          SEMGREP_TIMEOUT: 300
+          SEMGREP_RULES: auto
+        continue-on-error: true
+
+      - name: Run Semgrep scan (Local)
+        if: steps.validate.outputs.configured == 'false'
+        id: semgrep-local
+        run: |
+          echo "Running Semgrep with default rulesets..."
+          semgrep scan \
+            --config=auto \
+            --sarif \
+            --output=semgrep.sarif \
+            --json \
+            --output=semgrep.json \
+            --metrics=off \
+            --verbose \
+            || echo "semgrep-exit-code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Parse Semgrep results
+        if: always()
+        id: parse
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            
+            // Check if results exist
+            if (!fs.existsSync('semgrep.sarif') && !fs.existsSync('semgrep.json')) {
+              core.notice('No Semgrep results found');
+              core.setOutput('has-results', 'false');
+              return;
+            }
+            
+            core.setOutput('has-results', 'true');
+            
+            let findings = { error: 0, warning: 0, note: 0 };
+            
+            // Parse SARIF results
+            if (fs.existsSync('semgrep.sarif')) {
+              try {
+                const sarif = JSON.parse(fs.readFileSync('semgrep.sarif', 'utf8'));
+                
+                sarif.runs?.forEach(run => {
+                  run.results?.forEach(result => {
+                    const level = result.level || 'note';
+                    findings[level] = (findings[level] || 0) + 1;
+                  });
+                });
+              } catch (error) {
+                core.warning(`Failed to parse SARIF: ${error.message}`);
+              }
+            }
+            
+            // Parse JSON results (fallback)
+            if (fs.existsSync('semgrep.json') && findings.error === 0) {
+              try {
+                const json = JSON.parse(fs.readFileSync('semgrep.json', 'utf8'));
+                
+                json.results?.forEach(result => {
+                  const severity = result.extra?.severity || 'INFO';
+                  if (severity === 'ERROR') findings.error++;
+                  else if (severity === 'WARNING') findings.warning++;
+                  else findings.note++;
+                });
+              } catch (error) {
+                core.warning(`Failed to parse JSON: ${error.message}`);
+              }
+            }
+            
+            core.setOutput('errors', findings.error);
+            core.setOutput('warnings', findings.warning);
+            core.setOutput('notes', findings.note);
+            core.setOutput('total', findings.error + findings.warning + findings.note);
+            
+            // Generate summary
+            const emoji = findings.error > 0 ? '❌' : findings.warning > 0 ? '⚠️' : '✅';
+            const summary = `${emoji} **Semgrep Security Scan Results**
+            
+            | Severity | Count |
+            |----------|-------|
+            | 🔴 Errors | ${findings.error} |
+            | 🟡 Warnings | ${findings.warning} |
+            | 🔵 Notes | ${findings.note} |
+            | **Total** | **${findings.error + findings.warning + findings.note}** |
+            
+            ${findings.error > 0 ? '❗ **Action required**: Critical security issues found.' : ''}
+            ${findings.warning > 0 ? '⚠️ Review warnings for potential security concerns.' : ''}
+            `;
+            
+            core.summary.addRaw(summary).write();
+            core.setOutput('summary', summary);
+
+      - name: Comment on PR
+        if: >
+          github.event_name == 'pull_request' && 
+          steps.parse.outputs.has-results == 'true' &&
+          always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `${{ steps.parse.outputs.summary }}`;
+            const mode = '${{ steps.validate.outputs.mode }}';
+            const totalFindings = parseInt('${{ steps.parse.outputs.total }}' || '0');
+            
+            if (!summary) return;
+            
+            const modeInfo = mode === 'cloud' 
+              ? '🌐 Running with Semgrep Cloud integration'
+              : '💻 Running in local mode (configure SEMGREP_APP_TOKEN for cloud features)';
+            
+            const commentBody = `## 🔒 Semgrep Security Analysis
+            
+            ${modeInfo}
+            
+            ${summary}
+            
+            <details>
+            <summary>📚 About Semgrep</summary>
+            
+            Semgrep is a static analysis tool that finds bugs and enforces secure coding standards.
+            ${mode === 'cloud' ? 'View detailed results at [Semgrep Cloud Dashboard](https://semgrep.dev/orgs/-/findings)' : ''}
+            
+            </details>
+            
+            <details>
+            <summary>🔗 Useful Links</summary>
+            
+            - [View workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - [Semgrep Documentation](https://semgrep.dev/docs)
+            - [Security Findings](${{ github.server_url }}/${{ github.repository }}/security/code-scanning)
+            
+            </details>
+            `;
+            
+            // Find and update existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🔒 Semgrep Security Analysis')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+
+      - name: Upload SARIF results
+        if: always() && steps.parse.outputs.has-results == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: semgrep.sarif
+          category: semgrep
+          wait-for-processing: true
+
+      - name: Upload scan artifacts
+        if: always() && steps.parse.outputs.has-results == 'true'
+        uses: actions/upload-artifact@v4
+        with:
+          name: semgrep-results-${{ github.run_number }}
+          path: |
+            semgrep.sarif
+            semgrep.json
+          retention-days: 90
+          if-no-files-found: warn
+
+      - name: Create GitHub Issue for critical findings
+        if: >
+          steps.parse.outputs.errors > 0 && 
+          github.event_name == 'schedule' &&
+          steps.validate.outputs.configured == 'true'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const errors = parseInt('${{ steps.parse.outputs.errors }}');
+            
+            const { data: issues } = await github.rest.issues.listForRepo({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              labels: 'security,semgrep',
+              per_page: 10
+            });
+            
+            const existingIssue = issues.find(issue => 
+              issue.title.includes('Semgrep Security Findings')
+            );
+            
+            const issueBody = `## 🚨 Semgrep Security Scan Alert
+            
+            The scheduled Semgrep scan has detected **${errors} critical security issue(s)**.
+            
+            ### Details
+            - **Run**: [View Workflow](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }})
+            - **Branch**: \`${{ github.ref_name }}\`
+            - **Commit**: \`${{ github.sha }}\`
+            - **Date**: ${new Date().toISOString()}
+            
+            ### Action Required
+            1. Review the findings in the [Security tab](${{ github.server_url }}/${{ github.repository }}/security/code-scanning)
+            2. Address critical issues promptly
+            3. Close this issue once resolved
+            
+            ---
+            *This issue was automatically created by the Semgrep security workflow.*
+            `;
+            
+            if (existingIssue) {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: existingIssue.number,
+                body: `🔄 **New findings detected**\n\n${issueBody}`
+              });
+            } else {
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Semgrep Security Findings Require Attention',
+                body: issueBody,
+                labels: ['security', 'semgrep', 'automated']
+              });
+            }
+
+      - name: Check scan status
+        if: always()
+        run: |
+          ERRORS=${{ steps.parse.outputs.errors }}
+          WARNINGS=${{ steps.parse.outputs.warnings }}
+          
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "📊 Semgrep Scan Summary"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "🔴 Errors: $ERRORS"
+          echo "🟡 Warnings: $WARNINGS"
+          echo "🔵 Notes: ${{ steps.parse.outputs.notes }}"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          
+          if [ "$ERRORS" -gt 0 ]; then
+            echo "❌ Scan failed: Critical security issues found"
+            exit 1
+          elif [ "$WARNINGS" -gt 0 ]; then
+            echo "⚠️ Scan completed with warnings"
+            exit 0
+          else
+            echo "✅ Scan completed successfully"
+            exit 0
+          fi

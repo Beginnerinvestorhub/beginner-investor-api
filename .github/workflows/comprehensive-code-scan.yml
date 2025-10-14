@@ -1,18 +1,4 @@
-Here is a **fully revised** version of your `.github/workflows/comprehensive-code-scan.yml` file, applying all fixes and improvements discussed above:
 
-- **CodeQL languages syntax corrected**
-- **SARIF uploads for all security scan outputs**
-- **Container scans use SARIF and are uploaded**
-- **Python dependency upgrading improved**
-- **Markdown linting added for documentation**
-- **Concurrency added to prevent duplicate runs**
-- **Comments added for clarity**
-- **All jobs reviewed for best practices and error handling**
-
-```yaml
-name: Comprehensive Code Scanning & Auto-Fix
-
-# Prevent duplicate runs on same branch
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
