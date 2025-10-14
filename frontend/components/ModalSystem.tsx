@@ -120,7 +120,7 @@ const ModalItem: React.FC<{
   const isClosable = modal.closable !== false;
 
   // onClose is triggered by backdrop click or escape key
-  const handleClose = () => {
+  const handleClose = (open: boolean) => {
     // Only close if it's the topmost modal and it's allowed to be closed
     if (isTopmost && isClosable) {
       closeModal(modal.id);
