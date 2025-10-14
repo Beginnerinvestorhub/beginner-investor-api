@@ -66,8 +66,8 @@ export default function FractionalShareCalculator() {
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Failed to fetch price');
       setPrice(data.price.toString());
-    } catch (err: any) {
-      setPriceError(err.message);
+    } catch (err: unknown) {
+      setPriceError(err instanceof Error ? err.message : 'Failed to fetch price');
     } finally {
       setLoadingPrice(false);
     }

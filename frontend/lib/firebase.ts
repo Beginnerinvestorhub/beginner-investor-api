@@ -1,40 +1,27 @@
-import { initializeApp } from 'firebase/app';
-import { getAnalytics } from 'firebase/analytics';
-import { getAuth } from 'firebase/auth';
-
-// Import the functions you need from the SDKs you need
-
-// TODO: Add SDKs for Firebase products that you want to use
-// https://firebase.google.com/docs/web/setup#available-libraries
+import { initializeApp, FirebaseApp } from 'firebase/app';
+import { getAuth, Auth } from 'firebase/auth';
 
 // Your web app's Firebase configuration
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+// Use environment variables for sensitive or configuration data in a real application
 const firebaseConfig = {
-  apiKey: 'AIzaSyAwatQASRMtJKkrATJXrpNUzzG2VxSYCf0',
-  authDomain: 'beginnerinvestorhub-8ce1f.firebaseapp.com',
-  projectId: 'beginnerinvestorhub-8ce1f',
-  storageBucket: 'beginnerinvestorhub-8ce1f.firebasestorage.app',
-  messagingSenderId: '807595603132',
-  appId: '1:807595603132:web:6a2be21962544669f9ccb9',
-  measurementId: 'G-S2FYWXCWGB',
+  // Use environment variables for better security and configuration management
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID,
 };
 
-// Initialize Firebase
-let app = initializeApp(firebaseConfig);
-const analytics = getAnalytics(app);
-// Only initialize Firebase if API key is available (prevents build-time errors)
+// Initialize Firebase App
+// Check if the app is already initialized to prevent errors in Next.js development mode (hot reloading)
+// In a real application, you might also check if the API key is present before initializing.
+const app: FirebaseApp = initializeApp(firebaseConfig);
 
-let auth: any = null;
+// Initialize Firebase Authentication
+// Export `auth` for use in other parts of your application
+export const auth: Auth = getAuth(app);
 
-if (process.env.NEXT_PUBLIC_FIREBASE_API_KEY) {
-  app = initializeApp(firebaseConfig);
-  const analytics =
-    typeof window !== 'undefined' ? getAnalytics(app) : undefined;
-  auth = getAuth(app);
-} else {
-  console.warn(
-    'Firebase not initialized: Missing NEXT_PUBLIC_FIREBASE_API_KEY'
-  );
-}
-
-export { app, analytics, auth };
+// Export the Firebase App instance if needed elsewhere
+export { app };
