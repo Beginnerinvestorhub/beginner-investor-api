@@ -60,7 +60,7 @@ export default function AchievementNotification({
         title: '🏆 Achievement Unlocked!',
         subtitle: achievement.name,
         description: achievement.description,
-        points: achievement.reward.points,
+        points: achievement.points,
         color: 'bg-gradient-to-r from-purple-500 to-pink-500',
       };
     }

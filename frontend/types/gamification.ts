@@ -1,4 +1,6 @@
 export interface Badge {
+
+  points: number;
   id: string;
   name: string;
   description: string;
@@ -32,6 +34,8 @@ export interface UserProgress {
 }
 
 export interface Achievement {
+  name: string;
+  reward: string | number | Badge;
   id: string;
   title: string;
   description: string;

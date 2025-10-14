@@ -103,13 +103,23 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
 // --- Modal Components Registry ---
 
-const modalComponents: Record<string, React.ComponentType<any>> = {
+// Modal component props type
+type ModalComponentProps = Record<string, any>;
+
+const modalComponents: Record<string, React.ComponentType<ModalComponentProps>> = {
   ConfirmModal,
   // Add more modal components here as needed
 };
 
 // --- Individual Modal Component Wrapper ---
 
+/**
+ * Individual modal component wrapper.
+ * Manages the modal's visibility, backdrop, close button, and stacking.
+ * @param {Modal} modal - The modal to be rendered
+ * @param {boolean} isTopmost - Whether the modal is currently the topmost in the stack
+ * @param {number} zIndexOffset - The z-index offset for stacking modals
+ */
 const ModalItem: React.FC<{
   modal: Modal;
   isTopmost: boolean;
@@ -120,7 +130,7 @@ const ModalItem: React.FC<{
   const isClosable = modal.closable !== false;
 
   // onClose is triggered by backdrop click or escape key
-  const handleClose = (open: boolean) => {
+  const handleClose = (_value: boolean) => {
     // Only close if it's the topmost modal and it's allowed to be closed
     if (isTopmost && isClosable) {
       closeModal(modal.id);
@@ -137,16 +147,21 @@ const ModalItem: React.FC<{
   return (
     // We use `show={true}` and rely on the ModalSystem parent to conditionally mount/unmount
     // when the modal is added/removed from the store, allowing the Transition to work.
-    <Transition appear show={true} as={Fragment}>
+    <Transition appear show={true}>
       <Dialog
         open={true} // Dialog is open as long as it's mounted
         as="div"
         // Use inline style for dynamic z-index for proper stacking
         className="relative"
+        /**
+         * Dynamic z-index for proper stacking of modals.
+         * The z-index is offset by 50 to ensure it's above the main content.
+         * The additional zIndexOffset is used to stack modals on top of each other.
+         */
         style={{ zIndex: 50 + zIndexOffset }}
         // Only allow closing on the topmost modal via backdrop/ESC
-        onClose={isTopmost ? handleClose : undefined}
-      >
+        {...(isTopmost ? { onClose: handleClose } : {})}>
+      
         {/* Backdrop: Only the topmost modal has a visible backdrop */}
         <Transition.Child
           as={Fragment}
@@ -182,7 +197,7 @@ const ModalItem: React.FC<{
                   <div className="absolute right-0 top-0 pr-4 pt-4">
                     <button
                       type="button"
-                      onClick={() => handleClose(false)}
+                      onClick={() => handleClose(true)}
                       className="rounded-md bg-white dark:bg-gray-800 text-gray-400 hover:text-gray-500 dark:hover:text-gray-300 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
                       <span className="sr-only">Close</span>
