@@ -1,8 +1,8 @@
-name: ESLint
+name: ESLint Analysis
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [main, develop]
     paths:
       - '**/*.js'
       - '**/*.jsx'
@@ -10,8 +10,12 @@ on:
       - '**/*.tsx'
       - '**/*.mjs'
       - '**/*.cjs'
+      - '.eslintrc*'
+      - 'eslint.config.*'
+      - 'package.json'
+      - 'package-lock.json'
   pull_request:
-    branches: [ "main" ]
+    branches: [main, develop]
     paths:
       - '**/*.js'
       - '**/*.jsx'
@@ -19,50 +23,244 @@ on:
       - '**/*.tsx'
       - '**/*.mjs'
       - '**/*.cjs'
+      - '.eslintrc*'
+      - 'eslint.config.*'
+      - 'package.json'
+      - 'package-lock.json'
   schedule:
     - cron: '26 20 * * 1'
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   eslint:
+    name: ESLint (${{ matrix.node-version }})
+    runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         node-version: [18.x, 20.x]
-    runs-on: ubuntu-latest
+    
     permissions:
       contents: read
       security-events: write
       actions: read
+      pull-requests: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup Node.js
+      - name: Setup Node.js ${{ matrix.node-version }}
         uses: actions/setup-node@v4
         with:
           node-version: ${{ matrix.node-version }}
-
-      - name: Cache node modules
-        uses: actions/cache@v3
-        with:
-          path: ~/.npm
-          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
-          restore-keys: |
-            ${{ runner.os }}-npm-cache-
+          cache: 'npm'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline --no-audit
 
-      - name: Install ESLint SARIF formatter
-        run: npm install @microsoft/eslint-formatter-sarif@latest
+      - name: Install ESLint formatters
+        run: |
+          npm install --no-save \
+            @microsoft/eslint-formatter-sarif@latest \
+            eslint-formatter-summary@latest
 
-      - name: Run ESLint
-        env:
-          SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
-        run: npx eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+      - name: Get changed files
+        if: github.event_name == 'pull_request'
+        id: changed-files
+        uses: tj-actions/changed-files@v41
+        with:
+          files: |
+            **/*.js
+            **/*.jsx
+            **/*.ts
+            **/*.tsx
+            **/*.mjs
+            **/*.cjs
+
+      - name: Run ESLint on changed files
+        if: github.event_name == 'pull_request' && steps.changed-files.outputs.any_changed == 'true'
+        id: eslint-changed
+        run: |
+          echo "Running ESLint on changed files..."
+          echo "${{ steps.changed-files.outputs.all_changed_files }}" | \
+          xargs npx eslint \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file eslint-results-${{ matrix.node-version }}.sarif \
+            --format json \
+            --output-file eslint-results-${{ matrix.node-version }}.json \
+            --format summary \
+            || echo "eslint-exit-code=$?" >> $GITHUB_OUTPUT
         continue-on-error: true
 
-      - name: Upload analysis results to GitHub
+      - name: Run ESLint on all files
+        if: github.event_name != 'pull_request'
+        id: eslint-all
+        run: |
+          echo "Running ESLint on all files..."
+          npx eslint . \
+            --ext .js,.jsx,.ts,.tsx,.mjs,.cjs \
+            --format @microsoft/eslint-formatter-sarif \
+            --output-file eslint-results-${{ matrix.node-version }}.sarif \
+            --format json \
+            --output-file eslint-results-${{ matrix.node-version }}.json \
+            --format summary \
+            || echo "eslint-exit-code=$?" >> $GITHUB_OUTPUT
+        continue-on-error: true
+
+      - name: Generate ESLint report
+        if: always()
+        id: report
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const resultsFile = `eslint-results-${{ matrix.node-version }}.json`;
+            
+            if (!fs.existsSync(resultsFile)) {
+              core.notice('No ESLint results found');
+              return;
+            }
+            
+            const results = JSON.parse(fs.readFileSync(resultsFile, 'utf8'));
+            
+            let errorCount = 0;
+            let warningCount = 0;
+            let fixableErrorCount = 0;
+            let fixableWarningCount = 0;
+            
+            results.forEach(result => {
+              errorCount += result.errorCount;
+              warningCount += result.warningCount;
+              fixableErrorCount += result.fixableErrorCount;
+              fixableWarningCount += result.fixableWarningCount;
+            });
+            
+            const summary = `### ESLint Results (Node ${{ matrix.node-version }})
+            
+            | Metric | Count |
+            |--------|-------|
+            | ❌ Errors | ${errorCount} |
+            | ⚠️ Warnings | ${warningCount} |
+            | 🔧 Fixable Errors | ${fixableErrorCount} |
+            | 🔧 Fixable Warnings | ${fixableWarningCount} |
+            | 📁 Files Checked | ${results.length} |
+            
+            ${fixableErrorCount + fixableWarningCount > 0 ? '💡 Run `npm run lint:fix` to automatically fix some issues.' : ''}
+            `;
+            
+            core.summary.addRaw(summary).write();
+            core.setOutput('error-count', errorCount);
+            core.setOutput('warning-count', warningCount);
+            core.setOutput('summary', summary);
+
+      - name: Comment on PR
+        if: >
+          github.event_name == 'pull_request' && 
+          matrix.node-version == '20.x' &&
+          always()
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const summary = `${{ steps.report.outputs.summary }}`;
+            const errorCount = parseInt('${{ steps.report.outputs.error-count }}' || '0');
+            
+            if (!summary) return;
+            
+            const commentBody = `## 🔍 ESLint Analysis Results
+            
+            ${summary}
+            
+            <details>
+            <summary>📋 View detailed results</summary>
+            
+            Check the [workflow run](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) for full details.
+            </details>
+            `;
+            
+            // Find existing comment
+            const { data: comments } = await github.rest.issues.listComments({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              issue_number: context.issue.number,
+            });
+            
+            const botComment = comments.find(comment => 
+              comment.user.type === 'Bot' && 
+              comment.body.includes('🔍 ESLint Analysis Results')
+            );
+            
+            if (botComment) {
+              await github.rest.issues.updateComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                comment_id: botComment.id,
+                body: commentBody
+              });
+            } else {
+              await github.rest.issues.createComment({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                issue_number: context.issue.number,
+                body: commentBody
+              });
+            }
+
+      - name: Upload SARIF results
+        if: always() && matrix.node-version == '20.x'
         uses: github/codeql-action/upload-sarif@v3
         with:
-          sarif_file: eslint-results.sarif
+          sarif_file: eslint-results-${{ matrix.node-version }}.sarif
+          category: eslint-node-${{ matrix.node-version }}
           wait-for-processing: true
+
+      - name: Upload ESLint results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: eslint-results-node-${{ matrix.node-version }}
+          path: |
+            eslint-results-${{ matrix.node-version }}.sarif
+            eslint-results-${{ matrix.node-version }}.json
+          retention-days: 30
+
+      - name: Fail on errors
+        if: steps.report.outputs.error-count > 0
+        run: |
+          echo "❌ ESLint found ${{ steps.report.outputs.error-count }} error(s)"
+          exit 1
+
+  eslint-summary:
+    name: ESLint Summary
+    runs-on: ubuntu-latest
+    needs: eslint
+    if: always()
+    
+    steps:
+      - name: Check ESLint results
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { data: workflowRun } = await github.rest.actions.getWorkflowRun({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              run_id: context.runId,
+            });
+            
+            const conclusion = workflowRun.conclusion;
+            const status = conclusion === 'success' ? '✅' : '❌';
+            
+            core.summary
+              .addHeading(`${status} ESLint Analysis Complete`)
+              .addRaw(`Workflow conclusion: **${conclusion}**`)
+              .write();
+            
+            if (conclusion === 'failure') {
+              core.setFailed('ESLint analysis found errors');
+            }
