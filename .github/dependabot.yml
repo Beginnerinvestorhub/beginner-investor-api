@@ -59,9 +59,137 @@ updates:
       prefix: "chore(docker)"
       include: "scope"
 
+    package-ecosystem: "npm"
+    package-ecosystem: "npm"
+    directory: "/services/backend-api"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]: 
+       
+    
+    package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+        
+ package-ecosystem: "pip"
+    directory: "services/ai-behavioral-nudge-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+
+ package-ecosystem: "pip"
+    directory: "/services/portfolio-simulation"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  
+  package-ecosystem: "pip"
+    directory: "/services/python-risk-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  
+   package-ecosystem: "pip"
+    directory: "/services/market-data-ingestion"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  
+  package-ecosystem: "pip"
+    directory: "/services/ai-microservice-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "backend"
+    commit-message:
+      prefix: "chore(backend-deps)"
+      include: "scope"
+    # Group updates by dependency name
+    versioning-strategy: "increase"
+    # Only allow updates to the patch and minor version for 0.x and 1.x
+    ignore:
+      # Ignore updates for packages with breaking changes
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+  
   # Configuration for backend API
   - package-ecosystem: "npm"
-    directory: "/tools-restructured/services/backend-api"
+    directory: "/shared"
     schedule:
       interval: "daily"
     labels:
