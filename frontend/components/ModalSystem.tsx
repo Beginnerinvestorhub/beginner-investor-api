@@ -103,7 +103,7 @@ const ConfirmModal: React.FC<ConfirmModalProps> = ({
 
 // --- Modal Components Registry ---
 
-const modalComponents: Record<string, React.ComponentType<Record<string, unknown>>> = {
+const modalComponents: Record<string, React.ComponentType<any>> = {
   ConfirmModal,
   // Add more modal components here as needed
 };
