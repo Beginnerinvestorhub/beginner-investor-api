@@ -5,8 +5,8 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/router';
-import { useLearningStore } from '../../store/learningStore';
-import { useAuthUser } from '../../store/authStore';
+import { useLearningStore } from '../../src/store/learningStore';
+import { useAuth } from '../../hooks/useAuth';
 import {
   ChevronRightIcon,
   ChevronLeftIcon,
@@ -23,7 +23,7 @@ interface OnboardingFlowProps {
 
 const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
   const router = useRouter();
-  const user = useAuthUser();
+  const { user } = useAuth();
   const {
     onboardingStep,
     isLoading,
@@ -120,7 +120,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               Welcome to Your Investment Journey!
             </h2>
             <p className="text-xl text-gray-600 mb-8 max-w-2xl mx-auto">
-              Let's personalize your learning experience to match your goals,
+              Let&apos;s personalize your learning experience to match your goals,
               risk tolerance, and learning style. This will take just 2-3
               minutes.
             </p>
@@ -156,7 +156,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         return (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              What's your investment risk tolerance?
+              What&apos;s your investment risk tolerance?
             </h2>
             <p className="text-gray-600 mb-6">
               This helps us recommend the right investment strategies for you.
@@ -234,7 +234,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               What are your investment goals?
             </h2>
             <p className="text-gray-600 mb-6">
-              Select all that apply. We'll tailor content to help you achieve
+              Select all that apply. We&apos;ll tailor content to help you achieve
               these goals.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
@@ -290,10 +290,10 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
         return (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-4">
-              What's your investment time horizon?
+              What&apos;s your investment time horizon?
             </h2>
             <p className="text-gray-600 mb-6">
-              When do you plan to use the money you're investing?
+              When do you plan to use the money you&apos;re investing?
             </p>
             <div className="space-y-4">
               {[
@@ -366,7 +366,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               How do you prefer to learn?
             </h2>
             <p className="text-gray-600 mb-6">
-              We'll customize the content format to match your learning style.
+              We&apos;ll customize the content format to match your learning style.
             </p>
             <div className="grid md:grid-cols-2 gap-4">
               {[
@@ -450,7 +450,7 @@ const OnboardingFlow: React.FC<OnboardingFlowProps> = ({ onComplete }) => {
               Perfect! Your personalized path is ready.
             </h2>
             <p className="text-xl text-gray-600 mb-8">
-              Based on your preferences, we've created a customized learning
+              Based on your preferences, we&apos;ve created a customized learning
               journey that will help you achieve your investment goals.
             </p>
             <div className="bg-indigo-50 rounded-lg p-6 mb-8 max-w-2xl mx-auto">

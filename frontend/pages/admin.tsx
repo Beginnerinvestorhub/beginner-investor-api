@@ -105,7 +105,7 @@ export default function AdminPage() {
             <p className="text-sm text-gray-600">Loading admin dashboard...</p>
           </div>
         </div>
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           @keyframes spin-slow {
             from {
               transform: rotate(0deg);
@@ -592,7 +592,7 @@ export default function AdminPage() {
           </div>
         </div>
 
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           @keyframes spin-slow {
             from {
               transform: rotate(0deg);

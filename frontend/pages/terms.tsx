@@ -310,7 +310,7 @@ export default function TermsOfService() {
         </main>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .terms-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

@@ -1,6 +1,4 @@
-import Head from 'next/head';
-import Link from 'next/link';
-import { useState } from 'react';
+import React, { useState } from 'react';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -74,7 +72,7 @@ export default function Contact() {
             </Link>
             <h1>Contact Us</h1>
             <p className="header-subtitle">
-              Have questions? We're here to help you master investing.
+              Have questions? We&apos;re here to help you master investing.
             </p>
           </div>
         </header>
@@ -174,7 +172,7 @@ export default function Contact() {
                 <div className="form-card">
                   <h2>Send Us a Message</h2>
                   <p className="form-description">
-                    Fill out the form below and we'll get back to you as soon as
+                    Fill out the form below and we&apos;ll get back to you as soon as
                     possible.
                   </p>
 
@@ -253,7 +251,7 @@ export default function Contact() {
 
                     {status === 'success' && (
                       <div className="alert alert-success">
-                        ✓ Message sent successfully! We'll respond within 24
+                        ✓ Message sent successfully! We&apos;ll respond within 24
                         hours.
                       </div>
                     )}
@@ -276,307 +274,6 @@ export default function Contact() {
           </div>
         </main>
       </div>
-
-      <style jsx>{`
-        .contact-page {
-          min-height: 100vh;
-          background: var(--nyse-color-background-alt);
-        }
-
-        .contact-header {
-          background: linear-gradient(
-            135deg,
-            var(--nyse-color-primary) 0%,
-            var(--nyse-color-secondary) 100%
-          );
-          color: white;
-          padding: var(--nyse-spacing-xxl) 0;
-        }
-
-        .back-link {
-          display: inline-block;
-          color: white;
-          text-decoration: none;
-          margin-bottom: var(--nyse-spacing-md);
-          font-size: 0.95rem;
-          opacity: 0.9;
-          transition: opacity 0.3s ease;
-        }
-
-        .back-link:hover {
-          opacity: 1;
-        }
-
-        .contact-header h1 {
-          font-family: var(--nyse-font-serif);
-          font-size: clamp(2rem, 4vw, 3rem);
-          margin-bottom: var(--nyse-spacing-sm);
-          color: white;
-        }
-
-        .header-subtitle {
-          font-size: 1.1rem;
-          opacity: 0.95;
-          margin: 0;
-        }
-
-        .contact-content {
-          padding: var(--nyse-spacing-xxl) 0;
-        }
-
-        .contact-grid {
-          display: grid;
-          grid-template-columns: 1fr 1fr;
-          gap: var(--nyse-spacing-xxl);
-          max-width: 1200px;
-          margin: 0 auto;
-        }
-
-        .contact-info-section h2,
-        .contact-form-section h2 {
-          font-family: var(--nyse-font-serif);
-          font-size: 2rem;
-          color: var(--nyse-color-dark);
-          margin-bottom: var(--nyse-spacing-md);
-        }
-
-        .section-description,
-        .form-description {
-          color: var(--nyse-color-text);
-          line-height: 1.7;
-          margin-bottom: var(--nyse-spacing-xl);
-        }
-
-        .contact-methods {
-          display: flex;
-          flex-direction: column;
-          gap: var(--nyse-spacing-lg);
-          margin-bottom: var(--nyse-spacing-xxl);
-        }
-
-        .contact-method {
-          display: flex;
-          gap: var(--nyse-spacing-md);
-          padding: var(--nyse-spacing-lg);
-          background: var(--nyse-color-background);
-          border-radius: 8px;
-          border: 1px solid var(--nyse-color-border);
-          transition: all 0.3s ease;
-        }
-
-        .contact-method:hover {
-          border-color: var(--nyse-color-accent);
-          box-shadow: 0 4px 12px rgba(0, 61, 122, 0.1);
-        }
-
-        .method-icon {
-          font-size: 2rem;
-          flex-shrink: 0;
-        }
-
-        .method-content h3 {
-          font-size: 1.1rem;
-          color: var(--nyse-color-dark);
-          margin-bottom: var(--nyse-spacing-xs);
-        }
-
-        .method-content p {
-          font-size: 0.9rem;
-          color: var(--nyse-color-text-light);
-          margin-bottom: var(--nyse-spacing-xs);
-        }
-
-        .contact-link {
-          color: var(--nyse-color-primary);
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 0.95rem;
-          transition: color 0.3s ease;
-        }
-
-        .contact-link:hover {
-          color: var(--nyse-color-accent);
-          text-decoration: underline;
-        }
-
-        .location-note {
-          font-size: 0.9rem;
-          color: var(--nyse-color-text);
-          margin: 0;
-        }
-
-        .response-info {
-          background: var(--nyse-color-background);
-          padding: var(--nyse-spacing-lg);
-          border-radius: 8px;
-          border-left: 4px solid var(--nyse-color-accent);
-          margin-bottom: var(--nyse-spacing-xl);
-        }
-
-        .response-info h3 {
-          font-size: 1.1rem;
-          color: var(--nyse-color-dark);
-          margin-bottom: var(--nyse-spacing-md);
-        }
-
-        .response-list {
-          list-style: none;
-          padding: 0;
-          margin: 0;
-        }
-
-        .response-list li {
-          padding: var(--nyse-spacing-xs) 0;
-          color: var(--nyse-color-text);
-          font-size: 0.95rem;
-        }
-
-        .faq-callout {
-          background: linear-gradient(
-            135deg,
-            rgba(0, 61, 122, 0.05) 0%,
-            rgba(0, 160, 227, 0.05) 100%
-          );
-          padding: var(--nyse-spacing-lg);
-          border-radius: 8px;
-          border: 1px solid var(--nyse-color-border);
-        }
-
-        .faq-callout h4 {
-          font-size: 1.1rem;
-          color: var(--nyse-color-dark);
-          margin-bottom: var(--nyse-spacing-sm);
-        }
-
-        .faq-callout p {
-          color: var(--nyse-color-text);
-          margin-bottom: var(--nyse-spacing-md);
-          font-size: 0.95rem;
-        }
-
-        .faq-link {
-          color: var(--nyse-color-primary);
-          text-decoration: none;
-          font-weight: 600;
-          font-size: 0.95rem;
-          transition: color 0.3s ease;
-        }
-
-        .faq-link:hover {
-          color: var(--nyse-color-accent);
-        }
-
-        .form-card {
-          background: var(--nyse-color-background);
-          padding: var(--nyse-spacing-xxl);
-          border-radius: 12px;
-          border: 1px solid var(--nyse-color-border);
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .contact-form {
-          display: flex;
-          flex-direction: column;
-          gap: var(--nyse-spacing-lg);
-        }
-
-        .form-group {
-          display: flex;
-          flex-direction: column;
-          gap: var(--nyse-spacing-sm);
-        }
-
-        .form-label {
-          font-weight: 600;
-          color: var(--nyse-color-dark);
-          font-size: 0.95rem;
-        }
-
-        .required {
-          color: #d32f2f;
-        }
-
-        .form-input,
-        .form-textarea,
-        .form-select {
-          font-family: var(--nyse-font-sans);
-          font-size: 1rem;
-          padding: var(--nyse-spacing-md);
-          border: 1px solid var(--nyse-color-border);
-          border-radius: 4px;
-          transition: all 0.3s ease;
-        }
-
-        .form-input:focus,
-        .form-textarea:focus,
-        .form-select:focus {
-          outline: none;
-          border-color: var(--nyse-color-primary);
-          box-shadow: 0 0 0 3px rgba(0, 61, 122, 0.1);
-        }
-
-        .form-textarea {
-          resize: vertical;
-          min-height: 120px;
-        }
-
-        .alert {
-          padding: var(--nyse-spacing-md);
-          border-radius: 4px;
-          font-size: 0.95rem;
-          font-weight: 600;
-        }
-
-        .alert-success {
-          background: #e8f5e9;
-          color: #2e7d32;
-          border: 1px solid #66bb6a;
-        }
-
-        .alert-error {
-          background: #ffebee;
-          color: #c62828;
-          border: 1px solid #ef5350;
-        }
-
-        .submit-button {
-          padding: var(--nyse-spacing-md) var(--nyse-spacing-xl);
-          background: var(--nyse-color-primary);
-          color: white;
-          border: none;
-          border-radius: 4px;
-          font-family: var(--nyse-font-sans);
-          font-size: 1rem;
-          font-weight: 600;
-          cursor: pointer;
-          transition: all 0.3s ease;
-        }
-
-        .submit-button:hover:not(:disabled) {
-          background: var(--nyse-color-secondary);
-          transform: translateY(-2px);
-          box-shadow: 0 4px 12px rgba(0, 61, 122, 0.3);
-        }
-
-        .submit-button:disabled {
-          opacity: 0.6;
-          cursor: not-allowed;
-        }
-
-        @media (max-width: 968px) {
-          .contact-grid {
-            grid-template-columns: 1fr;
-          }
-
-          .contact-header {
-            padding: var(--nyse-spacing-lg) 0;
-          }
-
-          .form-card {
-            padding: var(--nyse-spacing-lg);
-          }
-        }
-      `}</style>
     </>
   );
 }

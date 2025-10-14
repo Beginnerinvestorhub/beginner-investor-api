@@ -28,7 +28,7 @@ export default function LoginPage() {
           <div className="nyse-spinner"></div>
           <p className="nyse-loading-text">Loading...</p>
         </div>
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -141,7 +141,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .login-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

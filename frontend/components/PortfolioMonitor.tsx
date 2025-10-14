@@ -38,7 +38,7 @@ function useRegisterChartJS() {
 type PortfolioAsset = { name: string; value: number; allocation: number };
 type PortfolioHistory = { date: string; total: number };
 
-const PortfolioMonitor = React.memo(function PortfolioMonitor(): JSX.Element {
+const PortfolioMonitor = React.memo(function PortfolioMonitor() {
   useRegisterChartJS();
   const [showAsset, setShowAsset] = useState<string | null>(null);
   const [alertSensitivity, setAlertSensitivity] = useState<number>(5);

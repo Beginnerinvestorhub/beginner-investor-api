@@ -32,7 +32,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -163,7 +163,7 @@ export default function DashboardPage() {
                         <div className="activity-icon">✅</div>
                         <div className="activity-content">
                           <div className="activity-text">
-                            Completed "Risk Assessment" module
+                            Completed &quot;Risk Assessment&quot; module
                           </div>
                           <div className="activity-time">2 hours ago</div>
                         </div>
@@ -181,7 +181,7 @@ export default function DashboardPage() {
                         <div className="activity-icon">🏆</div>
                         <div className="activity-content">
                           <div className="activity-text">
-                            Earned "First Investment" badge
+                            Earned &quot;First Investment&quot; badge
                           </div>
                           <div className="activity-time">3 days ago</div>
                         </div>
@@ -309,7 +309,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .dashboard-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

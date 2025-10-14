@@ -157,7 +157,7 @@ export default function AchievementNotification({
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .animate-shrink {
           animation: shrink ${duration}ms linear forwards;
         }

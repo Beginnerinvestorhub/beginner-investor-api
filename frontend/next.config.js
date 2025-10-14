@@ -14,8 +14,6 @@ try {
 const nextConfig = withBundleAnalyzer(
   withMDX({
     reactStrictMode: true,
-
-    // Performance optimizations
     compress: true,
 
     // Image optimization

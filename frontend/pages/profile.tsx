@@ -100,7 +100,7 @@ export default function ProfilePage() {
           </p>
         </div>
 
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -221,7 +221,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .profile-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

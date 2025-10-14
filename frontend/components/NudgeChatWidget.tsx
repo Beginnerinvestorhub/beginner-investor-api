@@ -1,7 +1,7 @@
 // components/NudgeChatWidget.tsx
 'use client';
 
-import { useState } from 'react';
+import React, { useState } from 'react';
 import { useSession } from 'next-auth/react';
 
 const NudgeChatWidget: React.FC = () => {

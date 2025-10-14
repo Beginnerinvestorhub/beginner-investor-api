@@ -2,7 +2,7 @@ import Head from 'next/head';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/router';
 import { useAuth } from '../hooks/useAuth';
-import { useOnboardingCompleted } from '../store/learningStore';
+import { useOnboardingCompleted } from '../src/store/learningStore';
 import OnboardingFlow from '../components/onboarding/OnboardingFlow';
 
 export default function OnboardingPage() {
@@ -48,7 +48,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
         </footer>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .onboarding-page {
           min-height: 100vh;
           background: linear-gradient(

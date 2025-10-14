@@ -1,3 +1,4 @@
+import React from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
 import { useAuth } from '../hooks/useAuth';
@@ -210,7 +211,7 @@ export default function ToolsOverview() {
         </main>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .tools-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

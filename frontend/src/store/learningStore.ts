@@ -7,11 +7,18 @@ interface LearningState {
   currentModule: string | null;
   completedModules: string[];
   progress: number;
+  onboardingStep: number;
+  isLoading: boolean;
+  error: string | null;
   setOnboardingCompleted: (completed: boolean) => void;
   setCurrentModule: (module: string | null) => void;
   addCompletedModule: (module: string) => void;
   setProgress: (progress: number) => void;
   resetProgress: () => void;
+  startOnboarding: () => void;
+  completeOnboardingStep: (step: number) => void;
+  submitOnboardingProfile: (data: any) => void;
+  clearError: () => void;
 }
 
 export const useLearningStore = create<LearningState>()(
@@ -21,6 +28,9 @@ export const useLearningStore = create<LearningState>()(
       currentModule: null,
       completedModules: [],
       progress: 0,
+      onboardingStep: 0,
+      isLoading: false,
+      error: null,
 
       setOnboardingCompleted: (completed: boolean) =>
         set({ onboardingCompleted: completed }),
@@ -43,6 +53,24 @@ export const useLearningStore = create<LearningState>()(
           completedModules: [],
           progress: 0,
         }),
+
+      startOnboarding: () => set({ onboardingStep: 1, isLoading: false, error: null }),
+
+      completeOnboardingStep: (step: number) => set({ onboardingStep: step }),
+
+      submitOnboardingProfile: () => {
+        set({ isLoading: true, error: null });
+        // Simulate API call
+        setTimeout(() => {
+          set({
+            onboardingCompleted: true,
+            onboardingStep: 0,
+            isLoading: false
+          });
+        }, 1000);
+      },
+
+      clearError: () => set({ error: null }),
     }),
     {
       name: 'learning-storage',

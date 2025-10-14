@@ -363,7 +363,7 @@ export default function PrivacyPolicy() {
 
               {/* Children's Privacy */}
               <section className="privacy-section">
-                <h2>7. Children's Privacy</h2>
+                <h2>7. Children&apos;s Privacy</h2>
                 <div className="legal-box">
                   <p>
                     Our services are not intended for individuals under 18 years
@@ -470,7 +470,7 @@ export default function PrivacyPolicy() {
                 </p>
                 <ul className="styled-list">
                   <li>
-                    Posting the updated policy on our website with a new "Last
+                    Posting the updated policy on our website with a new &quot;Last
                     Updated" date
                   </li>
                   <li>Sending an email notification to registered users</li>
@@ -503,7 +503,7 @@ export default function PrivacyPolicy() {
         </main>
       </div>
 
-      <style jsx>{`
+      <style jsx>{css}</style>{`
         .privacy-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

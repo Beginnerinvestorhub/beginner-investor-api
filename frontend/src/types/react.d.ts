@@ -66,7 +66,7 @@ declare module 'react' {
 
   type Key = string | number;
 
-  interface PropsWithChildren<P = Record<string, never>> {
+  interface PropsWithChildren {
     children?: React.ReactNode | undefined;
   }
 

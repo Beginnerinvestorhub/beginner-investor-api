@@ -245,7 +245,7 @@ export default function PortfolioMonitorPage() {
           </div>
         </div>
 
-        <style jsx>{`
+        <style jsx>{css}</style>{`
           @keyframes spin-slow {
             from {
               transform: rotate(0deg);

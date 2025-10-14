@@ -10,7 +10,7 @@ describe('Basic Test Suite', () => {
   });
 
   it('should render without crashing', () => {
-    const { container } = render(<div data-testid="test-element">Test</div>);
+    render(<div data-testid="test-element">Test</div>);
     expect(screen.getByTestId('test-element')).toBeInTheDocument();
   });
 });
