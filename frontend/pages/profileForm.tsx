@@ -34,7 +34,6 @@ export default function ProfileForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState(false);
-  const [progress, setProgress] = useState(30);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -91,12 +90,12 @@ export default function ProfileForm() {
       <div className="profile-progress">
         <div className="progress-header">
           <span className="progress-label">Profile Completion</span>
-          <span className="progress-percentage">{progress}%</span>
+          <span className="progress-percentage">30%</span>
         </div>
         <div className="progress-bar">
           <div 
             className="progress-fill" 
-            style={{ width: `${progress}%` }}
+            style={{ width: '30%' }}
           ></div>
         </div>
       </div>
