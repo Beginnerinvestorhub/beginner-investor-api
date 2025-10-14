@@ -54,7 +54,7 @@ export default function AdminPage() {
           <div className="text-center">
             {/* Mechanical Loading Gears */}
             <div className="relative w-24 h-24 mx-auto mb-6">
-              <div className="absolute inset-0 animate-spin-slow">
+              <div className="absolute inset-0 animate-spin-slow-fast">
                 <svg
                   viewBox="0 0 100 100"
                   fill="none"
@@ -76,7 +76,7 @@ export default function AdminPage() {
                   ))}
                 </svg>
               </div>
-              <div className="absolute inset-0 animate-spin-reverse opacity-60">
+              <div className="absolute inset-0 animate-spin-reverse-fast opacity-60">
                 <svg
                   viewBox="0 0 100 100"
                   fill="none"
@@ -105,30 +105,6 @@ export default function AdminPage() {
             <p className="text-sm text-gray-600">Loading admin dashboard...</p>
           </div>
         </div>
-        <style jsx>{`
-          @keyframes spin-slow {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          @keyframes spin-reverse {
-            from {
-              transform: rotate(360deg);
-            }
-            to {
-              transform: rotate(0deg);
-            }
-          }
-          .animate-spin-slow {
-            animation: spin-slow 3s linear infinite;
-          }
-          .animate-spin-reverse {
-            animation: spin-reverse 2s linear infinite;
-          }
-        `}</style>
       </>
     );
   }
@@ -148,13 +124,19 @@ export default function AdminPage() {
       <main className="min-h-screen bg-gray-50 py-12 px-4">
         {/* Technical Grid Overlay - Blueprint Pattern */}
         <div
-          className="fixed inset-0 pointer-events-none opacity-5"
+          className="fixed inset-0 pointer-events-none opacity-5 bg-grid-40"
           style={{
             backgroundImage:
               'linear-gradient(rgba(0, 61, 122, 0.3) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 61, 122, 0.3) 1px, transparent 1px)',
             backgroundSize: '40px 40px',
           }}
         ></div>
+        
+        {/*
+          NOTE: Custom styles for .nyse-container, .nyse-card, .nyse-btn, and font-family are NOT standard Tailwind utilities.
+          You would need to define these in your main CSS file or through a custom Tailwind plugin.
+          For this conversion, I'm keeping the custom class names and inline style, but you should migrate them.
+        */}
 
         <div className="nyse-container relative z-10">
           {/* Hero Section with Mechanical Elements */}
@@ -591,31 +573,6 @@ export default function AdminPage() {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes spin-slow {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          @keyframes spin-reverse {
-            from {
-              transform: rotate(360deg);
-            }
-            to {
-              transform: rotate(0deg);
-            }
-          }
-          .animate-spin-slow {
-            animation: spin-slow 20s linear infinite;
-          }
-          .animate-spin-reverse {
-            animation: spin-reverse 15s linear infinite;
-          }
-        `}</style>
       </main>
     </>
   );

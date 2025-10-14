@@ -1,4 +1,5 @@
 /** @type {import('next').NextConfig} */
+const path = require('path');
 const withMDX = require('@next/mdx')({ extension: /\.mdx?$/ });
 
 // Optional bundle analyzer - only load if installed
@@ -38,7 +39,7 @@ const nextConfig = withBundleAnalyzer(
     pageExtensions: ['js', 'jsx', 'ts', 'tsx', 'md', 'mdx'],
 
     // Webpack optimizations
-    webpack: (config, { buildId, dev, isServer, defaultLoaders, webpack }) => {
+    webpack: (config, { buildId: _buildId, dev, isServer, defaultLoaders: _defaultLoaders, webpack: _webpack }) => {
       if (dev && !isServer) {
         config.optimization.splitChunks = {
           ...config.optimization.splitChunks,
@@ -75,12 +76,12 @@ const nextConfig = withBundleAnalyzer(
       // Resolve aliases
       config.resolve.alias = {
         ...config.resolve.alias,
-        '@': require('path').resolve(__dirname),
-        '@/components': require('path').resolve(__dirname, 'components'),
-        '@/store': require('path').resolve(__dirname, 'store'),
-        '@/hooks': require('path').resolve(__dirname, 'hooks'),
-        '@/lib': require('path').resolve(__dirname, 'lib'),
-        '@/styles': require('path').resolve(__dirname, 'styles'),
+        '@': path.resolve(__dirname),
+        '@/components': path.resolve(__dirname, 'components'),
+        '@/store': path.resolve(__dirname, 'store'),
+        '@/hooks': path.resolve(__dirname, 'hooks'),
+        '@/lib': path.resolve(__dirname, 'lib'),
+        '@/styles': path.resolve(__dirname, 'styles'),
       };
 
       return config;
@@ -90,12 +91,12 @@ const nextConfig = withBundleAnalyzer(
     turbopack: {
       // Enable Turbopack for faster builds
       resolveAlias: {
-        '@': require('path').resolve(__dirname),
-        '@/components': require('path').resolve(__dirname, 'components'),
-        '@/store': require('path').resolve(__dirname, 'store'),
-        '@/hooks': require('path').resolve(__dirname, 'hooks'),
-        '@/lib': require('path').resolve(__dirname, 'lib'),
-        '@/styles': require('path').resolve(__dirname, 'styles'),
+        '@': path.resolve(__dirname),
+        '@/components': path.resolve(__dirname, 'components'),
+        '@/store': path.resolve(__dirname, 'store'),
+        '@/hooks': path.resolve(__dirname, 'hooks'),
+        '@/lib': path.resolve(__dirname, 'lib'),
+        '@/styles': path.resolve(__dirname, 'styles'),
       },
     },
     async headers() {

@@ -2,6 +2,11 @@ import Head from 'next/head';
 import Link from 'next/link';
 
 export default function TermsOfService() {
+  // Define custom colors/variables as Tailwind classes where possible
+  // NOTE: Assuming 'nyse-color-primary' is a dark blue (e.g., blue-800)
+  // and 'nyse-color-secondary' is a slightly lighter blue (e.g., blue-600)
+  // and 'nyse-color-accent' is an accent color (e.g., teal-500).
+
   return (
     <>
       <Head>
@@ -12,35 +17,52 @@ export default function TermsOfService() {
         />
       </Head>
 
-      <div className="terms-page">
-        {/* Header */}
-        <header className="terms-header">
-          <div className="nyse-container">
-            <Link href="/" className="back-link">
+      {/* terms-page: min-h-screen, bg-gray-50 (alt color) */}
+      <div className="min-h-screen bg-gray-50 text-gray-800">
+        {/* terms-header: background gradient, text white, padding */}
+        <header className="bg-gradient-to-br from-blue-800 to-blue-600 text-white py-16 md:py-24">
+          {/* nyse-container: max-w-7xl, mx-auto, px-4, sm:px-6, lg:px-8 */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* back-link: inline-block, color white, no-underline, margin-bottom, font-size, opacity, transition */}
+            <Link href="/" className="inline-block text-white no-underline mb-4 text-sm opacity-90 hover:opacity-100 transition duration-300">
               ← Back to Home
             </Link>
-            <h1>Terms of Service</h1>
-            <p className="last-updated">Last Updated: October 6, 2025</p>
+            {/* terms-header h1: font-serif, font-size clamp, margin-bottom */}
+            <h1 className="font-serif text-4xl sm:text-5xl lg:text-6xl mb-2 text-white font-extrabold">
+              Terms of Service
+            </h1>
+            {/* last-updated: font-size, opacity */}
+            <p className="text-sm opacity-90 m-0">Last Updated: October 6, 2025</p>
           </div>
         </header>
 
-        {/* Content */}
-        <main className="terms-content">
-          <div className="nyse-container">
-            <div className="content-wrapper">
+        {/* Content Section */}
+        {/* terms-content: padding */}
+        <main className="py-16 md:py-24">
+          {/* nyse-container: max-w-7xl, mx-auto, px-4, sm:px-6, lg:px-8 */}
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            {/* content-wrapper: max-width, margin auto, background, padding, border-radius, box-shadow */}
+            <div className="max-w-4xl mx-auto bg-white p-6 sm:p-12 lg:p-16 rounded-xl shadow-2xl">
+              
               {/* Introduction */}
-              <section className="terms-section">
-                <p className="intro-text">
+              {/* terms-section: margin-bottom */}
+              <section className="mb-12">
+                {/* intro-text: font-size, line-height, color */}
+                <p className="text-lg leading-relaxed text-gray-700">
                   Welcome to Beginner Investor Hub. By accessing or using our
                   platform, you agree to be bound by these Terms of Service.
                   Please read them carefully before using our services.
                 </p>
               </section>
 
-              {/* Service Description */}
-              <section className="terms-section">
-                <h2>1. Service Description</h2>
-                <p>
+              {/* --- Service Description --- */}
+              <section className="mb-12">
+                {/* terms-section h2: font-serif, font-size, color primary, margin-bottom, padding-bottom, border-bottom */}
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  1. Service Description
+                </h2>
+                {/* terms-section p: color, line-height, margin-bottom */}
+                <p className="text-gray-700 leading-relaxed mb-4">
                   BeginnerInvestorHub.com provides educational financial tools
                   including risk assessment, portfolio simulation, AI-powered
                   behavioral coaching, and investment monitoring. These tools
@@ -48,78 +70,81 @@ export default function TermsOfService() {
                   and do not constitute financial advice, investment
                   recommendations, or professional financial planning services.
                 </p>
-                <div className="highlight-box">
-                  <strong>Important:</strong> All simulations and tools are for
+                {/* highlight-box: light blue background, left border, padding, border-radius, margin */}
+                <div className="bg-blue-50 border-l-4 border-teal-500 p-4 rounded-md my-6">
+                  <strong className="text-blue-900">Important:</strong> All simulations and tools are for
                   learning purposes. Always consult with qualified financial
                   professionals before making investment decisions.
                 </div>
               </section>
 
-              {/* User Responsibilities */}
-              <section className="terms-section">
-                <h2>2. User Responsibilities</h2>
-                <p>As a user of our platform, you agree to:</p>
-                <ul className="styled-list">
-                  <li>
-                    Provide accurate and complete information for personalized
-                    results
+              {/* --- User Responsibilities --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  2. User Responsibilities
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">As a user of our platform, you agree to:</p>
+                {/* styled-list: list-none, padding-left, margin */}
+                <ul className="list-none pl-0 my-4 space-y-2">
+                  {/* styled-list li: padding-left, position relative, before content */}
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Provide accurate and complete information for personalized results
                   </li>
-                  <li>
-                    Understand that all tools are educational in nature and not
-                    financial advice
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Understand that all tools are educational in nature and not financial advice
                   </li>
-                  <li>
-                    Consult qualified financial professionals for investment
-                    decisions
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Consult qualified financial professionals for investment decisions
                   </li>
-                  <li>
-                    Maintain the security and confidentiality of your account
-                    credentials
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Maintain the security and confidentiality of your account credentials
                   </li>
-                  <li>
-                    Use the platform in compliance with all applicable laws and
-                    regulations
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Use the platform in compliance with all applicable laws and regulations
                   </li>
-                  <li>
-                    Not attempt to manipulate, reverse engineer, or abuse the
-                    platform
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
+                    Not attempt to manipulate, reverse engineer, or abuse the platform
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     Not share your account access with unauthorized parties
                   </li>
                 </ul>
               </section>
 
-              {/* Educational Nature & Disclaimers */}
-              <section className="terms-section">
-                <h2>3. Educational Nature & Disclaimers</h2>
-                <div className="warning-box">
-                  <h3>⚠️ Important Disclaimers</h3>
-                  <ul className="styled-list">
-                    <li>
+              {/* --- Educational Nature & Disclaimers --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  3. Educational Nature & Disclaimers
+                </h2>
+                {/* warning-box: light orange background, left border, padding, border-radius, margin */}
+                <div className="bg-amber-50 border-l-4 border-amber-500 p-4 rounded-md my-6">
+                  {/* warning-box h3: color, margin-top/bottom, font-size */}
+                  <h3 className="text-orange-800 mt-0 mb-3 text-lg font-bold">⚠️ Important Disclaimers</h3>
+                  <ul className="list-none pl-0 space-y-2">
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>No Financial Advice:</strong> Nothing on this
                       platform constitutes professional financial, investment,
                       tax, or legal advice
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>Past Performance:</strong> Past performance does
                       not guarantee future results or investment success
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>Simulation Limitations:</strong> Portfolio
                       simulations are based on historical data and mathematical
                       models that may not reflect real market conditions
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>Market Data:</strong> Market data may be delayed,
                       subject to provider limitations, and may contain errors
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>Estimates Only:</strong> All results, projections,
                       and calculations are estimates and may not reflect actual
                       investment outcomes
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-amber-500 before:font-bold">
                       <strong>AI Limitations:</strong> AI-generated insights are
                       based on algorithms and may not account for all variables
                       or personal circumstances
@@ -128,109 +153,119 @@ export default function TermsOfService() {
                 </div>
               </section>
 
-              {/* Data Usage & Privacy */}
-              <section className="terms-section">
-                <h2>4. Data Usage & Privacy</h2>
-                <p>
+              {/* --- Data Usage & Privacy --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  4. Data Usage & Privacy
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   We take your privacy seriously and handle your data with care:
                 </p>
-                <ul className="styled-list">
-                  <li>
+                <ul className="list-none pl-0 my-4 space-y-2">
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     Personal information is encrypted and stored securely using
                     industry-standard practices
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     Market data is provided by licensed third-party providers
                     (Alpha Vantage, Finnhub)
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     User data is not shared with unauthorized third parties
                     without your consent
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     We use cookies and tracking technologies as described in our
                     Privacy Policy
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     You may request data export or account deletion at any time
                   </li>
-                  <li>
+                  <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-teal-500 before:font-bold">
                     Portfolio simulations and learning progress are stored to
                     enhance your experience
                   </li>
                 </ul>
-                <p className="policy-link">
+                {/* policy-link: italic, font-size, link styling */}
+                <p className="italic text-sm text-gray-600 mt-6">
                   For detailed information, please review our{' '}
-                  <Link href="/privacy">Privacy Policy</Link>.
+                  <Link href="/privacy" className="text-blue-800 font-semibold hover:underline">
+                    Privacy Policy
+                  </Link>.
                 </p>
               </section>
 
-              {/* Account Management */}
-              <section className="terms-section">
-                <h2>5. Account Management</h2>
-                <h3>Account Creation</h3>
-                <p>
+              {/* --- Account Management --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  5. Account Management
+                </h2>
+                <h3 className="text-xl text-gray-800 mt-6 mb-3 font-medium">Account Creation</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   You must provide accurate information when creating an
                   account. You are responsible for maintaining the
                   confidentiality of your login credentials.
                 </p>
-
-                <h3>Account Termination</h3>
-                <p>
+                <h3 className="text-xl text-gray-800 mt-6 mb-3 font-medium">Account Termination</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   We reserve the right to suspend or terminate accounts that
                   violate these terms, engage in fraudulent activity, or misuse
                   the platform.
                 </p>
-
-                <h3>User-Initiated Deletion</h3>
-                <p>
+                <h3 className="text-xl text-gray-800 mt-6 mb-3 font-medium">User-Initiated Deletion</h3>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   You may delete your account at any time through your account
                   settings or by contacting support.
                 </p>
               </section>
 
-              {/* Limitation of Liability */}
-              <section className="terms-section">
-                <h2>6. Limitation of Liability</h2>
-                <div className="legal-box">
-                  <p>
-                    <strong>TO THE MAXIMUM EXTENT PERMITTED BY LAW:</strong> The
+              {/* --- Limitation of Liability --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  6. Limitation of Liability
+                </h2>
+                {/* legal-box: alt background, border, padding, border-radius, margin */}
+                <div className="bg-gray-50 border-2 border-gray-300 p-6 rounded-md my-6">
+                  <p className="text-gray-700 leading-relaxed mb-4">
+                    <strong className="text-red-600">TO THE MAXIMUM EXTENT PERMITTED BY LAW:</strong> The
                     platform, its operators, employees, and affiliates are not
                     liable for:
                   </p>
-                  <ul className="styled-list">
-                    <li>
+                  <ul className="list-none pl-0 my-4 space-y-2">
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">
                       Investment losses or financial damages resulting from use
                       of the platform
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">
                       Inaccuracies in data, calculations, or AI-generated
                       insights
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">
                       Decisions made based on tool outputs or platform
                       information
                     </li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">
                       Service interruptions, technical errors, or data loss
                     </li>
-                    <li>Third-party content or linked external resources</li>
-                    <li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">Third-party content or linked external resources</li>
+                    <li className="relative pl-6 text-gray-700 leading-relaxed before:content-['▸'] before:absolute before:left-0 before:text-gray-500 before:font-bold">
                       Unauthorized access to your account due to compromised
                       credentials
                     </li>
                   </ul>
-                  <p>
+                  <p className="text-gray-700 leading-relaxed mt-6">
                     You acknowledge that investing involves risk and that you
                     are solely responsible for your investment decisions.
                   </p>
                 </div>
               </section>
 
-              {/* Intellectual Property */}
-              <section className="terms-section">
-                <h2>7. Intellectual Property</h2>
-                <p>
+              {/* --- Intellectual Property --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  7. Intellectual Property
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   All content, features, functionality, and technology on the
                   platform are owned by Beginner Investor Hub and are protected
                   by copyright, trademark, and other intellectual property laws.
@@ -239,10 +274,12 @@ export default function TermsOfService() {
                 </p>
               </section>
 
-              {/* Affiliate Disclosure */}
-              <section className="terms-section">
-                <h2>8. Affiliate Disclosure</h2>
-                <p>
+              {/* --- Affiliate Disclosure --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  8. Affiliate Disclosure
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   Our platform may contain affiliate links to third-party
                   products and services. We may receive compensation for
                   referrals, which helps support the platform. All affiliate
@@ -252,10 +289,12 @@ export default function TermsOfService() {
                 </p>
               </section>
 
-              {/* Changes to Terms */}
-              <section className="terms-section">
-                <h2>9. Changes to Terms</h2>
-                <p>
+              {/* --- Changes to Terms --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  9. Changes to Terms
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   We reserve the right to modify these Terms of Service at any
                   time. We will notify users of material changes via email or
                   platform notification. Continued use of the platform after
@@ -263,45 +302,49 @@ export default function TermsOfService() {
                 </p>
               </section>
 
-              {/* Governing Law */}
-              <section className="terms-section">
-                <h2>10. Governing Law</h2>
-                <p>
+              {/* --- Governing Law --- */}
+              <section className="mb-12">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  10. Governing Law
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   These Terms are governed by the laws of the United States and
                   the State of North Carolina, without regard to conflict of law
                   provisions.
                 </p>
               </section>
 
-              {/* Contact Information */}
-              <section className="terms-section contact-section">
-                <h2>11. Contact Information</h2>
-                <p>
+              {/* --- Contact Information --- */}
+              <section className="mb-12 bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <h2 className="font-serif text-2xl sm:text-3xl text-blue-800 mb-4 pb-2 border-b-2 border-teal-500 font-semibold">
+                  11. Contact Information
+                </h2>
+                <p className="text-gray-700 leading-relaxed mb-4">
                   For questions, concerns, or requests regarding these Terms of
                   Service:
                 </p>
-                <div className="contact-info">
-                  <p>
-                    <strong>Email:</strong> support@beginnerinvestorhub.com
+                <div className="mt-4">
+                  <p className="mb-2">
+                    <strong className="font-semibold text-gray-900">Email:</strong> support@beginnerinvestorhub.com
                   </p>
-                  <p>
-                    <strong>Address:</strong> Charlotte, North Carolina, United
+                  <p className="mb-2">
+                    <strong className="font-semibold text-gray-900">Address:</strong> Charlotte, North Carolina, United
                     States
                   </p>
                 </div>
               </section>
 
-              {/* Footer Navigation */}
-              <div className="terms-footer">
-                <Link href="/privacy" className="footer-link">
+              {/* --- Footer Navigation --- */}
+              <div className="flex justify-center items-center flex-wrap gap-4 pt-12 mt-12 border-t border-gray-200">
+                <Link href="/privacy" className="text-blue-800 no-underline font-semibold hover:text-teal-500 transition duration-300">
                   Privacy Policy
                 </Link>
-                <span className="separator">•</span>
-                <Link href="/" className="footer-link">
+                <span className="text-gray-400">•</span>
+                <Link href="/" className="text-blue-800 no-underline font-semibold hover:text-teal-500 transition duration-300">
                   Home
                 </Link>
-                <span className="separator">•</span>
-                <Link href="/contact" className="footer-link">
+                <span className="text-gray-400">•</span>
+                <Link href="/contact" className="text-blue-800 no-underline font-semibold hover:text-teal-500 transition duration-300">
                   Contact
                 </Link>
               </div>
@@ -309,229 +352,6 @@ export default function TermsOfService() {
           </div>
         </main>
       </div>
-
-      <style jsx>{css}</style>{`
-        .terms-page {
-          min-height: 100vh;
-          background: var(--nyse-color-background-alt);
-        }
-
-        .terms-header {
-          background: linear-gradient(
-            135deg,
-            var(--nyse-color-primary) 0%,
-            var(--nyse-color-secondary) 100%
-          );
-          color: white;
-          padding: var(--nyse-spacing-xxl) 0;
-        }
-
-        .back-link {
-          display: inline-block;
-          color: white;
-          text-decoration: none;
-          margin-bottom: var(--nyse-spacing-md);
-          font-size: 0.95rem;
-          opacity: 0.9;
-          transition: opacity 0.3s ease;
-        }
-
-        .back-link:hover {
-          opacity: 1;
-        }
-
-        .terms-header h1 {
-          font-family: var(--nyse-font-serif);
-          font-size: clamp(2rem, 4vw, 3rem);
-          margin-bottom: var(--nyse-spacing-sm);
-          color: white;
-        }
-
-        .last-updated {
-          font-size: 0.9rem;
-          opacity: 0.9;
-          margin: 0;
-        }
-
-        .terms-content {
-          padding: var(--nyse-spacing-xxl) 0;
-        }
-
-        .content-wrapper {
-          max-width: 800px;
-          margin: 0 auto;
-          background: var(--nyse-color-background);
-          padding: var(--nyse-spacing-xxl);
-          border-radius: 12px;
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
-
-        .terms-section {
-          margin-bottom: var(--nyse-spacing-xxl);
-        }
-
-        .terms-section:last-of-type {
-          margin-bottom: 0;
-        }
-
-        .intro-text {
-          font-size: 1.1rem;
-          line-height: 1.8;
-          color: var(--nyse-color-text);
-        }
-
-        .terms-section h2 {
-          font-family: var(--nyse-font-serif);
-          font-size: 1.75rem;
-          color: var(--nyse-color-primary);
-          margin-bottom: var(--nyse-spacing-lg);
-          padding-bottom: var(--nyse-spacing-sm);
-          border-bottom: 2px solid var(--nyse-color-accent);
-        }
-
-        .terms-section h3 {
-          font-size: 1.25rem;
-          color: var(--nyse-color-dark);
-          margin-top: var(--nyse-spacing-lg);
-          margin-bottom: var(--nyse-spacing-md);
-        }
-
-        .terms-section p {
-          color: var(--nyse-color-text);
-          line-height: 1.8;
-          margin-bottom: var(--nyse-spacing-md);
-        }
-
-        .styled-list {
-          list-style: none;
-          padding-left: 0;
-          margin: var(--nyse-spacing-md) 0;
-        }
-
-        .styled-list li {
-          padding-left: var(--nyse-spacing-lg);
-          margin-bottom: var(--nyse-spacing-sm);
-          position: relative;
-          color: var(--nyse-color-text);
-          line-height: 1.7;
-        }
-
-        .styled-list li::before {
-          content: '▸';
-          position: absolute;
-          left: 0;
-          color: var(--nyse-color-accent);
-          font-weight: 700;
-        }
-
-        .highlight-box {
-          background: linear-gradient(
-            135deg,
-            rgba(0, 61, 122, 0.05) 0%,
-            rgba(0, 160, 227, 0.05) 100%
-          );
-          border-left: 4px solid var(--nyse-color-accent);
-          padding: var(--nyse-spacing-lg);
-          border-radius: 4px;
-          margin: var(--nyse-spacing-lg) 0;
-        }
-
-        .warning-box {
-          background: #fff3e0;
-          border-left: 4px solid #ff9800;
-          padding: var(--nyse-spacing-lg);
-          border-radius: 4px;
-          margin: var(--nyse-spacing-lg) 0;
-        }
-
-        .warning-box h3 {
-          color: #e65100;
-          margin-top: 0;
-          margin-bottom: var(--nyse-spacing-md);
-          font-size: 1.1rem;
-        }
-
-        .legal-box {
-          background: var(--nyse-color-background-alt);
-          border: 2px solid var(--nyse-color-border);
-          padding: var(--nyse-spacing-lg);
-          border-radius: 4px;
-          margin: var(--nyse-spacing-lg) 0;
-        }
-
-        .policy-link {
-          font-style: italic;
-          font-size: 0.95rem;
-        }
-
-        .policy-link a {
-          color: var(--nyse-color-primary);
-          font-weight: 600;
-          text-decoration: none;
-        }
-
-        .policy-link a:hover {
-          text-decoration: underline;
-        }
-
-        .contact-section {
-          background: var(--nyse-color-background-alt);
-          padding: var(--nyse-spacing-xl);
-          border-radius: 8px;
-          border: 1px solid var(--nyse-color-border);
-        }
-
-        .contact-info {
-          margin-top: var(--nyse-spacing-md);
-        }
-
-        .contact-info p {
-          margin-bottom: var(--nyse-spacing-sm);
-        }
-
-        .terms-footer {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: var(--nyse-spacing-md);
-          padding-top: var(--nyse-spacing-xxl);
-          margin-top: var(--nyse-spacing-xxl);
-          border-top: 1px solid var(--nyse-color-border);
-        }
-
-        .footer-link {
-          color: var(--nyse-color-primary);
-          text-decoration: none;
-          font-weight: 600;
-          transition: color 0.3s ease;
-        }
-
-        .footer-link:hover {
-          color: var(--nyse-color-accent);
-        }
-
-        .separator {
-          color: var(--nyse-color-text-light);
-        }
-
-        @media (max-width: 768px) {
-          .content-wrapper {
-            padding: var(--nyse-spacing-lg);
-          }
-
-          .terms-header {
-            padding: var(--nyse-spacing-lg) 0;
-          }
-
-          .terms-section h2 {
-            font-size: 1.5rem;
-          }
-
-          .terms-footer {
-            flex-wrap: wrap;
-          }
-        }
-      `}</style>
     </>
   );
 }

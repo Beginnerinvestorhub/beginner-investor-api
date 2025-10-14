@@ -48,7 +48,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <style jsx>{`
+        
           .nyse-loading-container {
             display: flex;
             flex-direction: column;

@@ -169,9 +169,7 @@ export default function SignupPage() {
             </div>
           </div>
         </div>
-      </div>
-
-      <style jsx>{css}</style>{`
+<style jsx>{`
         .signup-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);
