@@ -1,53 +1,153 @@
-# To get started with Dependabot version updates, you'll need to specify which
-# package ecosystems to update and where the package manifests are located.
-# See the documentation for all configuration options:
-# https://docs.github.com/en/github/administering-a-repository/configuration-options-for-dependency-updates
+# Dependabot configuration file
+# Learn more: https://docs.github.com/en/code-security/dependabot
 
 version: 2
 updates:
-  # Enable version updates for npm
+  # === Root NPM (Frontend / Core App) ===
   - package-ecosystem: "npm"
-    # Look for `package.json` in the `root` directory
     directory: "/"
-    # Check for npm updates daily
     schedule:
       interval: "daily"
-    # Create pull requests for security updates immediately
+    target-branch: "develop"
     open-pull-requests-limit: 10
-    # Apply labels to pull requests
+    rebase-strategy: "auto"
     labels:
       - "dependencies"
       - "javascript"
-    # Group updates by dependency name
     versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
     ignore:
-      # Ignore updates for packages with breaking changes
       - dependency-name: "*"
         update-types: ["version-update:semver-major"]
-    # Automatically merge minor and patch updates
     commit-message:
       prefix: "chore(deps)"
       prefix-development: "chore(dev-deps)"
       include: "scope"
-    # Rebase strategy
-    rebase-strategy: "auto"
-    # Target branch for pull requests
-    target-branch: "develop"
 
-  # Enable version updates for GitHub Actions
-  - package-ecosystem: "github-actions"
-    directory: "/"
+  # === Backend API (Node.js) ===
+  - package-ecosystem: "npm"
+    directory: "/services/backend-api"
     schedule:
       interval: "daily"
     labels:
-      - "github-actions"
       - "dependencies"
+      - "backend"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
     commit-message:
-      prefix: "chore(actions)"
+      prefix: "chore(backend-deps)"
       include: "scope"
 
-  # Enable version updates for Docker
+  # === Frontend (React / Web UI) ===
+  - package-ecosystem: "npm"
+    directory: "/frontend"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "frontend"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(frontend-deps)"
+      include: "scope"
+
+  # === Shared NPM Packages ===
+  - package-ecosystem: "npm"
+    directory: "/shared"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "shared"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(shared-deps)"
+      include: "scope"
+
+  # === Python Services ===
+  - package-ecosystem: "pip"
+    directory: "/services/ai-behavioral-nudge-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "python"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(python-deps)"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/services/portfolio-simulation"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "python"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(python-deps)"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/services/python-risk-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "python"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(python-deps)"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/services/market-data-ingestion"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "python"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(python-deps)"
+      include: "scope"
+
+  - package-ecosystem: "pip"
+    directory: "/services/ai-microservice-engine"
+    schedule:
+      interval: "daily"
+    labels:
+      - "dependencies"
+      - "python"
+    versioning-strategy: "increase"
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-major"]
+    commit-message:
+      prefix: "chore(python-deps)"
+      include: "scope"
+
+  # === Docker ===
   - package-ecosystem: "docker"
     directory: "/"
     schedule:
@@ -59,174 +159,32 @@ updates:
       prefix: "chore(docker)"
       include: "scope"
 
-    package-ecosystem: "npm"
-    package-ecosystem: "npm"
-    directory: "/services/backend-api"
+  # === GitHub Actions ===
+  - package-ecosystem: "github-actions"
+    directory: "/"
     schedule:
       interval: "daily"
     labels:
+      - "github-actions"
       - "dependencies"
-      - "backend"
     commit-message:
-      prefix: "chore(backend-deps)"
+      prefix: "chore(actions)"
       include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]: 
-       
-    
-    package-ecosystem: "npm"
-    directory: "/frontend"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-        
- package-ecosystem: "pip"
-    directory: "services/ai-behavioral-nudge-engine"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
 
- package-ecosystem: "pip"
-    directory: "/services/portfolio-simulation"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-  
-  package-ecosystem: "pip"
-    directory: "/services/python-risk-engine"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-  
-   package-ecosystem: "pip"
-    directory: "/services/market-data-ingestion"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-  
-  package-ecosystem: "pip"
-    directory: "/services/ai-microservice-engine"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-  
-  # Configuration for backend API
-  - package-ecosystem: "npm"
-    directory: "/shared"
-    schedule:
-      interval: "daily"
-    labels:
-      - "dependencies"
-      - "backend"
-    commit-message:
-      prefix: "chore(backend-deps)"
-      include: "scope"
-    # Group updates by dependency name
-    versioning-strategy: "increase"
-    # Only allow updates to the patch and minor version for 0.x and 1.x
-    ignore:
-      # Ignore updates for packages with breaking changes
-      - dependency-name: "*"
-        update-types: ["version-update:semver-major"]
-
-# Configuration for security updates
-updates:
+  # === Security Updates (All Dependencies) ===
   - package-ecosystem: "npm"
     directory: "/"
     schedule:
       interval: "daily"
-    # Apply security updates immediately
+    target-branch: "main"
     open-pull-requests-limit: 10
     labels:
       - "security"
       - "dependencies"
-    # Allow all update types for security updates
     allow:
       - dependency-type: "all"
-    # Auto-merge security patches
     commit-message:
       prefix: "security"
       include: "scope"
-    # Rebase strategy
     rebase-strategy: "auto"
-    # Target branch for security updates
-    target-branch: "main"
-    # Apply security updates to all dependencies
     versioning-strategy: "auto"
