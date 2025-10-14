@@ -79,23 +79,6 @@ export default function ProfileForm() {
   
   // Progress is now calculated based on filled fields for dynamic behavior
   const progress = useMemo(() => {
-    let filledFields = 0;
-    
-    // Simple check for non-empty/non-default values
-    (Object.keys(formData) as Array<keyof ProfileFormData>).forEach(key => {
-        const value = formData[key];
-        if (Array.isArray(value) && value.length > 0) {
-            filledFields++;
-        } else if (typeof value === 'string' && value.trim() !== '') {
-            filledFields++;
-        } else if (typeof value === 'number' && value > 0) {
-             filledFields++;
-        } else if (typeof value === 'boolean' && value === true) {
-             filledFields++; // Though no boolean fields exist here, good practice
-        }
-        // Exclude 'riskScore' and 'timeHorizon' from filling for simplicity, as they have defaults
-    });
-    
     // A slightly more realistic calculation: count personal info (4) + 4 profile questions
     const relevantFields = 8;
     const personalInfoFilled = [formData.firstName, formData.lastName, formData.email, formData.phone].filter(v => v.trim() !== '').length;
