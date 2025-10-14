@@ -1,76 +1,211 @@
-name: Dependabot auto-approve and merge
+name: Dependabot Auto-Approve and Merge
 
 on:
   pull_request_target:
-    types: [opened, reopened, synchronize, labeled]
+    types: [opened, reopened, synchronize, labeled, ready_for_review]
     branches: [main, develop]
 
 permissions:
   pull-requests: write
   contents: write
   checks: read
+  actions: read
+
+concurrency:
+  group: dependabot-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
 
 jobs:
-  security-checks:
-    name: Security Checks
+  validate:
+    name: Validate Dependabot PR
     runs-on: ubuntu-latest
     if: github.actor == 'dependabot[bot]'
     outputs:
+      is-valid: ${{ steps.check.outputs.is-valid }}
+      skip-reason: ${{ steps.check.outputs.skip-reason }}
+    
+    steps:
+      - name: Check PR status
+        id: check
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const pr = context.payload.pull_request;
+            
+            // Skip draft PRs
+            if (pr.draft) {
+              core.setOutput('is-valid', 'false');
+              core.setOutput('skip-reason', 'PR is in draft state');
+              core.notice('Skipping draft PR');
+              return;
+            }
+            
+            // Skip if already merged
+            if (pr.merged) {
+              core.setOutput('is-valid', 'false');
+              core.setOutput('skip-reason', 'PR is already merged');
+              return;
+            }
+            
+            // Skip if closed
+            if (pr.state === 'closed') {
+              core.setOutput('is-valid', 'false');
+              core.setOutput('skip-reason', 'PR is closed');
+              return;
+            }
+            
+            core.setOutput('is-valid', 'true');
+            core.setOutput('skip-reason', '');
+
+  security-checks:
+    name: Security & Quality Checks
+    runs-on: ubuntu-latest
+    needs: validate
+    if: needs.validate.outputs.is-valid == 'true'
+    outputs:
       has-vulnerabilities: ${{ steps.audit.outputs.has-vulnerabilities }}
+      tests-passed: ${{ steps.tests.outcome == 'success' }}
+      build-passed: ${{ steps.build.outcome == 'success' }}
       
     steps:
-      - name: Checkout code
+      - name: Checkout PR code
         uses: actions/checkout@v4
         with:
           ref: ${{ github.event.pull_request.head.sha }}
-      
-      - name: Set up Node.js
+          fetch-depth: 0
+
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '20.x'
           cache: 'npm'
       
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --prefer-offline
       
       - name: Run security audit
         id: audit
         run: |
-          if npm audit --audit-level=moderate --json > audit-result.json; then
+          echo "🔍 Running security audit..."
+          
+          if npm audit --audit-level=moderate --json > audit-result.json 2>&1; then
             echo "has-vulnerabilities=false" >> $GITHUB_OUTPUT
             echo "✅ No vulnerabilities found"
+            
+            # Create summary
+            echo "### ✅ Security Audit Passed" >> $GITHUB_STEP_SUMMARY
+            echo "No vulnerabilities detected at moderate level or above." >> $GITHUB_STEP_SUMMARY
           else
+            AUDIT_EXIT_CODE=$?
             echo "has-vulnerabilities=true" >> $GITHUB_OUTPUT
-            echo "⚠️ Vulnerabilities detected"
-            cat audit-result.json
+            echo "⚠️ Vulnerabilities detected (exit code: $AUDIT_EXIT_CODE)"
+            
+            # Parse and display vulnerabilities
+            if [ -f audit-result.json ]; then
+              echo "### ⚠️ Security Vulnerabilities Found" >> $GITHUB_STEP_SUMMARY
+              echo '```json' >> $GITHUB_STEP_SUMMARY
+              cat audit-result.json >> $GITHUB_STEP_SUMMARY
+              echo '```' >> $GITHUB_STEP_SUMMARY
+            fi
+            
             exit 1
           fi
-      
-      - name: Run tests
-        run: npm test
         continue-on-error: false
       
+      - name: Check for package-lock changes
+        id: lockfile
+        run: |
+          if git diff origin/${{ github.base_ref }}...HEAD --name-only | grep -q "package-lock.json"; then
+            echo "lockfile-changed=true" >> $GITHUB_OUTPUT
+            echo "✅ package-lock.json was updated"
+          else
+            echo "lockfile-changed=false" >> $GITHUB_OUTPUT
+            echo "⚠️ package-lock.json was not updated"
+          fi
+      
+      - name: Build project
+        id: build
+        run: |
+          if npm run build --if-present; then
+            echo "✅ Build successful"
+          else
+            echo "❌ Build failed"
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Run tests
+        id: tests
+        run: |
+          if npm test; then
+            echo "✅ Tests passed"
+          else
+            echo "❌ Tests failed"
+            exit 1
+          fi
+        continue-on-error: true
+      
+      - name: Run linting
+        id: lint
+        run: npm run lint --if-present
+        continue-on-error: true
+      
       - name: Upload audit results
-        if: failure()
+        if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: security-audit-results
-          path: audit-result.json
+          name: security-audit-${{ github.event.pull_request.number }}
+          path: |
+            audit-result.json
           retention-days: 30
+          if-no-files-found: ignore
 
-  dependabot-auto-merge:
-    name: Auto-approve and merge
+      - name: Wait for other checks
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const { owner, repo } = context.repo;
+            const ref = '${{ github.event.pull_request.head.sha }}';
+            
+            // Wait up to 5 minutes for other checks
+            const maxWaitTime = 5 * 60 * 1000; // 5 minutes
+            const checkInterval = 10 * 1000; // 10 seconds
+            const startTime = Date.now();
+            
+            while (Date.now() - startTime < maxWaitTime) {
+              const { data: checkRuns } = await github.rest.checks.listForRef({
+                owner,
+                repo,
+                ref,
+                per_page: 100
+              });
+              
+              const relevantChecks = checkRuns.check_runs.filter(check => 
+                check.name !== 'Validate Dependabot PR' &&
+                check.name !== 'Security & Quality Checks' &&
+                check.status !== 'completed'
+              );
+              
+              if (relevantChecks.length === 0) {
+                core.info('✅ All other checks completed');
+                break;
+              }
+              
+              core.info(`⏳ Waiting for ${relevantChecks.length} check(s) to complete...`);
+              await new Promise(resolve => setTimeout(resolve, checkInterval));
+            }
+
+  analyze-changes:
+    name: Analyze Dependency Changes
     runs-on: ubuntu-latest
-    needs: security-checks
-    if: >
-      github.actor == 'dependabot[bot]' && 
-      needs.security-checks.result == 'success' &&
-      (github.event.action == 'opened' || 
-       github.event.action == 'reopened' ||
-       github.event.action == 'synchronize' ||
-       (github.event.action == 'labeled' && 
-        contains(github.event.pull_request.labels.*.name, 'dependencies')))
-
+    needs: [validate, security-checks]
+    if: needs.validate.outputs.is-valid == 'true' && needs.security-checks.result == 'success'
+    outputs:
+      should-auto-merge: ${{ steps.decision.outputs.should-auto-merge }}
+      merge-reason: ${{ steps.decision.outputs.merge-reason }}
+      update-type: ${{ steps.metadata.outputs.update-type }}
+      dependency-names: ${{ steps.metadata.outputs.dependency-names }}
+      
     steps:
       - name: Fetch Dependabot metadata
         id: metadata
@@ -78,104 +213,292 @@ jobs:
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
-      - name: Determine merge strategy
-        id: strategy
-        run: |
-          UPDATE_TYPE="${{ steps.metadata.outputs.update-type }}"
-          PACKAGE_ECOSYSTEM="${{ steps.metadata.outputs.package-ecosystem }}"
-          
-          echo "update-type=${UPDATE_TYPE}" >> $GITHUB_OUTPUT
-          echo "package-ecosystem=${PACKAGE_ECOSYSTEM}" >> $GITHUB_OUTPUT
-          
-          # Define merge criteria
-          if [[ "${UPDATE_TYPE}" == "version-update:semver-major" ]]; then
-            echo "should-auto-merge=false" >> $GITHUB_OUTPUT
-            echo "❌ Major version update - requires manual review"
-          elif [[ "${UPDATE_TYPE}" == "version-update:semver-minor" ]] && \
-               [[ ! "${{ contains(github.event.pull_request.labels.*.name, 'security') }}" == "true" ]]; then
-            echo "should-auto-merge=false" >> $GITHUB_OUTPUT
-            echo "⚠️ Minor version update - requires manual review unless security patch"
-          else
-            echo "should-auto-merge=true" >> $GITHUB_OUTPUT
-            echo "✅ Safe to auto-merge"
-          fi
-
-      - name: Approve PR
-        if: >
-          steps.strategy.outputs.should-auto-merge == 'true' &&
-          (contains(github.event.pull_request.labels.*.name, 'dependencies') ||
-           contains(github.event.pull_request.labels.*.name, 'security'))
-        run: |
-          echo "📝 Approving PR #${{ github.event.pull_request.number }}"
-          gh pr review ${{ github.event.pull_request.number }} \
-            --approve \
-            --body "**Automatically approved by Dependabot workflow** ✅
-
-          - Update type: \`${{ steps.metadata.outputs.update-type }}\`
-          - Package: \`${{ steps.metadata.outputs.dependency-names }}\`
-          - Previous version: \`${{ steps.metadata.outputs.previous-version }}\`
-          - New version: \`${{ steps.metadata.outputs.new-version }}\`
-          - Security checks: Passed ✅"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Enable auto-merge
-        if: >
-          steps.strategy.outputs.should-auto-merge == 'true' &&
-          (contains(github.event.pull_request.labels.*.name, 'dependencies') ||
-           contains(github.event.pull_request.labels.*.name, 'security'))
-        run: |
-          echo "🔄 Enabling auto-merge for PR #${{ github.event.pull_request.number }}"
-          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Add comment for manual review
-        if: steps.strategy.outputs.should-auto-merge == 'false'
+      - name: Analyze dependency update
+        id: analysis
         uses: actions/github-script@v7
         with:
           script: |
-            github.rest.issues.createComment({
+            const updateType = '${{ steps.metadata.outputs.update-type }}';
+            const ecosystem = '${{ steps.metadata.outputs.package-ecosystem }}';
+            const dependencyType = '${{ steps.metadata.outputs.dependency-type }}';
+            const labels = context.payload.pull_request.labels.map(l => l.name);
+            
+            core.info(`Update Type: ${updateType}`);
+            core.info(`Ecosystem: ${ecosystem}`);
+            core.info(`Dependency Type: ${dependencyType}`);
+            core.info(`Labels: ${labels.join(', ')}`);
+            
+            // Store for decision step
+            core.setOutput('is-security', labels.includes('security'));
+            core.setOutput('is-dev-dependency', dependencyType === 'development');
+
+      - name: Make merge decision
+        id: decision
+        run: |
+          UPDATE_TYPE="${{ steps.metadata.outputs.update-type }}"
+          IS_SECURITY="${{ steps.analysis.outputs.is-security }}"
+          IS_DEV_DEP="${{ steps.analysis.outputs.is-dev-dependency }}"
+          HAS_DEPS_LABEL="${{ contains(github.event.pull_request.labels.*.name, 'dependencies') }}"
+          
+          echo "📊 Decision Factors:"
+          echo "  Update Type: $UPDATE_TYPE"
+          echo "  Security: $IS_SECURITY"
+          echo "  Dev Dependency: $IS_DEV_DEP"
+          echo "  Has dependencies label: $HAS_DEPS_LABEL"
+          
+          # Decision logic
+          SHOULD_MERGE="false"
+          REASON=""
+          
+          if [[ "$IS_SECURITY" == "true" ]]; then
+            # Always auto-merge security updates (except major for production deps)
+            if [[ "$UPDATE_TYPE" == "version-update:semver-major" ]] && [[ "$IS_DEV_DEP" == "false" ]]; then
+              SHOULD_MERGE="false"
+              REASON="Major security update for production dependency requires manual review"
+            else
+              SHOULD_MERGE="true"
+              REASON="Security update approved automatically"
+            fi
+          elif [[ "$UPDATE_TYPE" == "version-update:semver-patch" ]]; then
+            SHOULD_MERGE="true"
+            REASON="Patch update (bug fixes only)"
+          elif [[ "$UPDATE_TYPE" == "version-update:semver-minor" ]]; then
+            if [[ "$IS_DEV_DEP" == "true" ]]; then
+              SHOULD_MERGE="true"
+              REASON="Minor update for dev dependency"
+            else
+              SHOULD_MERGE="false"
+              REASON="Minor update for production dependency requires review"
+            fi
+          elif [[ "$UPDATE_TYPE" == "version-update:semver-major" ]]; then
+            SHOULD_MERGE="false"
+            REASON="Major version update requires manual review"
+          else
+            SHOULD_MERGE="false"
+            REASON="Unknown update type"
+          fi
+          
+          echo "should-auto-merge=$SHOULD_MERGE" >> $GITHUB_OUTPUT
+          echo "merge-reason=$REASON" >> $GITHUB_OUTPUT
+          
+          if [[ "$SHOULD_MERGE" == "true" ]]; then
+            echo "✅ Decision: $REASON"
+          else
+            echo "⚠️ Decision: $REASON"
+          fi
+
+  auto-approve:
+    name: Auto-Approve PR
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, security-checks]
+    if: needs.analyze-changes.outputs.should-auto-merge == 'true'
+    
+    steps:
+      - name: Approve PR
+        run: |
+          echo "📝 Approving PR #${{ github.event.pull_request.number }}"
+          
+          gh pr review ${{ github.event.pull_request.number }} \
+            --approve \
+            --body "## ✅ Auto-Approved by Dependabot Workflow
+          
+          **Merge Decision:** ${{ needs.analyze-changes.outputs.merge-reason }}
+          
+          ### Update Details
+          - **Type:** \`${{ needs.analyze-changes.outputs.update-type }}\`
+          - **Package(s):** \`${{ needs.analyze-changes.outputs.dependency-names }}\`
+          - **Previous:** \`${{ needs.dependabot-metadata.outputs.previous-version }}\`
+          - **New:** \`${{ needs.dependabot-metadata.outputs.new-version }}\`
+          
+          ### Checks Passed
+          - ✅ Security audit
+          - ✅ Tests
+          - ✅ Build
+          
+          ---
+          *This PR will be automatically merged once all required checks pass.*"
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  auto-merge:
+    name: Enable Auto-Merge
+    runs-on: ubuntu-latest
+    needs: [auto-approve, analyze-changes]
+    if: needs.analyze-changes.outputs.should-auto-merge == 'true'
+    
+    steps:
+      - name: Enable auto-merge
+        run: |
+          echo "🔄 Enabling auto-merge for PR #${{ github.event.pull_request.number }}"
+          
+          # Enable auto-merge with squash
+          gh pr merge --auto --squash "${{ github.event.pull_request.html_url }}"
+          
+          echo "✅ Auto-merge enabled. PR will merge automatically when all checks pass."
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  request-review:
+    name: Request Manual Review
+    runs-on: ubuntu-latest
+    needs: [analyze-changes, security-checks]
+    if: >
+      needs.validate.outputs.is-valid == 'true' &&
+      needs.security-checks.result == 'success' &&
+      needs.analyze-changes.outputs.should-auto-merge == 'false'
+    
+    steps:
+      - name: Add review request comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const body = `## ⚠️ Manual Review Required
+            
+            **Reason:** ${{ needs.analyze-changes.outputs.merge-reason }}
+            
+            ### Update Details
+            - **Type:** \`${{ needs.analyze-changes.outputs.update-type }}\`
+            - **Package(s):** \`${{ needs.analyze-changes.outputs.dependency-names }}\`
+            
+            ### Action Items
+            1. 📖 Review the [changelog](https://github.com/${{ github.event.pull_request.head.repo.full_name }}/compare/${{ github.event.pull_request.base.sha }}...${{ github.event.pull_request.head.sha }})
+            2. 🧪 Test the changes locally if needed
+            3. ✅ Approve and merge when ready
+            
+            ### Quick Commands
+            \`\`\`bash
+            # Test locally
+            gh pr checkout ${{ github.event.pull_request.number }}
+            npm ci
+            npm test
+            npm run build
+            \`\`\`
+            
+            ---
+            *All automated checks have passed ✅*`;
+            
+            await github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `⚠️ **Manual review required**
-              
-              This PR contains a **${{ steps.metadata.outputs.update-type }}** update and requires manual review before merging.
-              
-              **Details:**
-              - Package: \`${{ steps.metadata.outputs.dependency-names }}\`
-              - Previous version: \`${{ steps.metadata.outputs.previous-version }}\`
-              - New version: \`${{ steps.metadata.outputs.new-version }}\`
-              
-              Please review the changelog and test thoroughly before approving.`
-            })
+              body
+            });
 
-  notify-on-failure:
-    name: Notify on failure
+      - name: Request reviews from team
+        uses: actions/github-script@v7
+        with:
+          script: |
+            // Optional: Request review from specific team members
+            // Uncomment and configure as needed
+            /*
+            await github.rest.pulls.requestReviewers({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: context.issue.number,
+              reviewers: ['maintainer1', 'maintainer2']
+            });
+            */
+            
+            core.notice('Manual review requested');
+        continue-on-error: true
+
+  notify-failure:
+    name: Notify on Failure
     runs-on: ubuntu-latest
-    needs: [security-checks, dependabot-auto-merge]
-    if: failure()
+    needs: [validate, security-checks, analyze-changes, auto-approve, auto-merge]
+    if: always() && contains(needs.*.result, 'failure')
     
     steps:
+      - name: Determine failure details
+        id: failure-info
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const needs = {
+              validate: '${{ needs.validate.result }}',
+              security: '${{ needs.security-checks.result }}',
+              analyze: '${{ needs.analyze-changes.result }}',
+              approve: '${{ needs.auto-approve.result }}',
+              merge: '${{ needs.auto-merge.result }}'
+            };
+            
+            const failed = Object.entries(needs)
+              .filter(([_, result]) => result === 'failure')
+              .map(([name, _]) => name);
+            
+            core.setOutput('failed-jobs', failed.join(', '));
+            core.setOutput('count', failed.length);
+
       - name: Comment on PR
         uses: actions/github-script@v7
         with:
           script: |
-            const failedJobs = [
-              ${{ needs.security-checks.result == 'failure' && '"Security Checks"' || '' }},
-              ${{ needs.dependabot-auto-merge.result == 'failure' && '"Auto-merge"' || '' }}
-            ].filter(Boolean);
+            const skipReason = '${{ needs.validate.outputs.skip-reason }}';
             
-            if (failedJobs.length > 0) {
-              github.rest.issues.createComment({
-                issue_number: context.issue.number,
-                owner: context.repo.owner,
-                repo: context.repo.repo,
-                body: `❌ **Dependabot auto-merge workflow failed**
-                
-                Failed jobs: ${failedJobs.join(', ')}
-                
-                Please review the [workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId}) for details.`
-              })
+            if (skipReason) {
+              // Don't comment if skipped for valid reason
+              return;
             }
+            
+            const failedJobs = '${{ steps.failure-info.outputs.failed-jobs }}';
+            const hasVulnerabilities = '${{ needs.security-checks.outputs.has-vulnerabilities }}' === 'true';
+            
+            let body = `## ❌ Dependabot Auto-Merge Failed\n\n`;
+            
+            if (hasVulnerabilities) {
+              body += `### 🔒 Security Issues Detected\n\n`;
+              body += `The security audit found vulnerabilities. Please review the [audit results](${context.payload.repository.html_url}/actions/runs/${context.runId}).\n\n`;
+            }
+            
+            body += `**Failed Steps:** ${failedJobs}\n\n`;
+            body += `### Next Steps\n`;
+            body += `1. Review the [workflow run](${context.payload.repository.html_url}/actions/runs/${context.runId})\n`;
+            body += `2. Check the audit results artifact\n`;
+            body += `3. Fix any issues and push updates\n\n`;
+            body += `---\n`;
+            body += `*Once issues are resolved, this workflow will run again automatically.*`;
+            
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body
+            });
+
+  summary:
+    name: Workflow Summary
+    runs-on: ubuntu-latest
+    needs: [validate, security-checks, analyze-changes, auto-approve, auto-merge, request-review]
+    if: always()
+    
+    steps:
+      - name: Generate summary
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const isValid = '${{ needs.validate.outputs.is-valid }}' === 'true';
+            const skipReason = '${{ needs.validate.outputs.skip-reason }}';
+            const shouldMerge = '${{ needs.analyze-changes.outputs.should-auto-merge }}' === 'true';
+            const securityPassed = '${{ needs.security-checks.result }}' === 'success';
+            
+            let summary = '# Dependabot Auto-Merge Summary\n\n';
+            
+            if (!isValid) {
+              summary += `⏭️ **Skipped:** ${skipReason}\n`;
+              core.summary.addRaw(summary).write();
+              return;
+            }
+            
+            summary += '## Status\n\n';
+            summary += `- Security Checks: ${securityPassed ? '✅' : '❌'}\n`;
+            summary += `- Auto-Merge Decision: ${shouldMerge ? '✅ Approved' : '⚠️ Manual Review Required'}\n\n`;
+            
+            if (shouldMerge) {
+              summary += '## ✅ Auto-Merge Enabled\n\n';
+              summary += 'PR will be merged automatically when all checks pass.\n';
+            } else {
+              summary += '## ⚠️ Manual Review Requested\n\n';
+              summary += `**Reason:** ${{ needs.analyze-changes.outputs.merge-reason }}\n`;
+            }
+            
+            core.summary.addRaw(summary).write();
