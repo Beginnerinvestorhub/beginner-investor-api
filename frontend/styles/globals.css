@@ -262,7 +262,1096 @@ img {
   margin-bottom: var(--nyse-spacing-md);
 }
 
-.nyse-input:focus, .nyse-textarea:focus, .nyse-select:focus {
-  outline: none;
+/* Signup Page Styles */
+.signup-page {
+  min-height: 100vh;
+  background: var(--nyse-color-background-alt);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--nyse-spacing-lg);
+}
+
+.signup-container {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  max-width: 1200px;
+  width: 100%;
+  background: var(--nyse-color-background);
+  border-radius: 16px;
+  overflow: hidden;
+  box-shadow: 0 20px 60px rgba(0, 61, 122, 0.15);
+}
+
+.signup-branding {
+  background: linear-gradient(
+    135deg,
+    var(--nyse-color-secondary) 0%,
+    var(--nyse-color-accent) 100%
+  );
+  color: white;
+  padding: var(--nyse-spacing-xxl);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.signup-branding::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background:
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 30px,
+      rgba(255, 255, 255, 0.03) 30px,
+      rgba(255, 255, 255, 0.03) 31px
+    ),
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 30px,
+      rgba(255, 255, 255, 0.03) 30px,
+      rgba(255, 255, 255, 0.03) 31px
+    );
+  pointer-events: none;
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--nyse-spacing-md);
+  margin-bottom: var(--nyse-spacing-xxl);
+  text-decoration: none;
+  position: relative;
+  z-index: 1;
+}
+
+.logo-icon {
+  font-size: 2.5rem;
+}
+
+.brand-name {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.75rem;
+  font-weight: 700;
+  color: white;
+  letter-spacing: 2px;
+}
+
+.signup-branding h1 {
+  font-family: var(--nyse-font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: var(--nyse-spacing-md);
+  color: white;
+  position: relative;
+  z-index: 1;
+}
+
+.brand-tagline {
+  font-size: 1.1rem;
+  line-height: 1.7;
+  margin-bottom: var(--nyse-spacing-xxl);
+  opacity: 0.95;
+  position: relative;
+  z-index: 1;
+}
+
+.benefits-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-lg);
+  margin-bottom: var(--nyse-spacing-xxl);
+  position: relative;
+  z-index: 1;
+}
+
+.benefit-item {
+  display: flex;
+  gap: var(--nyse-spacing-md);
+  align-items: flex-start;
+}
+
+.benefit-icon {
+  font-size: 2rem;
+  flex-shrink: 0;
+}
+
+.benefit-content h3 {
+  font-size: 1.1rem;
+  font-weight: 700;
+  margin-bottom: var(--nyse-spacing-xs);
+  color: white;
+}
+
+.benefit-content p {
+  font-size: 0.95rem;
+  opacity: 0.9;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.social-proof {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--nyse-spacing-lg);
+  padding: var(--nyse-spacing-lg);
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  backdrop-filter: blur(10px);
+  position: relative;
+  z-index: 1;
+}
+
+.proof-stat {
+  text-align: center;
+}
+
+.stat-number {
+  font-family: var(--nyse-font-serif);
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+.stat-label {
+  font-size: 0.85rem;
+  opacity: 0.9;
+}
+
+.signup-form-panel {
+  padding: var(--nyse-spacing-xxl);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.form-container {
+  width: 100%;
+  max-width: 400px;
+}
+
+.form-header {
+  margin-bottom: var(--nyse-spacing-xl);
+}
+
+.form-header h2 {
+  font-family: var(--nyse-font-serif);
+  font-size: 2rem;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.form-header p {
+  color: var(--nyse-color-text-light);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.form-footer {
+  margin-top: var(--nyse-spacing-xl);
+  text-align: center;
+}
+
+.form-footer p {
+  color: var(--nyse-color-text);
+  font-size: 0.95rem;
+  margin: 0;
+}
+
+.login-link {
+  color: var(--nyse-color-primary);
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 0.3s ease;
+}
+
+.login-link:hover {
+  color: var(--nyse-color-accent);
+  text-decoration: underline;
+}
+
+.divider {
+  margin: var(--nyse-spacing-xl) 0;
+  text-align: center;
+  position: relative;
+}
+
+.divider::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: var(--nyse-color-border);
+}
+
+.divider span {
+  position: relative;
+  background: var(--nyse-color-background);
+  padding: 0 var(--nyse-spacing-md);
+  color: var(--nyse-color-text-light);
+  font-size: 0.9rem;
+}
+
+.back-home {
+  display: block;
+  text-align: center;
+  color: var(--nyse-color-text-light);
+  text-decoration: none;
+  font-size: 0.95rem;
+  transition: color 0.3s ease;
+  margin-bottom: var(--nyse-spacing-lg);
+}
+
+.back-home:hover {
+  color: var(--nyse-color-primary);
+}
+
+.terms-notice {
+  text-align: center;
+  margin-top: var(--nyse-spacing-lg);
+  padding-top: var(--nyse-spacing-lg);
+  border-top: 1px solid var(--nyse-color-border);
+}
+
+.terms-notice p {
+  font-size: 0.8rem;
+  color: var(--nyse-color-text-light);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.terms-notice a {
+  color: var(--nyse-color-primary);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.terms-notice a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 968px) {
+  .signup-container {
+    grid-template-columns: 1fr;
+  }
+
+  .signup-branding {
+    padding: var(--nyse-spacing-xl);
+    text-align: center;
+  }
+
+  .brand-logo {
+    justify-content: center;
+  }
+
+  .benefits-list {
+    align-items: center;
+  }
+
+  .benefit-item {
+    text-align: left;
+    max-width: 400px;
+  }
+
+  .signup-form-panel {
+    padding: var(--nyse-spacing-xl);
+  }
+}
+
+@media (max-width: 640px) {
+  .signup-page {
+    padding: var(--nyse-spacing-md);
+  }
+
+  .signup-branding {
+    padding: var(--nyse-spacing-lg);
+  }
+
+  .signup-form-panel {
+    padding: var(--nyse-spacing-lg);
+  }
+
+/* Dashboard Page Styles */
+.dashboard-page {
+  min-height: 100vh;
+  background: var(--nyse-color-background-alt);
+}
+
+.dashboard-header {
+  background: var(--nyse-color-background);
+  padding: var(--nyse-spacing-xxl);
+  margin-bottom: var(--nyse-spacing-xl);
+  border-radius: 12px;
+  border: 1px solid var(--nyse-color-border);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--nyse-spacing-xl);
+}
+
+.welcome-section {
+  flex: 1;
+}
+
+.welcome-title {
+  font-family: var(--nyse-font-serif);
+  font-size: clamp(1.5rem, 3vw, 2rem);
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.welcome-subtitle {
+  color: var(--nyse-color-text-light);
+  font-size: 1.1rem;
+  margin: 0;
+}
+
+.quick-stats {
+  display: flex;
+  gap: var(--nyse-spacing-md);
+}
+
+.stat-card {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-lg);
+  border-radius: 8px;
+  text-align: center;
+  min-width: 80px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.stat-icon {
+  font-size: 1.5rem;
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.stat-number {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--nyse-color-primary);
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+.stat-label {
+  font-size: 0.8rem;
+  color: var(--nyse-color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.dashboard-nav {
+  margin-bottom: var(--nyse-spacing-xl);
+}
+
+.nav-tabs {
+  display: flex;
+  gap: var(--nyse-spacing-sm);
+  background: var(--nyse-color-background);
+  padding: var(--nyse-spacing-sm);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.nav-tab {
+  flex: 1;
+  padding: var(--nyse-spacing-md) var(--nyse-spacing-lg);
+  background: transparent;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  font-family: var(--nyse-font-sans);
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--nyse-color-text);
+  transition: all 0.3s ease;
+}
+
+.nav-tab:hover {
+  background: var(--nyse-color-background-alt);
+  color: var(--nyse-color-primary);
+}
+
+.nav-tab.active {
+  background: var(--nyse-color-primary);
+  color: white;
+}
+
+.dashboard-content {
+  background: var(--nyse-color-background);
+  padding: var(--nyse-spacing-xxl);
+  border-radius: 12px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.tab-panel {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.overview-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--nyse-spacing-xl);
+}
+
+.activity-card,
+.progress-card {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-xl);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.card-title {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.25rem;
+  color: var(--nyse-color-primary);
+  margin-bottom: var(--nyse-spacing-lg);
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-md);
+}
+
+.activity-item {
+  display: flex;
+  gap: var(--nyse-spacing-md);
+  align-items: center;
+  padding: var(--nyse-spacing-md);
+  background: var(--nyse-color-background);
+  border-radius: 6px;
+  border-left: 3px solid var(--nyse-color-accent);
+}
+
+.activity-icon {
+  font-size: 1.25rem;
+}
+
+.activity-content {
+  flex: 1;
+}
+
+.activity-text {
+  font-size: 0.95rem;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+.activity-time {
+  font-size: 0.8rem;
+  color: var(--nyse-color-text-light);
+}
+
+.progress-overview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-lg);
+}
+
+.progress-item {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-sm);
+}
+
+.progress-label {
+  font-size: 0.9rem;
+  color: var(--nyse-color-text);
+  font-weight: 600;
+}
+
+.progress-bar {
+  width: 100%;
+  height: 8px;
+  background: var(--nyse-color-background-alt);
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: linear-gradient(
+    90deg,
+    var(--nyse-color-primary) 0%,
+    var(--nyse-color-accent) 100%
+  );
+  transition: width 0.5s ease;
+}
+
+.progress-text {
+  font-size: 0.85rem;
+  color: var(--nyse-color-text-light);
+  text-align: right;
+}
+
+.tools-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--nyse-spacing-lg);
+}
+
+.tool-card {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-xl);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.tool-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 61, 122, 0.1);
   border-color: var(--nyse-color-primary);
+}
+
+.tool-icon {
+  font-size: 3rem;
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+.tool-title {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.25rem;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.tool-description {
+  color: var(--nyse-color-text-light);
+  font-size: 0.95rem;
+  margin-bottom: var(--nyse-spacing-lg);
+}
+
+.tool-button {
+  background: var(--nyse-color-primary);
+  color: white;
+  border: none;
+  padding: var(--nyse-spacing-sm) var(--nyse-spacing-lg);
+  border-radius: 4px;
+  font-family: var(--nyse-font-sans);
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.tool-button:hover {
+  background: var(--nyse-color-secondary);
+  transform: translateY(-1px);
+}
+
+.learning-path {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-xl);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.learning-modules {
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-md);
+}
+
+.module-item {
+  display: flex;
+  gap: var(--nyse-spacing-md);
+  align-items: center;
+  padding: var(--nyse-spacing-lg);
+  background: var(--nyse-color-background);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.module-item.completed {
+  border-left: 4px solid #4caf50;
+}
+
+.module-item.current {
+  border-left: 4px solid var(--nyse-color-primary);
+  background: linear-gradient(
+    135deg,
+    rgba(0, 61, 122, 0.05) 0%,
+    rgba(0, 160, 227, 0.05) 100%
+  );
+}
+
+.module-item.locked {
+  opacity: 0.6;
+}
+
+.module-icon {
+  font-size: 1.5rem;
+}
+
+.module-content h4 {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.1rem;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+.module-content p {
+  color: var(--nyse-color-text-light);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+@media (max-width: 968px) {
+  .dashboard-header {
+    flex-direction: column;
+    align-items: stretch;
+    text-align: center;
+  }
+
+  .quick-stats {
+    justify-content: center;
+  }
+
+  .overview-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .nav-tabs {
+    flex-direction: column;
+  }
+
+  .tools-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .dashboard-header {
+    padding: var(--nyse-spacing-xl);
+  }
+
+  .dashboard-content {
+    padding: var(--nyse-spacing-lg);
+  }
+}
+
+/* ESG Screener Page Animations */
+@keyframes spin-slow {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+@keyframes spin-reverse {
+  from {
+    transform: rotate(360deg);
+  }
+  to {
+    transform: rotate(0deg);
+  }
+}
+
+@keyframes spin-slower {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.animate-spin-slow {
+  animation: spin-slow 20s linear infinite;
+}
+
+.animate-spin-reverse {
+  animation: spin-reverse 15s linear infinite;
+}
+
+/* Onboarding Page Styles */
+.onboarding-page {
+  min-height: 100vh;
+  background: linear-gradient(
+    180deg,
+    var(--nyse-color-background-alt) 0%,
+    #f0f4f8 100%
+  );
+  display: flex;
+  flex-direction: column;
+}
+
+.onboarding-header {
+  background: var(--nyse-color-background);
+  border-bottom: 2px solid var(--nyse-color-border);
+  padding: var(--nyse-spacing-lg) 5%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.header-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: var(--nyse-spacing-md);
+}
+
+.brand-logo {
+  display: flex;
+  align-items: center;
+  gap: var(--nyse-spacing-sm);
+}
+
+.logo-icon {
+  font-size: 2rem;
+}
+
+.brand-name {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--nyse-color-primary);
+  letter-spacing: 2px;
+}
+
+.header-subtitle {
+  font-size: 1rem;
+  color: var(--nyse-color-text);
+  font-weight: 600;
+}
+
+.onboarding-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--nyse-spacing-xl) 5%;
+}
+
+.onboarding-footer {
+  background: var(--nyse-color-background);
+  border-top: 1px solid var(--nyse-color-border);
+  padding: var(--nyse-spacing-lg);
+  text-align: center;
+}
+
+.onboarding-footer p {
+  color: var(--nyse-color-text-light);
+  font-size: 0.9rem;
+  margin: 0;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .header-container {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+/* Privacy Page Styles */
+.privacy-page {
+  min-height: 100vh;
+  background: var(--nyse-color-background-alt);
+}
+
+.privacy-header {
+  background: linear-gradient(
+    135deg,
+    var(--nyse-color-secondary) 0%,
+    var(--nyse-color-accent) 100%
+  );
+  color: white;
+  padding: var(--nyse-spacing-xxl) 0;
+}
+
+.back-link {
+  display: inline-block;
+  color: white;
+  text-decoration: none;
+  margin-bottom: var(--nyse-spacing-md);
+  font-size: 0.95rem;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+}
+
+.back-link:hover {
+  opacity: 1;
+}
+
+.privacy-header h1 {
+  font-family: var(--nyse-font-serif);
+  font-size: clamp(2rem, 4vw, 3rem);
+  margin-bottom: var(--nyse-spacing-sm);
+  color: white;
+}
+
+.last-updated {
+  font-size: 0.9rem;
+  opacity: 0.9;
+  margin: 0;
+}
+
+.privacy-content {
+  padding: var(--nyse-spacing-xxl) 0;
+}
+
+.content-wrapper {
+  max-width: 800px;
+  margin: 0 auto;
+  background: var(--nyse-color-background);
+  padding: var(--nyse-spacing-xxl);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.privacy-section {
+  margin-bottom: var(--nyse-spacing-xxl);
+}
+
+.intro-text {
+  font-size: 1.1rem;
+  line-height: 1.8;
+  color: var(--nyse-color-text);
+}
+
+.privacy-section h2 {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.75rem;
+  color: var(--nyse-color-primary);
+  margin-bottom: var(--nyse-spacing-lg);
+  padding-bottom: var(--nyse-spacing-sm);
+  border-bottom: 2px solid var(--nyse-color-accent);
+}
+
+.privacy-section h3 {
+  font-size: 1.25rem;
+  color: var(--nyse-color-dark);
+  margin-top: var(--nyse-spacing-lg);
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+.privacy-section h4 {
+  font-size: 1.1rem;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.privacy-section p {
+  color: var(--nyse-color-text);
+  line-height: 1.8;
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+.styled-list {
+  list-style: none;
+  padding-left: 0;
+  margin: var(--nyse-spacing-md) 0;
+}
+
+.styled-list li {
+  padding-left: var(--nyse-spacing-lg);
+  margin-bottom: var(--nyse-spacing-sm);
+  position: relative;
+  color: var(--nyse-color-text);
+  line-height: 1.7;
+}
+
+.styled-list li::before {
+  content: '▸';
+  position: absolute;
+  left: 0;
+  color: var(--nyse-color-accent);
+  font-weight: 700;
+}
+
+.nested-list {
+  margin-top: var(--nyse-spacing-sm);
+  margin-left: var(--nyse-spacing-lg);
+}
+
+.highlight-box {
+  background: linear-gradient(
+    135deg,
+    rgba(0, 160, 227, 0.1) 0%,
+    rgba(0, 160, 227, 0.05) 100%
+  );
+  border-left: 4px solid var(--nyse-color-accent);
+  padding: var(--nyse-spacing-lg);
+  border-radius: 4px;
+  margin: var(--nyse-spacing-lg) 0;
+}
+
+.warning-box {
+  background: #fff3e0;
+  border-left: 4px solid #ff9800;
+  padding: var(--nyse-spacing-lg);
+  border-radius: 4px;
+  margin: var(--nyse-spacing-lg) 0;
+}
+
+.legal-box {
+  background: var(--nyse-color-background-alt);
+  border: 2px solid var(--nyse-color-border);
+  padding: var(--nyse-spacing-lg);
+  border-radius: 4px;
+  margin: var(--nyse-spacing-lg) 0;
+}
+
+.security-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--nyse-spacing-lg);
+  margin: var(--nyse-spacing-lg) 0;
+}
+
+.security-item {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-lg);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+  text-align: center;
+}
+
+.security-icon {
+  font-size: 2.5rem;
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.cookie-table {
+  margin: var(--nyse-spacing-lg) 0;
+}
+
+.cookie-row {
+  padding: var(--nyse-spacing-lg);
+  background: var(--nyse-color-background-alt);
+  border-radius: 8px;
+  margin-bottom: var(--nyse-spacing-md);
+  border-left: 4px solid var(--nyse-color-accent);
+}
+
+.cookie-type {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: var(--nyse-spacing-sm);
+}
+
+.cookie-badge {
+  display: inline-block;
+  padding: var(--nyse-spacing-xs) var(--nyse-spacing-sm);
+  border-radius: 12px;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.cookie-badge.required {
+  background: #ffebee;
+  color: #c62828;
+}
+
+.cookie-badge.optional {
+  background: #e3f2fd;
+  color: #1976d2;
+}
+
+.cookie-control {
+  font-style: italic;
+  font-size: 0.95rem;
+  color: var(--nyse-color-text-light);
+}
+
+.rights-note {
+  font-style: italic;
+  padding: var(--nyse-spacing-md);
+  background: var(--nyse-color-background-alt);
+  border-radius: 4px;
+  margin-top: var(--nyse-spacing-md);
+}
+
+.contact-section {
+  background: var(--nyse-color-background-alt);
+  padding: var(--nyse-spacing-xl);
+  border-radius: 8px;
+  border: 1px solid var(--nyse-color-border);
+}
+
+.contact-info {
+  margin-top: var(--nyse-spacing-md);
+  display: flex;
+  flex-direction: column;
+  gap: var(--nyse-spacing-sm);
+}
+
+.contact-item {
+  padding: var(--nyse-spacing-sm);
+}
+
+.privacy-footer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--nyse-spacing-md);
+  padding-top: var(--nyse-spacing-xxl);
+  margin-top: var(--nyse-spacing-xxl);
+  border-top: 1px solid var(--nyse-color-border);
+}
+
+.footer-link {
+  color: var(--nyse-color-primary);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+}
+
+.footer-link:hover {
+  color: var(--nyse-color-accent);
+}
+
+.separator {
+  color: var(--nyse-color-text-light);
+}
+
+@media (max-width: 768px) {
+  .content-wrapper {
+    padding: var(--nyse-spacing-lg);
+  }
+
+  .privacy-header {
+    padding: var(--nyse-spacing-lg) 0;
+  }
+
+  .privacy-section h2 {
+    font-size: 1.5rem;
+  }
+
+  .security-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .privacy-footer {
+    flex-wrap: wrap;
+  }
 }

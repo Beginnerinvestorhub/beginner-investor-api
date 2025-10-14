@@ -392,42 +392,6 @@ export default function ESGScreenerPage() {
             </div>
           </div>
         </div>
-
-        <style jsx>{`
-          @keyframes spin-slow {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          @keyframes spin-reverse {
-            from {
-              transform: rotate(360deg);
-            }
-            to {
-              transform: rotate(0deg);
-            }
-          }
-          @keyframes spin-slower {
-            from {
-              transform: rotate(0deg);
-            }
-            to {
-              transform: rotate(360deg);
-            }
-          }
-          .animate-spin-slow {
-            animation: spin-slow 20s linear infinite;
-          }
-          .animate-spin-reverse {
-            animation: spin-reverse 15s linear infinite;
-          }
-          .animate-spin-slower {
-            animation: spin-slower 30s linear infinite;
-          }
-        `}</style>
       </main>
     </>
   );

@@ -79,7 +79,6 @@ export default function ProfileForm() {
   
   // Progress is now calculated based on filled fields for dynamic behavior
   const progress = useMemo(() => {
-    const totalFields = Object.keys(initialFormData).length;
     let filledFields = 0;
     
     // Simple check for non-empty/non-default values
