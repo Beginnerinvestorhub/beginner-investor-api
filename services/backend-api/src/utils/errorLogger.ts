@@ -1,5 +1,5 @@
 import type { Request, Response } from "express";
-import { logger } from "./logger";
+import logger from "./logger";
 import { v4 as uuidv4 } from "uuid";
 
 /**
@@ -114,7 +114,7 @@ export class ErrorLogger {
     error: Error,
     req: Request,
     res: Response,
-    next: Function,
+    _next: Function,
   ) {
     const response = ErrorLogger.createErrorResponse(error, req);
     const statusCode = error instanceof ApiError ? error.statusCode : 500;

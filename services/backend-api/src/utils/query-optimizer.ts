@@ -1,6 +1,5 @@
-import { Prisma } from "@prisma/client";
 import { prisma } from "../config/prisma";
-import { logger } from "./logger";
+import logger from "./logger";
 
 type QueryInfo = {
   model: string;
@@ -101,7 +100,7 @@ class QueryOptimizer {
         };
       }
 
-      const model = groups[query.model];
+      const model = groups[query.model]!;
       model.count++;
       model.avgDuration =
         (model.avgDuration * (model.count - 1) + query.duration) / model.count;
@@ -188,7 +187,7 @@ class QueryOptimizer {
       logger.error("Query analysis failed:", error);
       return {
         success: false,
-        error: error.message,
+        error: (error as Error).message,
       };
     }
   }

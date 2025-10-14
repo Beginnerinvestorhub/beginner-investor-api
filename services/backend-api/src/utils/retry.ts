@@ -16,7 +16,7 @@ export async function withRetry<T>(
 ): Promise<T> {
   const { maxRetries = 3, initialDelay = 100, maxDelay = 10000 } = options;
   let attempts = 0;
-  let lastError: Error;
+  let lastError: Error = new Error('Function failed after all retry attempts');
 
   while (attempts <= maxRetries) {
     try {
@@ -43,7 +43,7 @@ export async function withRetry<T>(
     }
   }
 
-  throw 'lastError';
+  throw lastError;
 }
 
 /**
@@ -69,4 +69,3 @@ export function createRetryable<T>(
 const fetchWithRetry = createRetryable({ maxRetries: 3, initialDelay: 200 });
 const result = await fetchWithRetry(() => fetchData(params));
 */
-}

@@ -43,7 +43,7 @@ export class SafeQuery {
   ): Promise<T | null> {
     try {
       this.sanitizeWhereClause(where);
-      const result = await (prisma[model as string] as any).findUnique({
+      const result = await (prisma as any)[model].findUnique({
         where,
         ...options,
       });
@@ -66,7 +66,7 @@ export class SafeQuery {
   ): Promise<T> {
     try {
       this.sanitizeData(data);
-      const result = await (prisma[model as string] as any).create({ data });
+      const result = await (prisma as any)[model].create({ data });
       return result;
     } catch (error) {
       logger.error(`Error in SafeQuery.create for ${String(model)}:`, error);
@@ -85,7 +85,7 @@ export class SafeQuery {
     try {
       this.sanitizeWhereClause(where);
       this.sanitizeData(data);
-      const result = await (prisma[model as string] as any).update({
+      const result = await (prisma as any)[model].update({
         where,
         data,
       });
@@ -105,7 +105,7 @@ export class SafeQuery {
   ): Promise<T> {
     try {
       this.sanitizeWhereClause(where);
-      const result = await (prisma[model as string] as any).delete({ where });
+      const result = await (prisma as any)[model].delete({ where });
       return result;
     } catch (error) {
       logger.error(`Error in SafeQuery.delete for ${String(model)}:`, error);
@@ -228,7 +228,7 @@ export class SafeQuery {
     callback: (
       tx: Omit<
         PrismaClient,
-        "$connect" | "$disconnect" | "$on" | "$transaction" | "$use"
+        "$connect" | "$disconnect" | "$on" | "$transaction" | "$use" | "$extends"
       >,
     ) => Promise<T>,
   ): Promise<T> {
