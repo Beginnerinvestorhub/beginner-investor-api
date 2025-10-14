@@ -4,14 +4,14 @@
     "lib": ["ES2022"],
     "module": "commonjs",
     "moduleResolution": "node",
-    "baseUrl": "../",
+    "baseUrl": "./",
     "paths": {
-      "@/*": ["shared/*"],
-      "@/shared/*": ["shared/*"],
-      "@/config/*": ["config/*"]
+      "@/*": ["./*"],
+      "@/shared/*": ["./*"],
+      "@/config/*": ["../config/*"]
     },
     "outDir": "./dist",
-    "rootDir": "../",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "skipLibCheck": true,
@@ -31,15 +31,12 @@
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
     "typeRoots": [
-      "../node_modules/@types",
-      "./types"
+      "./node_modules/@types"
     ],
     "types": ["node"]
   },
   "include": [
-    "shared/**/*",
-    "config/**/*",
-    "scripts/**/*"
+    "**/*"
   ],
   "exclude": [
     "node_modules",
@@ -47,8 +44,8 @@
     "coverage",
     "**/*.test.ts",
     "**/*.spec.ts",
-    "frontend/**/*",
-    "services/**/*",
-    "clean-build/**/*"
+    "../frontend/**/*",
+    "../services/**/*",
+    "../clean-build/**/*"
   ]
 }

@@ -116,7 +116,7 @@ export class CacheManager {
     const map = new Map<string, T>();
 
     results.forEach((result, idx) => {
-      if (result) {
+      if (result && idx < keys.length) {
         try {
           map.set(keys[idx], JSON.parse(result) as T);
         } catch (error) {

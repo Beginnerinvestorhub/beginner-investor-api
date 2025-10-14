@@ -1,4 +1,4 @@
-import { redisManager } from '../redis';
+import { redisManager } from '../redis-client';
 import { logger } from '../utils/logger';
 
 type CacheOptions = {

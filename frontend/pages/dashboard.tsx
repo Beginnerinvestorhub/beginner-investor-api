@@ -32,7 +32,7 @@ export default function DashboardPage() {
           </p>
         </div>
 
-        <style jsx>{css}</style>{`
+        <style jsx>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -309,7 +309,7 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      <style jsx>{css}</style>{`
+      <style jsx>{`
         .dashboard-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

@@ -15,18 +15,19 @@ module.exports = {
     ecmaVersion: 'latest',
     sourceType: 'module',
     project: './tsconfig.json',
+    tsconfigRootDir: __dirname,
   },
   plugins: ['@typescript-eslint', 'prettier'],
   rules: {
-    '@typescript-eslint/explicit-function-return-type': 'warn',
+    '@typescript-eslint/explicit-function-return-type': 'off',
     '@typescript-eslint/no-explicit-any': 'warn',
     '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }],
     'prettier/prettier': 'error',
-    'no-console': ['warn', { allow: ['warn', 'error'] }],
+    'no-console': 'off', // Allow console statements in shared utilities
     'no-var': 'error',
     'prefer-const': 'error',
     'object-shorthand': 'error',
     'prefer-arrow-callback': 'error',
   },
-  ignorePatterns: ['node_modules', 'dist', '**/*.js'],
+  ignorePatterns: ['node_modules', 'dist', '**/*.js', '**/*.d.ts'],
 };

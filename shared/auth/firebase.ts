@@ -12,7 +12,7 @@ import {
 } from './auth.types';
 
 // Extend Express Request type to include user
-declare module 'express-serve-static-core' {
+declare module 'express' {
   interface Request {
     user?: AuthenticatedUser;
     firebaseUser?: FirebaseUser;
@@ -125,7 +125,7 @@ const firebaseAdmin = FirebaseAdmin.getInstance();
 export const authenticate = (
   options: AuthMiddlewareOptions = {}
 ): ((req: Request, res: Response, next: NextFunction) => Promise<void>) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     try {
       const authHeader = req.headers.authorization;
 
@@ -133,10 +133,11 @@ export const authenticate = (
         if (options.optional) {
           return next();
         }
-        return res.status(401).json({
+        res.status(401).json({
           error: 'Unauthorized: No token provided',
           code: 'MISSING_TOKEN',
         });
+        return;
       }
 
       const token = authHeader.split(' ')[1];
@@ -145,10 +146,11 @@ export const authenticate = (
         if (options.optional) {
           return next();
         }
-        return res.status(401).json({
+        res.status(401).json({
           error: 'Unauthorized: Invalid token format',
           code: 'INVALID_TOKEN_FORMAT',
         });
+        return;
       }
 
       try {
@@ -156,10 +158,11 @@ export const authenticate = (
 
         // Check if email verification is required
         if (options.requireEmailVerified && !decodedToken.email_verified) {
-          return res.status(403).json({
+          res.status(403).json({
             error: 'Forbidden: Email verification required',
             code: 'EMAIL_NOT_VERIFIED',
           });
+          return;
         }
 
         // Add user context to request
@@ -187,17 +190,19 @@ export const authenticate = (
       } catch (error) {
         if (error instanceof AuthenticationError) {
           logger.error('Authentication error:', { error: error.message, code: error.code });
-          return res.status(error.statusCode).json({
+          res.status(error.statusCode).json({
             error: error.message,
             code: error.code,
           });
+          return;
         }
 
         logger.error('Unexpected authentication error:', error);
-        return res.status(401).json({
+        res.status(401).json({
           error: 'Unauthorized: Invalid token',
           code: 'INVALID_TOKEN',
         });
+        return;
       }
     } catch (error) {
       logger.error('Authentication middleware error:', error);
@@ -281,10 +286,11 @@ export const serviceAuth = (req: Request, res: Response, next: NextFunction): vo
     const serviceToken = req.headers['x-service-token'] || req.headers['authorization'];
 
     if (!serviceToken) {
-      return res.status(401).json({
+      res.status(401).json({
         error: 'Unauthorized: No service token provided',
         code: 'MISSING_SERVICE_TOKEN',
       });
+      return;
     }
 
     // Support both header formats
@@ -303,7 +309,7 @@ export const serviceAuth = (req: Request, res: Response, next: NextFunction): vo
       return next();
     }
 
-    return res.status(403).json({
+    res.status(403).json({
       error: 'Forbidden: Invalid service token',
       code: 'INVALID_SERVICE_TOKEN',
     });

@@ -221,7 +221,7 @@ export default function ProfilePage() {
         </div>
       </div>
 
-      <style jsx>{css}</style>{`
+      <style jsx>{`
         .profile-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

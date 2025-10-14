@@ -10,16 +10,16 @@ class ServiceAuth {
   private static instance: ServiceAuth;
   private secret: string;
   private algorithm = 'sha256';
-  private encoding: 'hex' = 'hex';
+  private encoding = 'hex' as const;
   private headerName = 'x-service-signature';
   private timestampHeader = 'x-service-timestamp';
   private maxTimeDiff = 5 * 60 * 1000; // 5 minutes
 
   private constructor() {
     // Get secret from environment - required in production
-    this.secret = process.env.SERVICE_AUTH_SECRET;
+    const secret = process.env.SERVICE_AUTH_SECRET;
 
-    if (!this.secret) {
+    if (!secret) {
       if (process.env.NODE_ENV === 'development') {
         // Generate a temporary secret for development only
         this.secret = randomBytes(64).toString('hex');
@@ -28,6 +28,8 @@ class ServiceAuth {
       } else {
         throw new Error('SERVICE_AUTH_SECRET is required in production environment');
       }
+    } else {
+      this.secret = secret;
     }
 
     // Validate secret strength
@@ -68,8 +70,8 @@ class ServiceAuth {
   /**
    * Middleware to verify service requests
    */
-  public verify() {
-    return (req: Request, res: Response, next: NextFunction) => {
+  public verify(): (req: Request, res: Response, next: NextFunction) => void {
+    return (req: Request, res: Response, next: NextFunction): void => {
       try {
         const signature = req.header(this.headerName);
         const timestamp = req.header(this.timestampHeader);
@@ -77,13 +79,15 @@ class ServiceAuth {
         // Check if required headers are present
         if (!signature || !timestamp) {
           logger.warn('Missing required headers for service authentication');
-          return res.status(401).json({ error: 'Missing authentication headers' });
+          res.status(401).json({ error: 'Missing authentication headers' });
+          return;
         }
 
         // Validate timestamp
         if (!this.validateTimestamp(timestamp)) {
           logger.warn('Invalid timestamp in service request');
-          return res.status(401).json({ error: 'Request expired' });
+          res.status(401).json({ error: 'Request expired' });
+          return;
         }
 
         // Clone and clean the request body for signature generation
@@ -98,14 +102,15 @@ class ServiceAuth {
         // Compare signatures
         if (signature !== expectedSignature) {
           logger.warn('Invalid service request signature');
-          return res.status(401).json({ error: 'Invalid signature' });
+          res.status(401).json({ error: 'Invalid signature' });
+          return;
         }
 
         // Authentication successful
         next();
       } catch (error) {
         logger.error('Service authentication error:', error);
-        return res.status(500).json({ error: 'Authentication error' });
+        res.status(500).json({ error: 'Authentication error' });
       }
     };
   }
@@ -125,7 +130,7 @@ class ServiceAuth {
   public getSecretInfo(): { length: number; isProduction: boolean } {
     return {
       length: this.secret.length,
-      isProduction: process.env.NODE_ENV === 'production'
+      isProduction: process.env.NODE_ENV === 'production',
     };
   }
 }

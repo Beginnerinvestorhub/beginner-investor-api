@@ -393,7 +393,7 @@ export default function ESGScreenerPage() {
           </div>
         </div>
 
-        <style jsx>{css}</style>{`
+        <style jsx>{`
           @keyframes spin-slow {
             from {
               transform: rotate(0deg);

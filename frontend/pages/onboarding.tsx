@@ -48,7 +48,7 @@ export default function OnboardingPage() {
           </p>
         </div>
 
-        <style jsx>{css}</style>{`
+        <style jsx>{`
           .nyse-loading-container {
             display: flex;
             flex-direction: column;
@@ -138,7 +138,7 @@ export default function OnboardingPage() {
         </footer>
       </div>
 
-      <style jsx>{css}</style>{`
+      <style jsx>{`
         .onboarding-page {
           min-height: 100vh;
           background: linear-gradient(

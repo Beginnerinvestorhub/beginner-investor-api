@@ -43,7 +43,8 @@ export class RateLimiter {
           success: false,
           limit: options.maxRequests,
           remaining: 0,
-          resetTime: validRequests[0] + options.windowMs,
+          resetTime:
+            validRequests.length > 0 ? validRequests[0] + options.windowMs : now + options.windowMs,
         };
       }
 
@@ -59,7 +60,8 @@ export class RateLimiter {
         success: true,
         limit: options.maxRequests,
         remaining: options.maxRequests - validRequests.length,
-        resetTime: validRequests[0] + options.windowMs,
+        resetTime:
+          validRequests.length > 0 ? validRequests[0] + options.windowMs : now + options.windowMs,
       };
     } catch (error) {
       console.error('Rate limiter error:', error);

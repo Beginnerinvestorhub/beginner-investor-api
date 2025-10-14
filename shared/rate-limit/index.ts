@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { redisManager } from '../redis';
+import { redisManager } from '../redis-client';
 import { logger } from '../utils/logger';
 
 type RateLimitConfig = {
@@ -88,8 +88,8 @@ class RateLimiter {
   /**
    * Middleware to handle rate limiting
    */
-  public middleware() {
-    return async (req: Request, res: Response, next: NextFunction) => {
+  public middleware(): (req: Request, res: Response, next: NextFunction) => Promise<void> {
+    return async (req: Request, res: Response, next: NextFunction): Promise<void> => {
       try {
         // Skip rate limiting if configured
         if (this.config.skip?.(req)) {
@@ -109,18 +109,22 @@ class RateLimiter {
 
         // Check if rate limit is exceeded
         if (requests.length / 2 >= this.config.maxRequests) {
-          const retryAfter = Math.ceil((parseInt(requests[1]) + this.config.windowMs - now) / 1000);
+          const retryAfter =
+            requests.length > 1
+              ? Math.ceil((parseInt(requests[1]) + this.config.windowMs - now) / 1000)
+              : Math.ceil(this.config.windowMs / 1000);
 
           res.setHeader('Retry-After', retryAfter);
           res.setHeader('X-RateLimit-Limit', this.config.maxRequests.toString());
           res.setHeader('X-RateLimit-Remaining', '0');
           res.setHeader('X-RateLimit-Reset', new Date(now + this.config.windowMs).toISOString());
 
-          return res.status(this.config.statusCode).json({
+          res.status(this.config.statusCode).json({
             error: 'Too Many Requests',
             message: this.config.message,
             retryAfter: `${retryAfter} seconds`,
           });
+          return;
         }
 
         // Add current request to the sorted set

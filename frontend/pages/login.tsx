@@ -141,7 +141,7 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <style jsx>{css}</style>{`
+      <style jsx>{`
         .login-page {
           min-height: 100vh;
           background: var(--nyse-color-background-alt);

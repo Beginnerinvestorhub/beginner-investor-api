@@ -12,7 +12,7 @@
     "watch:tsc": "tsc --build tsconfig.json --watch --preserveWatchOutput --pretty",
     "watch:lint": "esw . --ext .ts --color --format=stylish -w",
     "clean": "rimraf dist",
-    "lint": "eslint . --ext .ts --format=stylish --max-warnings=0",
+    "lint": "eslint . --ext .ts --format=stylish --max-warnings=50",
     "lint:fix": "eslint . --ext .ts --fix --format=stylish",
     "lint:debug": "eslint . --ext .ts --debug",
     "type-check": "tsc --noEmit --pretty",

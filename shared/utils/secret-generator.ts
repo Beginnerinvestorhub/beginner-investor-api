@@ -93,7 +93,7 @@ export class SecretGenerator {
         marketData: this.generateAPIKey('md_'),
         finnhub: this.generateAPIKey('fh_'),
         alphaVantage: this.generateAPIKey('av_'),
-      }
+      },
     };
   }
 
@@ -145,14 +145,14 @@ export class SecretGenerator {
 
     // Common patterns check
     const commonPatterns = ['123456', 'password', 'qwerty', 'admin', 'secret'];
-    if (commonPatterns.some(pattern => secret.toLowerCase().includes(pattern))) {
+    if (commonPatterns.some((pattern) => secret.toLowerCase().includes(pattern))) {
       issues.push('Secret contains common patterns');
       score -= 20;
     }
 
     // Dictionary words check (basic)
     const dictionaryWords = ['password', 'secret', 'key', 'token', 'auth'];
-    if (dictionaryWords.some(word => secret.toLowerCase().includes(word))) {
+    if (dictionaryWords.some((word) => secret.toLowerCase().includes(word))) {
       issues.push('Secret contains dictionary words');
       score -= 10;
     }
@@ -160,7 +160,7 @@ export class SecretGenerator {
     return {
       isValid: issues.length === 0 && score >= 50,
       score: Math.max(0, Math.min(100, score)),
-      issues
+      issues,
     };
   }
 
@@ -196,7 +196,7 @@ export class SecretValidator {
       'JWT_SECRET',
       'COOKIE_SECRET',
       'SERVICE_AUTH_SECRET',
-      'DATABASE_ENCRYPTION_KEY'
+      'DATABASE_ENCRYPTION_KEY',
     ];
 
     const missing: string[] = [];
@@ -219,7 +219,7 @@ export class SecretValidator {
     return {
       isValid: missing.length === 0 && weak.length === 0,
       missing,
-      weak
+      weak,
     };
   }
 
@@ -235,10 +235,10 @@ export class SecretValidator {
       'JWT_SECRET',
       'COOKIE_SECRET',
       'SERVICE_AUTH_SECRET',
-      'DATABASE_ENCRYPTION_KEY'
+      'DATABASE_ENCRYPTION_KEY',
     ];
 
-    return secrets.map(key => {
+    return secrets.map((key) => {
       const secret = process.env[key];
       const present = !!secret;
 

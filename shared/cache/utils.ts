@@ -61,12 +61,12 @@ export async function getCacheHealth(): Promise<CacheHealth> {
     // Parse memory usage
     const usedMemoryMatch = info.match(/used_memory:(\d+)/);
     const maxMemoryMatch = info.match(/maxmemory:(\d+)/);
-    const usedMemory = usedMemoryMatch ? parseInt(usedMemoryMatch[1]) : 0;
-    const maxMemory = maxMemoryMatch ? parseInt(maxMemoryMatch[1]) : 0;
+    const usedMemory = usedMemoryMatch?.[1] ? parseInt(usedMemoryMatch[1], 10) : 0;
+    const maxMemory = maxMemoryMatch?.[1] ? parseInt(maxMemoryMatch[1], 10) : 0;
 
     // Parse uptime
     const uptimeMatch = statsInfo.match(/uptime_in_seconds:(\d+)/);
-    const uptime = uptimeMatch ? parseInt(uptimeMatch[1]) : 0;
+    const uptime = uptimeMatch?.[1] ? parseInt(uptimeMatch[1], 10) : 0;
 
     // Get key count
     const dbSize = await redis.dbSize();
