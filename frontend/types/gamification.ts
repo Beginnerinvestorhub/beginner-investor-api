@@ -44,11 +44,17 @@ export interface Achievement {
   unlockedAt?: string;
 }
 
-export interface LeaderboardEntry {
-  userId: string;
-  username: string;
-  level: number;
-  totalPoints: number;
-  badgesCount: number;
-  avatar?: string;
+export enum BadgeCategory {
+  EDUCATION = 'education',
+  INVESTMENT = 'investment',
+  ENGAGEMENT = 'engagement',
+  MILESTONE = 'milestone',
+  SOCIAL = 'social'
+}
+
+export enum BadgeRarity {
+  COMMON = 'common',
+  RARE = 'rare',
+  EPIC = 'epic',
+  LEGENDARY = 'legendary'
 }
