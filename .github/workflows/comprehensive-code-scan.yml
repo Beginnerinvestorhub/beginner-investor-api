@@ -1,4 +1,21 @@
+Here is a **fully revised** version of your `.github/workflows/comprehensive-code-scan.yml` file, applying all fixes and improvements discussed above:
+
+- **CodeQL languages syntax corrected**
+- **SARIF uploads for all security scan outputs**
+- **Container scans use SARIF and are uploaded**
+- **Python dependency upgrading improved**
+- **Markdown linting added for documentation**
+- **Concurrency added to prevent duplicate runs**
+- **Comments added for clarity**
+- **All jobs reviewed for best practices and error handling**
+
+```yaml
 name: Comprehensive Code Scanning & Auto-Fix
+
+# Prevent duplicate runs on same branch
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 on:
   schedule:
@@ -34,7 +51,7 @@ jobs:
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v3
         with:
-          languages: javascript-typescript, python
+          languages: javascript,typescript,python
           config-file: ./.github/codeql-config.yml
 
       - name: Autobuild
@@ -42,14 +59,18 @@ jobs:
 
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v3
+
+      - name: Upload CodeQL SARIF results
+        uses: github/codeql-action/upload-sarif@v3
         with:
-          category: "/language:javascript-typescript"
-          output: sarif-results
+          sarif_file: codeql-results.sarif
+          wait-for-processing: true
 
       # Security vulnerability scanning
       - name: Run npm audit
         run: |
-          cd services/backend-api && npm audit --audit-level=moderate || true
+          cd services/backend-api
+          npm audit --audit-level=moderate || true
         continue-on-error: true
 
       - name: Run Trivy vulnerability scanner
@@ -60,13 +81,20 @@ jobs:
           format: 'sarif'
           output: 'trivy-results.sarif'
 
+      - name: Upload Trivy SARIF results
+        uses: github/codeql-action/upload-sarif@v3
+        if: always()
+        with:
+          sarif_file: 'trivy-results.sarif'
+          wait-for-processing: true
+
       # Secrets scanning
       - name: Run GitLeaks
         uses: gitleaks/gitleaks-action@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      # Container security scanning
+      # Container security scanning (base image)
       - name: Run Trivy container scan
         uses: aquasecurity/trivy-action@master
         with:
@@ -74,12 +102,12 @@ jobs:
           format: 'sarif'
           output: 'container-scan.sarif'
 
-      # Upload SARIF results
-      - name: Upload Trivy scan results
+      - name: Upload container scan SARIF
         uses: github/codeql-action/upload-sarif@v3
         if: always()
         with:
-          sarif_file: 'trivy-results.sarif'
+          sarif_file: 'container-scan.sarif'
+          wait-for-processing: true
 
   # ===== CODE QUALITY & LINTING =====
   code-quality:
@@ -200,6 +228,9 @@ jobs:
           npx prettier --write "src/**/*.{ts,tsx,js,jsx}" || echo "Prettier formatting completed"
 
       # ===== AUTO-FIX PYTHON CODE =====
+      - name: Install pip-review
+        run: pip install pip-review
+
       - name: Auto-format Python code with Black
         run: |
           find services -name "*.py" -path "*/src/*" -o -name "app.py" | head -20 | xargs python -m black || echo "Black formatting completed"
@@ -212,8 +243,7 @@ jobs:
 
       - name: Update Python dependencies
         run: |
-          pip install --upgrade pip
-          pip list --outdated | head -10 || echo "Dependency check completed"
+          pip-review --auto || echo "Python dependencies updated"
 
       # ===== COMMIT AUTO-FIXES =====
       - name: Commit auto-fixes
@@ -255,11 +285,13 @@ jobs:
 
       - name: Run npm audit fix
         run: |
-          cd services/backend-api && npm audit fix || echo "npm audit fix completed"
+          cd services/backend-api
+          npm audit fix || echo "npm audit fix completed"
 
       - name: Check for outdated dependencies
         run: |
-          cd services/backend-api && npm outdated || echo "Dependency check completed"
+          cd services/backend-api
+          npm outdated || echo "Dependency check completed"
 
       - name: Python safety check
         run: |
@@ -280,18 +312,38 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v4
 
+      # Check for Dockerfile existence before attempting build
+      - name: Check for Dockerfile
+        id: dockerfile_check
+        run: |
+          if [ -f "./services/${{ matrix.service }}/Dockerfile" ]; then
+            echo "found=true" >> $GITHUB_OUTPUT
+          else
+            echo "found=false" >> $GITHUB_OUTPUT
+          fi
+
       - name: Build test image
+        if: steps.dockerfile_check.outputs.found == 'true'
         run: |
           docker build -t test-${{ matrix.service }} ./services/${{ matrix.service }}
 
       - name: Run container security scan
+        if: steps.dockerfile_check.outputs.found == 'true'
         uses: aquasecurity/trivy-action@master
         with:
           image-ref: test-${{ matrix.service }}
-          format: 'json'
-          output: 'container-scan-${{ matrix.service }}.json'
+          format: 'sarif'
+          output: 'container-scan-${{ matrix.service }}.sarif'
+
+      - name: Upload container scan SARIF
+        if: steps.dockerfile_check.outputs.found == 'true'
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: container-scan-${{ matrix.service }}.sarif
+          wait-for-processing: true
 
       - name: Clean up test image
+        if: steps.dockerfile_check.outputs.found == 'true'
         run: docker rmi test-${{ matrix.service }} || true
 
   # ===== PERFORMANCE SCANNING =====
@@ -347,6 +399,7 @@ jobs:
             if [ ! -s "$file" ]; then
               echo "Empty README found: $file"
             fi
+            head -1 "$file" | grep -iq '# ' || echo "README missing main header: $file"
           done || echo "README check completed"
 
       - name: Check for outdated documentation
@@ -356,6 +409,11 @@ jobs:
       - name: Check package.json descriptions
         run: |
           find services -name "package.json" -exec grep -l "TODO\|FIXME\|XXX" {} \; | head -5 || echo "Package check completed"
+
+      - name: Lint Markdown files
+        run: |
+          npm install -g markdownlint-cli
+          markdownlint "**/*.md" || echo "Markdown lint issues found"
 
   # ===== COMPREHENSIVE REPORTING =====
   comprehensive-report:
@@ -407,10 +465,11 @@ jobs:
           script: |
             const fs = require('fs');
             const report = fs.readFileSync('report.md', 'utf8');
-
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
               body: `## 🔍 Code Quality & Security Report\n\n${report}`
             });
+```
+

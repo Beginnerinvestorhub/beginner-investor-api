@@ -1,0 +1,68 @@
+name: ESLint
+
+on:
+  push:
+    branches: [ "main" ]
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
+      - '**/*.cjs'
+  pull_request:
+    branches: [ "main" ]
+    paths:
+      - '**/*.js'
+      - '**/*.jsx'
+      - '**/*.ts'
+      - '**/*.tsx'
+      - '**/*.mjs'
+      - '**/*.cjs'
+  schedule:
+    - cron: '26 20 * * 1'
+
+jobs:
+  eslint:
+    strategy:
+      matrix:
+        node-version: [18.x, 20.x]
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      actions: read
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: Cache node modules
+        uses: actions/cache@v3
+        with:
+          path: ~/.npm
+          key: ${{ runner.os }}-npm-cache-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-cache-
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Install ESLint SARIF formatter
+        run: npm install @microsoft/eslint-formatter-sarif@latest
+
+      - name: Run ESLint
+        env:
+          SARIF_ESLINT_IGNORE_SUPPRESSED: "true"
+        run: npx eslint . --ext .js,.jsx,.ts,.tsx,.mjs,.cjs --format @microsoft/eslint-formatter-sarif --output-file eslint-results.sarif
+        continue-on-error: true
+
+      - name: Upload analysis results to GitHub
+        uses: github/codeql-action/upload-sarif@v3
+        with:
+          sarif_file: eslint-results.sarif
+          wait-for-processing: true
