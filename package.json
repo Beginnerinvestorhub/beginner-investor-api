@@ -5,9 +5,12 @@
     "firebase": "^11.9.1",
     "firebase-admin": "^13.4.0",
     "firebase-functions": "^6.3.2",
+    "next": "^15.5.5",
+    "postcss": "^8.4.47",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "redis": "^5.8.3"
+    "redis": "^5.8.3",
+    "tailwindcss": "^3.4.10"
   },
   "devDependencies": {
     "autoprefixer": "^10.4.21",

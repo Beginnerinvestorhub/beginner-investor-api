@@ -80,8 +80,10 @@ export default function HomePage() {
         <link rel="icon" type="image/x-icon" href="/favicon.ico" />
       </Head>
 
-      {/* Hero Section */}
-      <section className="hero">
+      {/* Test element for CSS */}
+      <div className="test-style" style={{margin: '20px', textAlign: 'center'}}>
+        If you see red background with white text, CSS is working!
+      </div>
         <div className="gear-container">
           <div className="gear"></div>
           <div className="gear"></div>
@@ -109,10 +111,10 @@ export default function HomePage() {
             <Link href="#features" className="btn btn-secondary">Explore Demo</Link>
           </div>
         </div>
-      </section>
+      
 
       {/* Market Ticker */}
-      <div className="market-ticker">
+      <div className="market-ticker">;
         <div className="ticker-content">
           <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
           <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>

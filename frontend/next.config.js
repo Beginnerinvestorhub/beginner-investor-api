@@ -110,6 +110,10 @@ const nextConfig = withBundleAnalyzer(
               key: 'Referrer-Policy',
               value: 'strict-origin-when-cross-origin',
             },
+            {
+              key: 'Access-Control-Allow-Origin',
+              value: '*', // Allow all origins for dev; restrict in production
+            },
           ],
         },
         {

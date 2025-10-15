@@ -1352,8 +1352,11 @@ img {
   .security-grid {
     grid-template-columns: 1fr;
   }
-
-  .privacy-footer {
-    flex-wrap: wrap;
-  }
+}
+/* Test if CSS is loading */
+.test-style {
+  background-color: red !important;
+  color: white !important;
+  font-size: 20px !important;
+  padding: 10px !important;
 }
