@@ -43,6 +43,8 @@ export const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
+  // Add NEXTAUTH_URL for production
+  ...(process.env.NEXTAUTH_URL && { baseUrl: process.env.NEXTAUTH_URL }),
 };
 
 export default NextAuth(authOptions);
