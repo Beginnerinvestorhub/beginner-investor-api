@@ -1,5 +1,5 @@
 envGroups:
-  - name: shared-secrets
+  - name: "beginner investor"
     envVars:
       - key: REDIS_URL
         sync: false
@@ -24,7 +24,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -54,7 +54,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -72,7 +72,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -98,7 +98,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -118,7 +118,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -142,7 +142,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: shared-secrets
+      - fromGroup: "beginner investor"
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
