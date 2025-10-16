@@ -503,6 +503,7 @@ export default function PrivacyPolicy() {
           </div>
         </main>
       </div>
+    </Layout>
     </>
   );
 }

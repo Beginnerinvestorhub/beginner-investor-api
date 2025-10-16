@@ -1,21 +1,31 @@
 import { useState, useCallback } from 'react';
 import { useSession } from 'next-auth/react';
-import { Session } from 'next-auth';
+import { Session, DefaultSession } from 'next-auth';
 
-interface NudgeRequest {
-  message: string;
-  context?: {
-    deviceInfo?: {
-      type?: string;
-      os?: string;
-      browser?: string;
-    };
-    location?: {
-      country?: string;
-      timezone?: string;
-    };
-    [key: string]: any;
-  };
+// Extend the Session type to include accessToken and id
+declare module 'next-auth' {
+  interface Session {
+    user: {
+      id?: string;
+      accessToken?: string;
+    } & DefaultSession['user'];
+  }
+}
+
+// Geolocation API types
+interface GeolocationPosition {
+  coords: GeolocationCoordinates;
+  timestamp: number;
+}
+
+interface GeolocationCoordinates {
+  latitude: number;
+  longitude: number;
+  accuracy: number;
+  altitude?: number | null;
+  altitudeAccuracy?: number | null;
+  heading?: number | null;
+  speed?: number | null;
 }
 
 interface NudgeResponse {
@@ -33,7 +43,7 @@ interface UseNudgeApiReturn {
   error: string | null;
   sendNudge: (
     message: string,
-    context?: Record<string, any>
+    context?: Record<string, string | number | boolean | object>
   ) => Promise<NudgeResponse>;
 }
 
@@ -45,7 +55,7 @@ export function useNudgeApi(): UseNudgeApiReturn {
   const sendNudge = useCallback(
     async (
       message: string,
-      context: Record<string, any> = {}
+      context: Record<string, string | number | boolean | object> = {}
     ): Promise<NudgeResponse> => {
       if (!session?.user?.accessToken) {
         throw new Error('User not authenticated or missing access token');

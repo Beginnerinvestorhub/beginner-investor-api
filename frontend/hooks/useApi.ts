@@ -15,7 +15,7 @@ interface UseApiReturn<T> extends ApiState<T> {
 interface UseApiOptions {
   baseURL?: string;
   headers?: Record<string, string>;
-  onSuccess?: (data: any) => void;
+onSuccess?: (data: unknown) => void;
   onError?: (error: string) => void;
 }
 
@@ -25,7 +25,7 @@ interface UseApiOptions {
  * @param options - Configuration options for the API call
  * @returns Object containing data, loading, error states and execute function
  */
-export function useApi<T = any>(
+export function useApi<T = unknown>(
   url: string,
   options: UseApiOptions = {}
 ): UseApiReturn<T> {
@@ -66,11 +66,13 @@ export function useApi<T = any>(
         }
 
         return data;
-      } catch (err: any) {
+      } catch (err: unknown) {
         const errorMessage =
-          err.response?.data?.error ||
-          err.message ||
-          'An unexpected error occurred';
+          (err && typeof err === 'object' && 'response' in err && err.response && typeof err.response === 'object' && 'data' in err.response && err.response.data && typeof err.response.data === 'object' && 'error' in err.response.data && typeof err.response.data.error === 'string')
+            ? err.response.data.error
+            : (err && typeof err === 'object' && 'message' in err && typeof err.message === 'string')
+              ? err.message
+              : 'An unexpected error occurred';
         setState({ data: null, loading: false, error: errorMessage });
 
         if (onError) {
@@ -100,7 +102,7 @@ export function useApi<T = any>(
  * @param options - Configuration options
  * @returns Object containing data, loading, error states and refetch function
  */
-export function useApiGet<T = any>(
+export function useApiGet<T = unknown>(
   url: string,
   options: UseApiOptions & { autoFetch?: boolean } = {}
 ): UseApiReturn<T> & { refetch: () => Promise<T> } {
@@ -132,7 +134,7 @@ export function useApiGet<T = any>(
  * @param options - Configuration options
  * @returns Object containing data, loading, error states and post function
  */
-export function useApiPost<T = any, D = any>(
+export function useApiPost<T = unknown, D = unknown>(
   url: string,
   options: UseApiOptions = {}
 ): UseApiReturn<T> & { post: (data?: D) => Promise<T> } {
