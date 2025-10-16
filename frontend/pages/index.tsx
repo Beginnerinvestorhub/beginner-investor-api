@@ -73,6 +73,7 @@ export default function HomePage() {
   return (
     <>
       <Head>
+        <html lang="en" />
         <title>Beginner Investor Hub - Build Your Financial Future</title>
         <meta name="description" content="Master investing with portfolio simulation, AI-powered coaching, and real-time market insights. Learn risk-free with institutional-grade tools." />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
