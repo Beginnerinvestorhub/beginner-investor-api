@@ -55,7 +55,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -73,7 +73,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup:  beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -99,7 +99,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -119,7 +119,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -143,7 +143,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
