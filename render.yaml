@@ -9,6 +9,8 @@ envGroups:
         sync: false
       - key: ALPHA_VANTAGE_API_KEY
         sync: false
+      - key: FINANCIAL_MODELING_PREP_API_KEY
+        sync: false
       - key: OPENAI_API_KEY
         sync: false
       - key: BEHAVIORAL_NUDGE_API_KEY
@@ -173,6 +175,7 @@ databases:
 #    - MARKET_DATA_API_KEY (for marketdata-ingestion)
 #    - FINNHUB_API_KEY (for marketdata-ingestion)
 #    - ALPHA_VANTAGE_API_KEY (for marketdata-ingestion)
+#    - FINANCIAL_MODELING_PREP_API_KEY (for marketdata-ingestion)
 #    - OPENAI_API_KEY (for ai-microservice-engine)
 #    - BEHAVIORAL_NUDGE_API_KEY (for behavioral-nudge-engine)
 #
