@@ -57,7 +57,7 @@ export default function MarketDataWidget({
         ]);
         setAlphaData(alpha);
         setIexData(iex);
-        setCoinData(coin);
+        setCoinGeckoData(coin);
       } catch (err: unknown) {
         // Log unexpected errors for debugging
         console.error('MarketDataWidget fetch error:', err);
