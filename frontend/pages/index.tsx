@@ -72,16 +72,6 @@ export default function HomePage() {
 
   return (
     <>
-      <Head>
-        <html lang="en" />
-        <title>Beginner Investor Hub - Build Your Financial Future</title>
-        <meta name="description" content="Master investing with portfolio simulation, AI-powered coaching, and real-time market insights. Learn risk-free with institutional-grade tools." />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-        <link rel="icon" type="image/x-icon" href="/favicon.svg" />
-      </Head>
-
-      {/* Test element for CSS */}
       <div className="test-style" style={{margin: '20px', textAlign: 'center'}}>
         If you see red background with white text, CSS is working!
       </div>
