@@ -1,10 +1,9 @@
 services:
-  # Backend API 
+  # Backend API
   - type: web
     name: backend-api
-    runtime: image
-    image:
-      url: karingler/backend-api:latest
+    runtime: docker
+    dockerfilePath: services/backend-api/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -29,12 +28,11 @@ services:
         value: https://your-frontend.vercel.app
     autoDeploy: true
 
-  # MarketData-Ingestion 
+  # MarketData-Ingestion
   - type: web
     name: marketdata-ingestion
-    runtime: image
-    image:
-      url: karingler/marketdata-ingestion:latest
+    runtime: docker
+    dockerfilePath: services/marketdata-ingestion/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -50,9 +48,8 @@ services:
   # AI Microservice Engine
   - type: web
     name: ai-microservice-engine
-    runtime: image
-    image:
-      url: karingler/ai-microservice-engine:latest
+    runtime: docker
+    dockerfilePath: services/ai-microservice-engine/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -76,9 +73,8 @@ services:
   # Python Risk Engine
   - type: web
     name: python-risk-engine
-    runtime: image
-    image:
-      url: karingler/python-risk-engine:latest
+    runtime: docker
+    dockerfilePath: services/python-risk-engine/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -96,9 +92,8 @@ services:
   # Portfolio Simulation Service
   - type: web
     name: portfolio-simulation
-    runtime: image
-    image:
-      url: karingler/portfolio-simulation:latest
+    runtime: docker
+    dockerfilePath: services/portfolio-simulation/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -120,9 +115,8 @@ services:
   # Behavioral Nudge Engine Service
   - type: web
     name: behavioral-nudge-engine
-    runtime: image
-    image:
-      url: karingler/behavioral-nudge-engine:latest
+    runtime: docker
+    dockerfilePath: services/behavioral-nudge-engine/Dockerfile
     plan: starter
     healthCheckPath: /health
     envVars:
