@@ -1,4 +1,4 @@
-   Env Group Name: "beginner investor"
+   Env Group Name: beginner-investor
     envVars:
       - key: REDIS_URL
         sync: false
@@ -6,9 +6,9 @@
         sync: false
       - key: FINNHUB_API_KEY
         sync: false
-      - key: ALPHA_VANTAGE_API_KEY
+      - key: ALPHA_VANTAGE_API
         sync: false
-      - key: FINANCIAL_MODELING_PREP_API_KEY
+      - key: FINANCIAL_MODELING_PREP_API
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -25,7 +25,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -46,7 +46,7 @@ services:
         value: https://your-frontend.vercel.app
     autoDeploy: true
 
-  # Market Data Ingestion Service
+  # MarketData-Ingestion 
   - type: web
     name: marketdata-ingestion
     runtime: image
