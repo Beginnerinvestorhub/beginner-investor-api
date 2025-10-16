@@ -1,16 +1,60 @@
 import Head from 'next/head';
 import Link from 'next/link';
-import { useEffect, useState, useRef, useCallback } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
+
+interface TickerData {
+  symbol: string;
+  price: number;
+  change: number;
+  changePercent: number;
+  lastUpdated: string;
+}
 
 export default function HomePage() {
   const [statsAnimated, setStatsAnimated] = useState(false);
   const [isClient, setIsClient] = useState(false);
+  const [tickerData, setTickerData] = useState<TickerData[]>([]);
+  const [statsData, setStatsData] = useState({
+    portfoliosBuilt: 12847,
+    simulationsRun: 45392,
+    simulatedValue: 2100000,
+    userSatisfaction: 95
+  });
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   // Ensure we only run client-side code after hydration
   useEffect(() => {
     setIsClient(true);
   }, []);
+
+  const fetchTickerData = useCallback(async () => {
+    try {
+      const symbols = ['SPY', 'QQQ', 'DIA']; // Major market indices
+      const promises = symbols.map(symbol =>
+        fetch(`/api/marketdata/quote?symbol=${symbol}`)
+          .then(res => res.json())
+          .catch(() => null)
+      );
+
+      const results = await Promise.all(promises);
+      const validData = results.filter(data => data && !data.error);
+
+      if (validData.length > 0) {
+        setTickerData(validData);
+      }
+    } catch (error) {
+      console.error('Failed to fetch ticker data:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (isClient) {
+      fetchTickerData();
+      // Update every 60 seconds
+      const interval = setInterval(fetchTickerData, 60000);
+      return () => clearInterval(interval);
+    }
+  }, [isClient, fetchTickerData]);
 
   const animateCounters = useCallback(() => {
     if (!isClient) return;
@@ -117,16 +161,31 @@ export default function HomePage() {
       {/* Market Ticker */}
       <div className="market-ticker">
         <div className="ticker-content">
-          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
-          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
-          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
-          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
-          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
-          <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
-          <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
-          <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
-          <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
-          <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
+          {tickerData.length > 0 ? (
+            <>
+              {tickerData.map((data, index) => (
+                <React.Fragment key={data.symbol}>
+                  <span className="ticker-item">
+                    {data.symbol}: <span className={`ticker-value ${data.change >= 0 ? 'up' : 'down'}`}>
+                      {data.changePercent >= 0 ? '+' : ''}{data.changePercent.toFixed(1)}%
+                    </span>
+                  </span>
+                  {index < tickerData.length - 1 && <span className="ticker-separator">•</span>}
+                </React.Fragment>
+              ))}
+              <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
+              <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
+            </>
+          ) : (
+            // Fallback to static data if API fails
+            <>
+              <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
+              <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>
+              <span className="ticker-item">DOW: <span className="ticker-value down">-0.3%</span></span>
+              <span className="ticker-item">Portfolios Created: <span className="ticker-value">12,847</span></span>
+              <span className="ticker-item">Simulations Run: <span className="ticker-value">45,392</span></span>
+            </>
+          )}
         </div>
       </div>
 
