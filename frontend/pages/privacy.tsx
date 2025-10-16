@@ -504,6 +504,5 @@ export default function PrivacyPolicy() {
         </main>
       </div>
     </Layout>
-    </>
-  );
+  )
 }

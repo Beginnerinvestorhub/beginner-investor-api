@@ -1353,6 +1353,137 @@ img {
     grid-template-columns: 1fr;
   }
 }
+
+/* Market Ticker Styles */
+.market-ticker {
+  background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+  color: white;
+  overflow: hidden;
+  white-space: nowrap;
+  padding: var(--nyse-spacing-sm) 0;
+  position: relative;
+  z-index: 10;
+}
+
+.ticker-content {
+  display: flex;
+  gap: var(--nyse-spacing-xxl);
+  animation: ticker-scroll 30s linear infinite;
+  font-family: var(--nyse-font-sans);
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+@keyframes ticker-scroll {
+  0% {
+    transform: translateX(100%);
+  }
+  100% {
+    transform: translateX(-100%);
+  }
+}
+
+.ticker-item {
+  flex-shrink: 0;
+  margin-right: var(--nyse-spacing-xxl);
+}
+
+.ticker-value {
+  font-weight: 700;
+  margin-left: var(--nyse-spacing-xs);
+}
+
+.ticker-value.up {
+  color: #4caf50;
+}
+
+.ticker-value.down {
+  color: #f44336;
+}
+
+/* Gear Animation Styles */
+.gear-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 1;
+  overflow: hidden;
+}
+
+.gear {
+  position: absolute;
+  border-radius: 50%;
+  border: 8px solid rgba(0, 61, 122, 0.1);
+  animation: rotate 20s linear infinite;
+}
+
+.gear:nth-child(1) {
+  width: 80px;
+  height: 80px;
+  top: 10%;
+  left: 5%;
+  animation-duration: 15s;
+}
+
+.gear:nth-child(2) {
+  width: 60px;
+  height: 60px;
+  top: 20%;
+  right: 10%;
+  animation-duration: 25s;
+  animation-direction: reverse;
+}
+
+.gear:nth-child(3) {
+  width: 100px;
+  height: 100px;
+  bottom: 15%;
+  left: 8%;
+  animation-duration: 18s;
+}
+
+.gear:nth-child(4) {
+  width: 70px;
+  height: 70px;
+  bottom: 25%;
+  right: 5%;
+  animation-duration: 22s;
+  animation-direction: reverse;
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+/* Background Pattern */
+body {
+  background-color: var(--nyse-color-background);
+  position: relative;
+}
+
+body::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background:
+    radial-gradient(circle at 20% 80%, rgba(0, 61, 122, 0.03) 0%, transparent 50%),
+    radial-gradient(circle at 80% 20%, rgba(0, 160, 227, 0.03) 0%, transparent 50%),
+    linear-gradient(135deg, rgba(0, 61, 122, 0.02) 0%, transparent 100%);
+  pointer-events: none;
+  z-index: -1;
+}
+
 /* Test if CSS is loading */
 .test-style {
   background-color: red !important;

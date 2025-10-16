@@ -104,7 +104,7 @@ export default function HomePage() {
       
 
       {/* Market Ticker */}
-      <div className="market-ticker">;
+      <div className="market-ticker">
         <div className="ticker-content">
           <span className="ticker-item">S&P 500: <span className="ticker-value up">+1.2%</span></span>
           <span className="ticker-item">NASDAQ: <span className="ticker-value up">+0.8%</span></span>

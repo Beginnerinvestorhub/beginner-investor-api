@@ -52,6 +52,7 @@ import {
 import nudgeRoutes from "./routes/nudge.routes";
 import paywallRoutes from "./routes/paywall.routes";
 import affiliateRoutes from "./routes/affiliate.routes";
+import marketdataRoutes from "./routes/marketdata.routes";
 
 // Initialize Redis cache and rate limiting systems
 // import { initializeSystems, cleanup } from "../../../shared/cache/init.js";
@@ -165,6 +166,7 @@ async function startServer() {
     apiRouter.use("/nudges", nudgeRoutes);
     apiRouter.use("/paywall", paywallRoutes);
     apiRouter.use("/affiliate", affiliateRoutes);
+    apiRouter.use("/marketdata", marketdataRoutes);
 
     // Mount API routes
     app.use("/api/v1", apiRouter);
