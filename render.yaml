@@ -25,7 +25,17 @@ services:
       - key: DATABASE_ENCRYPTION_KEY
         generateValue: true
       - key: CORS_ORIGIN
-        value: https://your-frontend.vercel.app
+        value: https://your-frontend.vercel.app,https://backend-api-n7cq.onrender.com,https://market-data-ingestion-service-l5n1.onrender.com,https://ai-microservice-engine.onrender.com,https://python-risk-engine.onrender.com,https://portfolio-simulation.onrender.com,https://behavioral-nudge-engine.onrender.com
+      - key: MARKET_DATA_URL
+        value: https://market-data-ingestion-service-l5n1.onrender.com
+      - key: AI_SERVICE_URL
+        value: https://ai-microservice-engine.onrender.com
+      - key: RISK_ENGINE_URL
+        value: https://python-risk-engine.onrender.com
+      - key: PORTFOLIO_SIMULATION_URL
+        value: https://portfolio-simulation.onrender.com
+      - key: BEHAVIORAL_NUDGE_URL
+        value: https://behavioral-nudge-engine.onrender.com
     autoDeploy: true
 
   # MarketData-Ingestion
@@ -38,11 +48,11 @@ services:
     envVars:
       - fromGroup: beginner-investor
       - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
+        value: postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a/investment_hub_9nuh
       - key: PORT
         value: 3002
+      - key: BACKEND_API_URL
+        value: https://backend-api-n7cq.onrender.com
     autoDeploy: true
 
   # AI Microservice Engine
@@ -55,9 +65,7 @@ services:
     envVars:
       - fromGroup: beginner-investor
       - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
+        value: postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a/investment_hub_9nuh
       - key: PORT
         value: 3003
       - key: AI_MODEL_VERSION
@@ -68,6 +76,10 @@ services:
         value: "150"
       - key: BEHAVIORAL_NUDGE_ENABLED
         value: "true"
+      - key: BACKEND_API_URL
+        value: https://backend-api-n7cq.onrender.com
+      - key: MARKET_DATA_URL
+        value: https://market-data-ingestion-service-l5n1.onrender.com
     autoDeploy: true
 
   # Python Risk Engine
@@ -80,13 +92,15 @@ services:
     envVars:
       - fromGroup: beginner-investor
       - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
+        value: postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a/investment_hub_9nuh
       - key: PORT
         value: 3001
       - key: RISK_CALCULATION_WORKERS
         value: "2"
+      - key: BACKEND_API_URL
+        value: https://backend-api-n7cq.onrender.com
+      - key: MARKET_DATA_URL
+        value: https://market-data-ingestion-service-l5n1.onrender.com
     autoDeploy: true
 
   # Portfolio Simulation Service
@@ -99,17 +113,17 @@ services:
     envVars:
       - fromGroup: beginner-investor
       - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
+        value: postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a/investment_hub_9nuh
       - key: PORT
         value: 3004
       - key: RISK_ENGINE_URL
         value: https://python-risk-engine.onrender.com
       - key: MARKET_DATA_URL
-        value: https://marketdata-ingestion.onrender.com
+        value: https://market-data-ingestion-service-l5n1.onrender.com
       - key: AI_SERVICE_URL
         value: https://ai-microservice-engine.onrender.com
+      - key: BACKEND_API_URL
+        value: https://backend-api-n7cq.onrender.com
     autoDeploy: true
 
   # Behavioral Nudge Engine Service
@@ -122,11 +136,11 @@ services:
     envVars:
       - fromGroup: beginner-investor
       - key: DATABASE_URL
-        fromDatabase:
-          name: beginner-investor-db
-          property: connectionString
+        value: postgresql://investment_hub_user:HthtLQ7nwPVwwKuyHAL6gfMOUVtGgG5m@dpg-d2v0j4buibrs7384kr80-a/investment_hub_9nuh
       - key: PORT
         value: 8000
+      - key: BACKEND_API_URL
+        value: https://backend-api-n7cq.onrender.com
     autoDeploy: true
 
 databases:
