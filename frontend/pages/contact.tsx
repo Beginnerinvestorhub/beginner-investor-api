@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import Head from 'next/head';
 import Link from 'next/link';
+import Layout from '../components/Layout';
 
 export default function Contact() {
   const [formData, setFormData] = useState({
@@ -56,7 +57,7 @@ export default function Contact() {
   };
 
   return (
-    <>
+    <Layout>
       <Head>
         <title>Contact Us | Beginner Investor Hub</title>
         <meta
@@ -276,6 +277,6 @@ export default function Contact() {
           </div>
         </main>
       </div>
-    </>
+    </Layout>
   );
 }

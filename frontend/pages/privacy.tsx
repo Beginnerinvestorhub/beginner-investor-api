@@ -1,9 +1,10 @@
 import Head from 'next/head';
 import Link from 'next/link';
+import Layout from '../components/Layout';
 
 export default function PrivacyPolicy() {
   return (
-    <>
+    <Layout>
       <Head>
         <title>Privacy Policy | Beginner Investor Hub</title>
         <meta

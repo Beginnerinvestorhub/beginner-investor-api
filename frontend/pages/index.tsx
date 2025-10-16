@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
+
 export default function HomePage() {
   const [statsAnimated, setStatsAnimated] = useState(false);
   const [isClient, setIsClient] = useState(false);

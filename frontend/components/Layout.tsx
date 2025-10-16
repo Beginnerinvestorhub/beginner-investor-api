@@ -19,6 +19,7 @@ export default function Layout({ children }: LayoutProps) {
         <main className="flex-1">{children}</main>
         <footer className="w-full py-8 text-center text-indigo-400 text-sm flex flex-col items-center gap-2 border-t border-indigo-100 mt-8">
           <div>&copy; {currentYear || 2024} BeginnerInvestorHub.com</div>
+          <div>Raleigh, North Carolina</div>
           <nav className="flex gap-4">
             <Link href="/privacy">Privacy Policy</Link>
             <Link href="/terms">Terms of Service</Link>
