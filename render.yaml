@@ -1,21 +1,3 @@
-envGroups:
-  - name: "beginner investor"
-    envVars:
-      - key: REDIS_URL
-        sync: false
-      - key: MARKET_DATA_API_KEY
-        sync: false
-      - key: FINNHUB_API_KEY
-        sync: false
-      - key: ALPHA_VANTAGE_API_KEY
-        sync: false
-      - key: FINANCIAL_MODELING_PREP_API_KEY
-        sync: false
-      - key: OPENAI_API_KEY
-        sync: false
-      - key: BEHAVIORAL_NUDGE_API_KEY
-        sync: false
-
 services:
   # Backend API 
   - type: web
@@ -26,7 +8,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: NODE_ENV
         value: production
       - key: PORT
@@ -47,7 +29,7 @@ services:
         value: https://your-frontend.vercel.app
     autoDeploy: true
 
-  # Market Data Ingestion Service
+  # MarketData-Ingestion 
   - type: web
     name: marketdata-ingestion
     runtime: image
@@ -56,7 +38,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -74,7 +56,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -100,7 +82,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -120,7 +102,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -144,7 +126,7 @@ services:
     plan: starter
     healthCheckPath: /health
     envVars:
-      - fromGroup: "beginner investor"
+      - fromGroup: beginner-investor
       - key: DATABASE_URL
         fromDatabase:
           name: beginner-investor-db
@@ -154,29 +136,12 @@ services:
     autoDeploy: true
 
 databases:
-- name: beginner-investor-db
-  databaseName: investment_hub
-  user: investment_hub_user
-  plan: free
-  region: virginia
-  ipAllowList:
-    - source: 0.0.0.0/0
-      description: everywhere
-  postgresMajorVersion: "17"
-
-# Environment Groups Configuration (CRITICAL)
-# IMPORTANT: Create an environment group named 'shared-secrets' in your Render dashboard
-# and add these environment variables to it:
-#
-# 1. REDIS_URL: Your external Redis Cloud connection string
-#    Example: redis://username:password@host:port
-#
-# 2. API Keys:
-#    - MARKET_DATA_API_KEY (for marketdata-ingestion)
-#    - FINNHUB_API_KEY (for marketdata-ingestion)
-#    - ALPHA_VANTAGE_API_KEY (for marketdata-ingestion)
-#    - FINANCIAL_MODELING_PREP_API_KEY (for marketdata-ingestion)
-#    - OPENAI_API_KEY (for ai-microservice-engine)
-#    - BEHAVIORAL_NUDGE_API_KEY (for behavioral-nudge-engine)
-#
-# These are shared across services via the 'shared-secrets' environment group.
+  - name: beginner-investor-db
+    databaseName: investment_hub
+    user: investment_hub_user
+    plan: free
+    region: virginia
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+    postgresMajorVersion: "17"
