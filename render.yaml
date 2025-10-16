@@ -1,20 +1,5 @@
 services:
-  # Frontend Service (Docker Hub)
-  - type: web
-    name: beginnerinvestorhub-frontend
-    runtime: docker
-    dockerfilePath: ./frontend/Dockerfile
-    dockerContext: ./frontend
-    plan: starter
-    autoDeploy: false
-    healthCheckPath: /
-    envVars:
-      - key: NODE_ENV
-        value: production
-      - key: NEXT_PUBLIC_API_BASE_URL
-        value: https://your-backend-api-url.onrender.com
-
-  # Backend API Service
+  # Backend API 
   - type: web
     name: backend-api
     runtime: image
@@ -63,11 +48,11 @@ services:
       - key: PORT
         value: 3002
       - key: MARKET_DATA_API_KEY
-        sync: false
+        fromSecret: market-data-api-key
       - key: FINNHUB_API_KEY
-        sync: false
+        fromSecret: finnhub-api-key
       - key: ALPHA_VANTAGE_API_KEY
-        sync: false
+        fromSecret: alpha-vantage-api-key
     autoDeploy: true
 
   # AI Microservice Engine
@@ -88,7 +73,7 @@ services:
       - key: PORT
         value: 3003
       - key: OPENAI_API_KEY
-        sync: false
+        fromSecret: openai-api-key
       - key: AI_MODEL_VERSION
         value: gpt-4
       - key: AI_TEMPERATURE
@@ -163,7 +148,7 @@ services:
       - key: PORT
         value: 8000
       - key: BEHAVIORAL_NUDGE_API_KEY
-        sync: false
+        fromSecret: behavioral-nudge-api-key
     autoDeploy: true
 
 databases:
