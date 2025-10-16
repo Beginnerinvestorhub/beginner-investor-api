@@ -1,5 +1,5 @@
 envGroups
-  - name: beginner-investor
+  - name:beginner-investor
     envVars:
       - key: REDIS_URL
         sync: false
