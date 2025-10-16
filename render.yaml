@@ -163,10 +163,7 @@ databases:
       description: everywhere
   postgresMajorVersion: "17"
 
-# Environment Groups Configuration (CRITICAL)
-# IMPORTANT: Create an environment group named 'shared-secrets' in your Render dashboard
-# and add these environment variables to it:
-#
+
 # 1. REDIS_URL: Your external Redis Cloud connection string
 #    Example: redis://username:password@host:port
 #
