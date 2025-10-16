@@ -258,7 +258,7 @@ export default function AdminPanel() {
             ].map(tab => (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as 'users' | 'analytics' | 'system')}
                 className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm transition-colors ${
                   activeTab === tab.id
                     ? 'border-indigo-500 text-indigo-600'

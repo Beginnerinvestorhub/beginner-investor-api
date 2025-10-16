@@ -3,8 +3,19 @@ import Head from 'next/head';
 import RiskAssessmentForm from '../components/RiskAssessmentForm';
 import RiskAssessmentResult from '../components/RiskAssessmentResult';
 
+// Define interface for risk data
+interface RiskData {
+  riskScore: number;
+  riskLevel: 'low' | 'medium' | 'high';
+  recommendations: string[];
+  portfolioMetrics: {
+    volatility: number;
+    diversification: number;
+  };
+}
+
 export default function RiskAssessmentPage() {
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<RiskData | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -147,13 +158,11 @@ export default function RiskAssessmentPage() {
                       body: JSON.stringify(formData),
                     });
                     if (!res.ok) throw new Error(await res.text());
-                    const data = await res.json();
+                    const data: RiskData = await res.json();
                     setResult(data);
-                  } catch (e: any) {
-                    setError(
-                      e.message ||
-                        'Failed to assess risk. Please verify all components and try again.'
-                    );
+                  } catch (e: unknown) {
+                    const errorMessage = e instanceof Error ? e.message : 'Failed to assess risk. Please verify all components and try again.';
+                    setError(errorMessage);
                   } finally {
                     setLoading(false);
                   }

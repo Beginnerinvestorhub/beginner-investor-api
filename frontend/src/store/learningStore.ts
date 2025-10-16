@@ -2,6 +2,13 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+interface OnboardingProfileData {
+  name: string;
+  email: string;
+  experience: string;
+  goals: string[];
+}
+
 interface LearningState {
   onboardingCompleted: boolean;
   currentModule: string | null;
@@ -17,7 +24,7 @@ interface LearningState {
   resetProgress: () => void;
   startOnboarding: () => void;
   completeOnboardingStep: (step: number) => void;
-  submitOnboardingProfile: (data: any) => void;
+  submitOnboardingProfile: (data: OnboardingProfileData) => void;
   clearError: () => void;
 }
 

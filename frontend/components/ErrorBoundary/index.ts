@@ -6,7 +6,11 @@ export {
 } from './PageErrorBoundary';
 
 // Error boundary utilities and hooks
-export const logError = (error: Error, errorInfo?: any, context?: string) => {
+interface ErrorInfo {
+  componentStack: string;
+}
+
+export const logError = (error: Error, errorInfo?: ErrorInfo, context?: string) => {
   console.group(`🚨 Error Logged${context ? ` - ${context}` : ''}`);
   console.error('Error:', error);
   if (errorInfo) {

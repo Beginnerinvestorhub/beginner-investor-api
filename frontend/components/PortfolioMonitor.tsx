@@ -53,44 +53,47 @@ const PortfolioMonitor = React.memo(function PortfolioMonitor() {
     history: PortfolioHistory[];
   }>('/api/portfolio-proxy');
 
-  const portfolio = portfolioData?.assets || [];
-  const history = portfolioData?.history || [];
-
   // Memoize chart data to prevent unnecessary recalculations - MUST be before early returns
   const pieData = useMemo(
-    () => ({
-      labels: portfolio.map(a => a.name),
-      datasets: [
-        {
-          data: portfolio.map(a => a.allocation),
-          backgroundColor: [
-            '#6366f1',
-            '#f59e42',
-            '#10b981',
-            '#f43f5e',
-            '#a78bfa',
-          ],
-        },
-      ],
-    }),
-    [portfolio]
+    () => {
+      const portfolio = (portfolioData?.assets || []).map(a => ({ ...a }));
+      return {
+        labels: portfolio.map(a => a.name),
+        datasets: [
+          {
+            data: portfolio.map(a => a.allocation),
+            backgroundColor: [
+              '#6366f1',
+              '#f59e42',
+              '#10b981',
+              '#f43f5e',
+              '#a78bfa',
+            ],
+          },
+        ],
+      };
+    },
+    [portfolioData]
   );
 
   const lineData = useMemo(
-    () => ({
-      labels: history.map(h => h.date),
-      datasets: [
-        {
-          label: 'Portfolio Value',
-          data: history.map(h => h.total),
-          fill: false,
-          borderColor: '#6366f1',
-          backgroundColor: '#6366f1',
-          tension: 0.3,
-        },
-      ],
-    }),
-    [history]
+    () => {
+      const history = portfolioData?.history || [];
+      return {
+        labels: history.map(h => h.date),
+        datasets: [
+          {
+            label: 'Portfolio Value',
+            data: history.map(h => h.total),
+            fill: false,
+            borderColor: '#6366f1',
+            backgroundColor: '#6366f1',
+            tension: 0.3,
+          },
+        ],
+      };
+    },
+    [portfolioData]
   );
 
   // Memoize chart options to prevent unnecessary re-renders
@@ -156,7 +159,7 @@ const PortfolioMonitor = React.memo(function PortfolioMonitor() {
             title="Select asset"
           >
             <option value="">All</option>
-            {portfolio.map(a => (
+            {portfolioData?.assets.map(a => (
               <option key={a.name} value={a.name}>
                 {a.name}
               </option>
@@ -190,7 +193,7 @@ const PortfolioMonitor = React.memo(function PortfolioMonitor() {
         {showAsset ? (
           <div className="text-indigo-700 font-bold">
             {showAsset}: $
-            {portfolio
+            {portfolioData?.assets
               .find(a => a.name === showAsset)
               ?.value?.toLocaleString() || 'N/A'}
           </div>

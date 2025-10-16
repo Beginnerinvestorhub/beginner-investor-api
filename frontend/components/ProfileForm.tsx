@@ -85,9 +85,11 @@ export default function ProfileForm() {
         message: 'Profile saved successfully!',
       });
       // No need to reset(data) here as formState.isDirty will be reset by react-hook-form automatically
-    } catch (error: any) {
+    } catch (error: unknown) {
       const message =
-        error.response?.data?.message || 'An unexpected error occurred.';
+        error instanceof Error && 'response' in error && error.response?.data?.message
+          ? (error.response.data as { message: string }).message
+          : 'An unexpected error occurred.';
       setStatusMessage({ type: 'error', message });
     }
   };

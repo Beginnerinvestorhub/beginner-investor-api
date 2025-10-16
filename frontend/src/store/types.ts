@@ -2,7 +2,7 @@
 export interface Modal {
   id: string;
   component: string;
-  props: Record<string, any>;
+  props: Record<string, unknown>;
   size?: 'sm' | 'md' | 'lg' | 'xl';
   closable?: boolean;
 }

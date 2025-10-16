@@ -19,7 +19,7 @@ services:
     name: backend-api
     runtime: image
     image:
-      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/backend-api:latest
+      url: karingler/backend-api:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -50,7 +50,7 @@ services:
     name: marketdata-ingestion
     runtime: image
     image:
-      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/marketdata-ingestion:latest
+      url: karingler/marketdata-ingestion:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -75,7 +75,7 @@ services:
     name: ai-microservice-engine
     runtime: image
     image:
-      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/ai-microservice-engine:latest
+      url: karingler/ai-microservice-engine:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -104,7 +104,7 @@ services:
     name: python-risk-engine
     runtime: image
     image:
-      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/python-risk-engine:latest
+      url: karingler/python-risk-engine:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -125,7 +125,7 @@ services:
     name: portfolio-simulation
     runtime: image
     image:
-      url: ghcr.io/beginnerinvestorhub/beginner-investor-api/portfolio-simulation:latest
+      url: karingler/portfolio-simulation:latest
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -143,6 +143,27 @@ services:
         value: https://marketdata-ingestion.onrender.com
       - key: AI_SERVICE_URL
         value: https://ai-microservice-engine.onrender.com
+    autoDeploy: true
+
+  # Behavioral Nudge Engine Service
+  - type: web
+    name: behavioral-nudge-engine
+    runtime: image
+    image:
+      url: karingler/behavioral-nudge-engine:latest
+    plan: starter
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: beginner-investor-db
+          property: connectionString
+      - key: REDIS_URL
+        fromSecret: redis-connection-string
+      - key: PORT
+        value: 8000
+      - key: BEHAVIORAL_NUDGE_API_KEY
+        sync: false
     autoDeploy: true
 
 databases:

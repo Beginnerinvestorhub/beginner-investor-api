@@ -5,6 +5,27 @@ import {
   fetchCoinGecko,
 } from '../lib/marketData';
 
+// Define interfaces for market data
+interface AlphaVantageData {
+  'Time Series (Daily)': {
+    [date: string]: {
+      '4. close': string;
+    };
+  };
+}
+
+interface IEXData {
+  latestPrice: number;
+}
+
+interface CoinGeckoData {
+  market_data: {
+    current_price: {
+      usd: number;
+    };
+  };
+}
+
 interface MarketDataWidgetProps {
   alphaVantageKey: string;
   iexCloudKey: string;
@@ -18,9 +39,9 @@ export default function MarketDataWidget({
   symbol,
   coinId,
 }: MarketDataWidgetProps) {
-  const [alphaData, setAlphaData] = useState<any>(null);
-  const [iexData, setIexData] = useState<any>(null);
-  const [coinData, setCoinData] = useState<any>(null);
+  const [alphaData, setAlphaData] = useState<AlphaVantageData | null>(null);
+  const [iexData, setIexData] = useState<IEXData | null>(null);
+  const [coinData, setCoinGeckoData] = useState<CoinGeckoData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -37,7 +58,7 @@ export default function MarketDataWidget({
         setAlphaData(alpha);
         setIexData(iex);
         setCoinData(coin);
-      } catch (err: any) {
+      } catch (err: unknown) {
         // Log unexpected errors for debugging
         console.error('MarketDataWidget fetch error:', err);
         setError('Failed to fetch market data.');
@@ -61,11 +82,7 @@ export default function MarketDataWidget({
               <div>
                 <b>Alpha Vantage:</b>{' '}
                 {alphaData && alphaData['Time Series (Daily)']
-                  ? (
-                      Object.entries(
-                        alphaData['Time Series (Daily)']
-                      )[0][1] as any
-                    )['4. close']
+                  ? Object.entries(alphaData['Time Series (Daily)'])[0]?.[1]?.['4. close'] || 'N/A'
                   : 'N/A'}
               </div>
               <div>

@@ -3,7 +3,7 @@
  * Real-time analytics and AI insights for administrators and power users
  */
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   ChartBarIcon,
   UserGroupIcon,
@@ -86,7 +86,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
   const AI_API_URL =
     process.env.NEXT_PUBLIC_AI_API_URL || 'http://localhost:8000';
 
-  const fetchUserInsights = async (userId: string) => {
+  const fetchUserInsights = useCallback(async (userId: string) => {
     try {
       setIsLoading(true);
       const response = await fetch(
@@ -102,9 +102,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [AI_API_URL]);
 
-  const fetchCohortAnalysis = async () => {
+  const fetchCohortAnalysis = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(
@@ -120,9 +120,9 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [AI_API_URL]);
 
-  const fetchModelPerformance = async () => {
+  const fetchModelPerformance = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await fetch(`${AI_API_URL}/models/performance`);
@@ -136,7 +136,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [AI_API_URL]);
 
   const retrainModels = async () => {
     try {
@@ -165,7 +165,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
     } else if (activeTab === 'performance') {
       fetchModelPerformance();
     }
-  }, [activeTab, selectedUserId]);
+  }, [activeTab, selectedUserId, fetchUserInsights, fetchCohortAnalysis, fetchModelPerformance]);
 
   const renderUserInsights = () => (
     <div className="space-y-6">
@@ -655,7 +655,7 @@ const AdvancedAnalyticsDashboard: React.FC = () => {
           ].map(tab => (
             <button
               key={tab.id}
-              onClick={() => setActiveTab(tab.id as any)}
+              onClick={() => setActiveTab(tab.id as 'insights' | 'cohorts' | 'performance')}
               className={`flex items-center py-2 px-1 border-b-2 font-medium text-sm ${
                 activeTab === tab.id
                   ? 'border-indigo-500 text-indigo-600'
