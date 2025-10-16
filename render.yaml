@@ -1,5 +1,5 @@
-envGroups
-  - name:beginner-investor
+envGroups:
+  - name: beginner-investor
     envVars:
       - key: REDIS_URL
         sync: false
@@ -7,9 +7,9 @@ envGroups
         sync: false
       - key: FINNHUB_API_KEY
         sync: false
-      - key: ALPHA_VANTAGE_API
+      - key: ALPHA_VANTAGE_API_KEY
         sync: false
-      - key: FINANCIAL_MODELING_PREP_API
+      - key: FINANCIAL_MODELING_PREP_API_KEY
         sync: false
       - key: OPENAI_API_KEY
         sync: false
@@ -154,26 +154,12 @@ services:
     autoDeploy: true
 
 databases:
-- name: beginner-investor-db
-  databaseName: investment_hub
-  user: investment_hub_user
-  plan: free
-  region: virginia
-  ipAllowList:
-    - source: 0.0.0.0/0
-      description: everywhere
-  postgresMajorVersion: "17"
-
-
-# 1. REDIS_URL: Your external Redis Cloud connection string
-#    Example: redis://username:password@host:port
-#
-# 2. API Keys:
-#    - MARKET_DATA_API_KEY (for marketdata-ingestion)
-#    - FINNHUB_API_KEY (for marketdata-ingestion)
-#    - ALPHA_VANTAGE_API_KEY (for marketdata-ingestion)
-#    - FINANCIAL_MODELING_PREP_API_KEY (for marketdata-ingestion)
-#    - OPENAI_API_KEY (for ai-microservice-engine)
-#    - BEHAVIORAL_NUDGE_API_KEY (for behavioral-nudge-engine)
-#
-# These are shared across services via the 'shared-secrets' environment group.
+  - name: beginner-investor-db
+    databaseName: investment_hub
+    user: investment_hub_user
+    plan: free
+    region: virginia
+    ipAllowList:
+      - source: 0.0.0.0/0
+        description: everywhere
+    postgresMajorVersion: "17"
