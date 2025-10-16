@@ -1,3 +1,4 @@
+import Head from 'next/head';
 import Link from 'next/link';
 import { useEffect, useState, useRef, useCallback } from 'react';
 
@@ -71,6 +72,16 @@ export default function HomePage() {
 
   return (
     <>
+      <Head>
+        <title>Beginner Investor Hub - Master Investment Fundamentals</title>
+        <meta
+          name="description"
+          content="Learn investing through hands-on portfolio simulation, AI-powered guidance, and institutional-grade market insights. Build your financial freedom with precision-engineered tools."
+        />
+        <meta name="viewport" content="width=device-width, initial-scale=1" />
+        <link rel="icon" href="/favicon.ico" />
+      </Head>
+
       <div className="test-style" style={{margin: '20px', textAlign: 'center'}}>
         If you see red background with white text, CSS is working!
       </div>
@@ -84,9 +95,9 @@ export default function HomePage() {
         <nav>
           <div className="logo">Beginner Investor Hub</div>
           <div className="nav-links">
-            <a href="#features">Features</a>
-            <a href="#how-it-works">How It Works</a>
-            <a href="#architecture">Technology</a>
+            <Link href="#features">Features</Link>
+            <Link href="#how-it-works">How It Works</Link>
+            <Link href="#architecture">Technology</Link>
             <Link href="/login" className="login-button">Login</Link>
           </div>
         </nav>
