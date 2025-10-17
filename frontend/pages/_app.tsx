@@ -1,13 +1,19 @@
 // pages/_app.tsx
+'use client' // ← Add this to make it a client component
+
 import type { AppProps } from 'next/app'
 import { useRouter } from 'next/router'
 import { useEffect, useState } from 'react'
 import Head from 'next/head'
+import { SessionProvider } from 'next-auth/react'
 
 // Import global styles
 import '../styles/globals.css'
 
-function MyApp({ Component, pageProps }: AppProps) {
+function MyApp({ 
+  Component, 
+  pageProps: { session, ...pageProps } 
+}: AppProps & { pageProps: { session: any } }) {
   const router = useRouter()
   const [pageLoading, setPageLoading] = useState(false)
 
@@ -42,21 +48,24 @@ function MyApp({ Component, pageProps }: AppProps) {
         />
       </Head>
 
-      {/* Global loading indicator */}
-      {pageLoading && (
-        <div className="global-loading">
-          <div className="loading-spinner">Loading...</div>
+      {/* Wrap with SessionProvider */}
+      <SessionProvider session={session}>
+        {/* Global loading indicator */}
+        {pageLoading && (
+          <div className="global-loading">
+            <div className="loading-spinner">Loading...</div>
+          </div>
+        )}
+        
+        {/* Main app content */}
+        <div className={`app-wrapper ${pageLoading ? 'page-transitioning' : ''}`}>
+          <Component {...pageProps} />
         </div>
-      )}
-      
-      {/* Main app content */}
-      <div className={`app-wrapper ${pageLoading ? 'page-transitioning' : ''}`}>
-        <Component {...pageProps} />
-      </div>
 
-      {/* Portal containers for modals/notifications */}
-      <div id="modal-root" />
-      <div id="notification-root" />
+        {/* Portal containers for modals/notifications */}
+        <div id="modal-root" />
+        <div id="notification-root" />
+      </SessionProvider>
     </>
   )
 }
