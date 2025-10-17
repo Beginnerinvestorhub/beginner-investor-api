@@ -13,14 +13,17 @@ export default function DashboardPage() {
   );
 
   // Get gamification data - call hook unconditionally
-  const { userProgress, loading: gamificationLoading } = useGamification(user?.uid || '');
+  const { userProgress, loading: gamificationLoading, trackEvent } = useGamification(user?.uid || '');
 
   useEffect(() => {
     if (!loading && !user) {
       setIsRedirecting(true);
       router.replace('/login');
+    } else if (user) {
+      // Track dashboard view
+      trackEvent('page_view', { page: 'dashboard' }).catch(console.error);
     }
-  }, [user, loading, router]);
+  }, [user, loading, router, trackEvent]);
 
   if (loading || isRedirecting || gamificationLoading) {
     return (
