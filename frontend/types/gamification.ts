@@ -1,12 +1,13 @@
-export interface Badge {
+// --- Corrected ../types/gamification.ts ---
 
+export interface Badge {
   points: number;
   id: string;
   name: string;
   description: string;
   icon: string;
   category: string;
-  isUnlocked: boolean;
+  isUnlocked: boolean; // Required property
   unlockedAt?: string;
   rarity: 'common' | 'rare' | 'epic' | 'legendary';
 }
@@ -23,6 +24,10 @@ export interface UserStats {
   portfoliosCreated: number;
   toolsUsed: string[];
   educationModulesCompleted: number;
+  
+  // FIXES for TypeScript Errors (2339)
+  pageViews: Record<string, number>; // Required for tracking page views
+  events: Record<string, number>;     // Required for tracking custom events
 }
 
 export interface UserProgress {
@@ -31,6 +36,12 @@ export interface UserProgress {
   badges: Badge[];
   streaks: StreakData;
   stats: UserStats;
+  
+  // FIXES for TypeScript Errors (2353)
+  userId: string;
+  experiencePoints: number;
+  experienceToNextLevel: number;
+  lastActivity: string; // Required for tracking last activity date
 }
 
 export interface Achievement {

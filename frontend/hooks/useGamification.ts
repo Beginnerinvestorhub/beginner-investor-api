@@ -1,13 +1,7 @@
 // Gamification hook for managing user progress, badges, and achievements
 
 import { useState, useEffect, useCallback } from 'react';
-import {
-  UserProgress,
-  Badge,
-  Achievement,
-  StreakData,
-  UserStats,
-} from '../types/gamification';
+import { UserProgress, Badge, Achievement, UserStats } from '../types/gamification'; // Added UserStats import for explicit typing
 import {
   BADGE_DEFINITIONS,
   LEVEL_THRESHOLDS,
@@ -15,6 +9,14 @@ import {
 } from '../config/badges';
 import { useAuth } from './useAuth';
 import axios from 'axios';
+
+// Utility to ensure consistent date strings for streak tracking
+const getTodayDateString = (): string => new Date().toDateString();
+const getYesterdayDateString = (): string => {
+  const yesterday = new Date();
+  yesterday.setDate(yesterday.getDate() - 1);
+  return yesterday.toDateString();
+};
 
 interface UseGamificationReturn {
   userProgress: UserProgress | null;
@@ -36,7 +38,7 @@ interface UseGamificationReturn {
   };
   checkAchievements: (
     eventType: string,
-    currentStats: Record<string, unknown>
+    currentStats: UserStats // Use specific type here
   ) => Promise<Achievement[]>;
 
   // UI Helpers
@@ -52,11 +54,23 @@ export function useGamification(userId: string): UseGamificationReturn {
   const [error, setError] = useState<string | null>(null);
   const { user } = useAuth();
 
-  // API base URL
   const API_BASE_URL =
     process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:4000';
 
-  // Create axios instance with auth headers
+  // --- Utility & API Functions ---
+
+  const calculateLevel = useCallback((totalPoints: number): number => {
+    let level = 1;
+    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
+      if (totalPoints >= LEVEL_THRESHOLDS[i]) {
+        level = i + 1;
+      } else {
+        break;
+      }
+    }
+    return Math.min(level, LEVEL_THRESHOLDS.length);
+  }, []);
+
   const createApiClient = useCallback(async () => {
     if (!user) return null;
     const token = await user.getIdToken();
@@ -73,10 +87,9 @@ export function useGamification(userId: string): UseGamificationReturn {
     try {
       const apiClient = await createApiClient();
       if (apiClient) {
+        // Correct way to call save (no change needed here)
         await apiClient.post('/api/gamification/save-user-data', progress);
       }
-
-      // Keep localStorage as backup
       try {
         localStorage.setItem(
           `gamification_${userId}`,
@@ -89,71 +102,7 @@ export function useGamification(userId: string): UseGamificationReturn {
       console.error('Failed to save user progress:', err);
     }
   }, [userId, createApiClient]);
-
-  // Load data from backend API
-  useEffect(() => {
-    const loadUserData = async () => {
-      if (user) {
-        try {
-          setLoading(true);
-
-          const apiClient = await createApiClient();
-          if (!apiClient) {
-            setError('Authentication required');
-            return;
-          }
-          const response = await apiClient.get('/api/gamification/user-data');
-
-          if (response.data?.data) {
-            const progress = response.data.data;
-
-            setUserProgress(progress);
-          } else {
-            // Initialize new user progress
-            const initialProgress: UserProgress = {
-              userId,
-              totalPoints: 0,
-              level: 1,
-              badges: [],
-              streaks: {
-                loginStreak: 0,
-                learningStreak: 0,
-              },
-              stats: {
-                toolsUsed: [],
-                assessmentsCompleted: 0,
-                portfoliosCreated: 0,
-                educationModulesCompleted: 0,
-              },
-            };
-
-            setUserProgress(initialProgress);
-            await saveUserData(initialProgress);
-          }
-        } catch (err) {
-          setError('Failed to load user progress');
-          console.error('Gamification load error:', err);
-        } finally {
-          setLoading(false);
-        }
-      }
-    };
-
-    loadUserData();
-  }, [user, userId, createApiClient, saveUserData]);
-
-  const calculateLevel = useCallback((totalPoints: number): number => {
-    let level = 1;
-    for (let i = 0; i < LEVEL_THRESHOLDS.length; i++) {
-      if (totalPoints >= LEVEL_THRESHOLDS[i]) {
-        level = i + 1;
-      } else {
-        break;
-      }
-    }
-    return Math.min(level, LEVEL_THRESHOLDS.length);
-  }, []);
-
+  
   const getProgressToNextLevel = useCallback(
     (totalPoints: number) => {
       const currentLevel = calculateLevel(totalPoints);
@@ -180,28 +129,55 @@ export function useGamification(userId: string): UseGamificationReturn {
 
   const showNotification = useCallback(
     (type: 'badge' | 'achievement' | 'points', data: Record<string, unknown>) => {
-      // In a real app, this would trigger a toast notification or modal
+      // Implementation placeholder
       console.log(
         `🎉 Gamification Notification [${type.toUpperCase()}]:`,
         data
       );
-
-      // You can integrate with react-hot-toast or another notification system here
-      // Example: toast.success(`🎉 ${data.name} unlocked!`);
     },
     []
   );
 
-  const checkLevelAchievements = async (
-    newLevel: number
-  ) => {
-    // Check for level-based badge unlocks
+  // --- Action Functions (Hoisted & Memoized) ---
+  
+  const unlockBadge = useCallback(
+    async (badgeId: string) => {
+      setUserProgress(currentProgress => {
+        if (!currentProgress) return null;
+
+        const badgeDefinition = BADGE_DEFINITIONS[badgeId];
+        if (!badgeDefinition) return currentProgress;
+
+        if (currentProgress.badges.some(b => b.id === badgeId)) return currentProgress;
+
+        const newBadge: Badge = {
+          ...badgeDefinition,
+          isUnlocked: true,
+          unlockedAt: new Date().toISOString(), 
+        };
+
+        const updatedProgress: UserProgress = {
+          ...currentProgress,
+          badges: [...currentProgress.badges, newBadge],
+          totalPoints: currentProgress.totalPoints + badgeDefinition.points,
+        };
+
+        saveUserData(updatedProgress);
+        showNotification('badge', newBadge as unknown as Record<string, unknown>);
+        
+        return updatedProgress;
+      });
+    },
+    [saveUserData, showNotification]
+  );
+
+  const checkLevelAchievements = useCallback(async (newLevel: number) => {
     if (newLevel >= 10) {
       await unlockBadge('PLATINUM_INVESTOR');
     }
-  };
+  }, [unlockBadge]);
 
-  const checkStreakAchievements = async (
+  const checkStreakAchievements = useCallback(async (
     streakType: string,
     streak: number
   ) => {
@@ -214,179 +190,274 @@ export function useGamification(userId: string): UseGamificationReturn {
     if (streakType === 'learning' && streak >= 14) {
       await unlockBadge('LEARNING_STREAK');
     }
-  };
+  }, [unlockBadge]);
 
   const awardPoints = useCallback(
     async (points: number, reason: string) => {
-      if (!userProgress) return;
+      setUserProgress(currentProgress => {
+        if (!currentProgress) return null;
 
-      const newTotalPoints = userProgress.totalPoints + points;
-      const newLevel = calculateLevel(newTotalPoints);
-      const leveledUp = newLevel > userProgress.level;
+        const newTotalPoints = currentProgress.totalPoints + points;
+        const newLevel = calculateLevel(newTotalPoints);
+        const leveledUp = newLevel > currentProgress.level;
 
-      const updatedProgress: UserProgress = {
-        ...userProgress,
-        totalPoints: newTotalPoints,
-        level: newLevel,
-        experiencePoints: newTotalPoints,
-        experienceToNextLevel:
-          LEVEL_THRESHOLDS[newLevel] ||
-          LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1],
-      };
+        const updatedProgress: UserProgress = {
+          ...currentProgress,
+          totalPoints: newTotalPoints,
+          level: newLevel,
+          experiencePoints: newTotalPoints,
+          experienceToNextLevel:
+            LEVEL_THRESHOLDS[newLevel] ||
+            LEVEL_THRESHOLDS[LEVEL_THRESHOLDS.length - 1],
+        };
 
-      setUserProgress(updatedProgress);
-      await saveUserData(updatedProgress);
+        saveUserData(updatedProgress);
+        showNotification('points', { points, reason, leveledUp, newLevel });
 
-      // Show notification
-      showNotification('points', { points, reason, leveledUp, newLevel });
-
-      // Check for level-based achievements
-      if (leveledUp) {
-        await checkLevelAchievements(newLevel);
-      }
+        if (leveledUp) {
+          checkLevelAchievements(newLevel);
+        }
+        
+        return updatedProgress;
+      });
     },
-    [userProgress, calculateLevel, saveUserData, showNotification, checkLevelAchievements]
-  );
-
-  const unlockBadge = useCallback(
-    async (badgeId: string) => {
-      if (!userProgress) return;
-
-      const badgeDefinition = BADGE_DEFINITIONS[badgeId];
-      if (!badgeDefinition) return;
-
-      // Check if badge is already unlocked
-      if (userProgress.badges.some(b => b.id === badgeId)) return;
-
-      const newBadge: Badge = {
-        ...badgeDefinition,
-        isUnlocked: true,
-        unlockedAt: new Date(),
-      };
-
-      const updatedProgress: UserProgress = {
-        ...userProgress,
-        badges: [...userProgress.badges, newBadge],
-        totalPoints: userProgress.totalPoints + badgeDefinition.points,
-      };
-
-      setUserProgress(updatedProgress);
-      await saveUserData(updatedProgress);
-
-      // Show notification
-      showNotification('badge', newBadge as unknown as Record<string, unknown>);
-    },
-    [userProgress]
+    [calculateLevel, saveUserData, showNotification, checkLevelAchievements]
   );
 
   const updateStreak = useCallback(
     async (streakType: 'login' | 'learning') => {
-      if (!userProgress) return;
+      setUserProgress(currentProgress => {
+        if (!currentProgress) return null;
 
-      const today = new Date().toDateString();
-      const lastDate =
-        streakType === 'login'
-          ? userProgress.streaks.lastLoginDate
-          : userProgress.streaks.lastLearningDate;
+        const today = getTodayDateString();
+        const yesterday = getYesterdayDateString();
+        
+        const lastDate =
+          streakType === 'login'
+            ? currentProgress.streaks.lastLoginDate
+            : currentProgress.streaks.lastLearningDate;
 
-      let newStreak = 1;
+        let newStreak = 1;
 
-      if (lastDate) {
-        const yesterday = new Date();
-        yesterday.setDate(yesterday.getDate() - 1);
-
-        if (lastDate === yesterday.toDateString()) {
-          // Consecutive day
-          newStreak =
-            (streakType === 'login'
-              ? userProgress.streaks.loginStreak
-              : userProgress.streaks.learningStreak) + 1;
-        } else if (lastDate === today) {
-          // Same day, no change
-          return;
+        if (lastDate) {
+          if (lastDate === yesterday) {
+            newStreak =
+              (streakType === 'login'
+                ? currentProgress.streaks.loginStreak
+                : currentProgress.streaks.learningStreak) + 1;
+          } else if (lastDate === today) {
+            return currentProgress;
+          }
         }
-        // If gap > 1 day, streak resets to 1
-      }
 
-      const updatedProgress: UserProgress = {
-        ...userProgress,
-        streaks: {
-          ...userProgress.streaks,
-          [streakType === 'login' ? 'loginStreak' : 'learningStreak']:
-            newStreak,
-          [streakType === 'login' ? 'lastLoginDate' : 'lastLearningDate']:
-            new Date(),
-        },
-      };
+        const updatedProgress: UserProgress = {
+          ...currentProgress,
+          streaks: {
+            ...currentProgress.streaks,
+            [streakType === 'login' ? 'loginStreak' : 'learningStreak']:
+              newStreak,
+            [streakType === 'login' ? 'lastLoginDate' : 'lastLearningDate']: today, 
+          },
+        };
 
-      setUserProgress(updatedProgress);
-      await saveUserData(updatedProgress);
-
-      // Check streak achievements
-      await checkStreakAchievements(streakType, newStreak);
+        saveUserData(updatedProgress);
+        checkStreakAchievements(streakType, newStreak);
+        
+        return updatedProgress;
+      });
     },
-    [userProgress]
+    [saveUserData, checkStreakAchievements]
   );
 
+  // FIX: Change currentStats type to UserStats for type safety
   const checkAchievements = useCallback(
-    async (eventType: string, currentStats: Record<string, unknown>): Promise<Achievement[]> => {
+    async (eventType: string, currentStats: UserStats): Promise<Achievement[]> => {
       if (!userProgress) return [];
-
+      
       const newAchievements: Achievement[] = [];
 
-      // Check each achievement definition
-      Object.values(ACHIEVEMENT_DEFINITIONS).forEach(achievementDef => {
-        // Skip if already completed
-        if (
-          (userProgress as UserProgress & { achievements: Achievement[] }).achievements.some(
-            a => a.id === achievementDef.id && a.isCompleted
-          )
-        ) {
-          return;
+      for (const achievementDef of Object.values(ACHIEVEMENT_DEFINITIONS)) {
+        if (userProgress.badges.some((b: Badge) => b.id === achievementDef.id)) {
+          continue;
         }
 
         let progress = 0;
 
-        // Calculate progress based on achievement type
         switch (achievementDef.id) {
           case 'first_risk_assessment':
-            progress = (currentStats as { assessmentsCompleted?: number }).assessmentsCompleted || 0;
+            progress = currentStats.assessmentsCompleted;
             break;
           case 'tools_explorer':
-            progress = (currentStats as { toolsUsed?: string[] }).toolsUsed?.length || 0;
+            progress = currentStats.toolsUsed.length;
             break;
           case 'portfolio_creator':
-            progress = (currentStats as { portfoliosCreated?: number }).portfoliosCreated || 0;
+            progress = currentStats.portfoliosCreated;
             break;
           case 'login_streak_7':
-            progress = (userProgress as UserProgress & { streaks: { loginStreak: number } }).streaks.loginStreak;
+            // Direct access is safe now because UserProgress is available via closure
+            progress = userProgress.streaks.loginStreak; 
             break;
           case 'esg_user':
-            progress = (currentStats as { toolsUsed?: string[] }).toolsUsed?.includes('esg-screener') ? 1 : 0;
+            progress = currentStats.toolsUsed.includes('esg-screener') ? 1 : 0;
             break;
+          default:
+            continue;
         }
 
-        const isCompleted = progress >= achievementDef.target;
+        if (progress >= achievementDef.target) {
+          // Assuming achievementDef.reward is a complete definition object
+          const reward = achievementDef.reward as { badge?: Badge, points?: number };
+          const badge = reward.badge || BADGE_DEFINITIONS[achievementDef.id];
+          
+          if (!badge) {
+            console.error(`Badge not found for achievement: ${achievementDef.id}`);
+            continue;
+          }
 
-        if (isCompleted) {
           const achievement: Achievement = {
             id: achievementDef.id,
             name: achievementDef.name,
-            title: achievementDef.name,
+            title: achievementDef.title,
             description: achievementDef.description,
-            points: achievementDef.reward.points || 0,
-            reward: achievementDef.reward.points || 0,
-            badge: achievementDef.reward.badge,
+            points: reward.points || badge.points || 0,
+            reward: reward.points || badge.points || 0,
+            badge: badge,
+            unlockedAt: new Date().toISOString(),
           };
 
           newAchievements.push(achievement);
         }
-      });
-
+      }
       return newAchievements;
     },
     [userProgress]
   );
+  
+  const trackEvent = useCallback(
+    async (eventType: string, data: Record<string, unknown> = {}) => {
+      if (!userProgress) return;
+      
+      try {
+        // --- 1. Synchronously Calculate Next State (Stat Updates) ---
+        
+        const updatedStats: UserStats = {
+          ...userProgress.stats,
+          // Direct access is safe after UserStats is fixed
+          pageViews: { ...userProgress.stats.pageViews }, 
+          events: { ...userProgress.stats.events }
+        };
+        
+        // Handle different event types
+        if (eventType === 'page_view') {
+          const page = (data.page as string) || 'unknown';
+          updatedStats.pageViews[page] = (updatedStats.pageViews[page] || 0) + 1;
+        } else {
+           // Track custom events
+           updatedStats.events[eventType] = (updatedStats.events[eventType] || 0) + 1;
+        }
+
+        let updatedProgress: UserProgress = {
+          ...userProgress,
+          stats: updatedStats,
+          lastActivity: new Date().toISOString(), 
+        };
+        
+        // --- 2. Asynchronously Check Achievements ---
+        const newAchievements = await checkAchievements(eventType, updatedStats);
+        
+        // --- 3. Synchronously Update State and Asynchronously Save/Unlock ---
+        
+        if (newAchievements.length > 0) {
+          const totalAchievementPoints = newAchievements.reduce((sum, a) => sum + (a.points || 0), 0);
+          
+          updatedProgress = {
+            ...updatedProgress,
+            totalPoints: updatedProgress.totalPoints + totalAchievementPoints
+          };
+          
+          setUserProgress(updatedProgress);
+          await saveUserData(updatedProgress);
+
+          for (const achievement of newAchievements) {
+              if (achievement.badge?.id) {
+                  await unlockBadge(achievement.badge.id);
+              }
+
+              // FIX: Cast to match showNotification's type (Error 2345 fix)
+              showNotification('achievement', achievement as unknown as Record<string, unknown>); 
+          }
+        } else {
+             setUserProgress(updatedProgress);
+             await saveUserData(updatedProgress);
+        }
+
+      } catch (error) {
+        console.error('Error tracking event:', error);
+      }
+    },
+    [userProgress, saveUserData, checkAchievements, showNotification, unlockBadge] 
+  );
+
+  // --- Data Loading Effect ---
+
+  useEffect(() => {
+    const loadUserData = async () => {
+      if (user) {
+        try {
+          setLoading(true);
+
+          const apiClient = await createApiClient();
+          if (!apiClient) {
+            setError('Authentication required');
+            return;
+          }
+          const response = await apiClient.get('/api/gamification/user-data');
+
+          if (response.data?.data) {
+            const progress = response.data.data as UserProgress;
+            setUserProgress(progress);
+          } else {
+            // Initialize new user progress (now safe with fixed UserProgress/UserStats)
+            const initialProgress: UserProgress = { 
+              userId,
+              totalPoints: 0,
+              level: 1,
+              experiencePoints: 0,
+              experienceToNextLevel: LEVEL_THRESHOLDS[0] || 100,
+              badges: [],
+              streaks: {
+                loginStreak: 0,
+                learningStreak: 0,
+                lastLoginDate: '',
+                lastLearningDate: ''
+              },
+              stats: {
+                toolsUsed: [],
+                assessmentsCompleted: 0,
+                portfoliosCreated: 0,
+                educationModulesCompleted: 0,
+                pageViews: {}, 
+                events: {}
+              },
+              lastActivity: new Date().toISOString()
+            };
+
+            setUserProgress(initialProgress);
+            await saveUserData(initialProgress);
+          }
+        } catch (err) {
+          setError('Failed to load user progress');
+          console.error('Gamification load error:', err);
+        } finally {
+          setLoading(false);
+        }
+      }
+    };
+
+    loadUserData();
+  }, [user, userId, createApiClient, saveUserData]);
+
+  // --- Return ---
 
   return {
     userProgress,
