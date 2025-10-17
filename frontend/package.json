@@ -29,7 +29,7 @@
     "@radix-ui/react-tooltip": "1.0.5",
     "@stripe/stripe-js": "7.4.0",
     "axios": "^1.12.0",
-    "chart.js": "^4.5.0",
+    "chart.js": "^4.5.1",
     "critters": "^0.0.23",
     "firebase": "12.0.0",
     "gray-matter": "4.0.3",
