@@ -124,10 +124,11 @@ export default function HomePage() {
           </div>
         </div>
       </section>
+      
 
       {/* Social Proof Section */}
       <section className="social-proof">
-        <div className="wooden-frame">
+        <div className="nyse-container">
           <div className="wooden-inner">
             <div className="section-header">
               <h2 className="section-title" style={{ color: '#6b5538' }}>Precision Results</h2>
