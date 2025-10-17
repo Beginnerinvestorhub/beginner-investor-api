@@ -198,6 +198,544 @@ img {
   }
 }
 
+/* ========================================
+   NAVIGATION STYLES
+   ======================================== */
+
+nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--nyse-spacing-lg) 5%;
+  background: var(--nyse-color-background);
+  position: relative;
+  z-index: 100;
+  border-bottom: 1px solid var(--nyse-color-border);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+}
+
+.logo {
+  font-family: var(--nyse-font-serif);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--nyse-color-primary);
+  letter-spacing: 1px;
+}
+
+.nav-links {
+  display: flex;
+  gap: var(--nyse-spacing-xl);
+  align-items: center;
+}
+
+.nav-links a {
+  color: var(--nyse-color-text);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.3s ease;
+  position: relative;
+}
+
+.nav-links a:hover {
+  color: var(--nyse-color-primary);
+  text-decoration: none;
+}
+
+.nav-links a::after {
+  content: '';
+  position: absolute;
+  bottom: -4px;
+  left: 0;
+  width: 0;
+  height: 2px;
+  background: var(--nyse-color-accent);
+  transition: width 0.3s ease;
+}
+
+.nav-links a:hover::after {
+  width: 100%;
+}
+
+.login-button {
+  background: var(--nyse-color-primary) !important;
+  color: white !important;
+  padding: var(--nyse-spacing-sm) var(--nyse-spacing-lg);
+  border-radius: 4px;
+  transition: background 0.3s ease, transform 0.2s ease;
+  font-weight: 600;
+}
+
+.login-button:hover {
+  background: var(--nyse-color-secondary) !important;
+  text-decoration: none;
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 61, 122, 0.2);
+}
+
+.login-button::after {
+  display: none;
+}
+
+/* ========================================
+   HERO SECTION STYLES
+   ======================================== */
+
+.hero-content {
+  text-align: center;
+  padding: var(--nyse-spacing-xxl) 5%;
+  max-width: 900px;
+  margin: 0 auto;
+  position: relative;
+  z-index: 10;
+}
+
+.hero-content h1 {
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-lg);
+  line-height: 1.1;
+}
+
+.accent {
+  color: var(--nyse-color-accent);
+  position: relative;
+  display: inline-block;
+}
+
+.hero-subtitle {
+  font-size: 1.2rem;
+  color: var(--nyse-color-text);
+  line-height: 1.8;
+  margin-bottom: var(--nyse-spacing-xxl);
+  max-width: 700px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.cta-buttons {
+  display: flex;
+  gap: var(--nyse-spacing-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.btn {
+  padding: var(--nyse-spacing-md) var(--nyse-spacing-xl);
+  font-size: 1.1rem;
+  font-weight: 600;
+  border-radius: 6px;
+  text-decoration: none;
+  transition: all 0.3s ease;
+  display: inline-block;
+  font-family: var(--nyse-font-sans);
+}
+
+.btn-primary {
+  background: var(--nyse-color-primary);
+  color: white;
+}
+
+.btn-primary:hover {
+  background: var(--nyse-color-secondary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 61, 122, 0.3);
+  text-decoration: none;
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--nyse-color-primary);
+  border: 2px solid var(--nyse-color-primary);
+}
+
+.btn-secondary:hover {
+  background: var(--nyse-color-primary);
+  color: white;
+  text-decoration: none;
+}
+
+/* ========================================
+   SECTION STYLES
+   ======================================== */
+
+.features {
+  padding: var(--nyse-spacing-xxl) 5%;
+  background: var(--nyse-color-background-alt);
+}
+
+.section-header {
+  text-align: center;
+  margin-bottom: var(--nyse-spacing-xxl);
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.section-title {
+  font-family: var(--nyse-font-serif);
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-md);
+}
+
+.section-subtitle {
+  font-size: 1.1rem;
+  color: var(--nyse-color-text-light);
+  line-height: 1.7;
+}
+
+.features-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: var(--nyse-spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.feature-icon {
+  font-size: 3rem;
+  margin-bottom: var(--nyse-spacing-md);
+  display: block;
+}
+
+.nyse-card h3 {
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-md);
+  font-size: 1.5rem;
+}
+
+.nyse-card p {
+  color: var(--nyse-color-text);
+  line-height: 1.7;
+}
+
+/* ========================================
+   SOCIAL PROOF SECTION
+   ======================================== */
+
+.social-proof {
+  padding: var(--nyse-spacing-xxl) 5%;
+  background: var(--nyse-color-background);
+}
+
+.wooden-frame {
+  background: #f4e4c1;
+  border: 12px solid #8b6f47;
+  border-radius: 8px;
+  box-shadow: 
+    inset 0 0 20px rgba(0,0,0,0.1),
+    0 4px 8px rgba(0,0,0,0.2);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.wooden-inner {
+  background: #faf5e9;
+  padding: var(--nyse-spacing-xxl);
+  border: 2px solid #d4c4a8;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--nyse-spacing-xl);
+  margin: var(--nyse-spacing-xxl) 0;
+}
+
+.stat-card {
+  text-align: center;
+  padding: var(--nyse-spacing-lg);
+  background: white;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.stat-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.15);
+}
+
+.stat-number {
+  font-family: var(--nyse-font-serif);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--nyse-color-primary);
+  margin-bottom: var(--nyse-spacing-xs);
+  display: block;
+}
+
+.stat-label {
+  font-size: 0.9rem;
+  color: var(--nyse-color-text-light);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  font-weight: 600;
+}
+
+.testimonials {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--nyse-spacing-lg);
+  margin-top: var(--nyse-spacing-xxl);
+}
+
+.testimonial-card {
+  background: white;
+  padding: var(--nyse-spacing-lg);
+  border-radius: 8px;
+  border-left: 4px solid var(--nyse-color-accent);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: transform 0.3s ease;
+}
+
+.testimonial-card:hover {
+  transform: translateY(-2px);
+}
+
+.testimonial-text {
+  font-style: italic;
+  color: var(--nyse-color-text);
+  margin-bottom: var(--nyse-spacing-md);
+  line-height: 1.7;
+  font-size: 1rem;
+}
+
+.testimonial-author {
+  font-weight: 700;
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-xs);
+}
+
+.testimonial-role {
+  font-size: 0.9rem;
+  color: var(--nyse-color-text-light);
+}
+
+/* ========================================
+   HOW IT WORKS SECTION
+   ======================================== */
+
+.how-it-works {
+  padding: var(--nyse-spacing-xxl) 5%;
+  background: var(--nyse-color-background);
+}
+
+.steps {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+  gap: var(--nyse-spacing-xl);
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+.step {
+  text-align: center;
+  padding: var(--nyse-spacing-xl);
+  background: var(--nyse-color-background-alt);
+  border-radius: 8px;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.step:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 16px rgba(0, 61, 122, 0.15);
+}
+
+.step-number {
+  width: 60px;
+  height: 60px;
+  background: var(--nyse-color-primary);
+  color: white;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.5rem;
+  font-weight: 700;
+  margin: 0 auto var(--nyse-spacing-lg);
+  font-family: var(--nyse-font-serif);
+}
+
+.step h3 {
+  color: var(--nyse-color-dark);
+  margin-bottom: var(--nyse-spacing-md);
+  font-size: 1.5rem;
+}
+
+.step p {
+  color: var(--nyse-color-text);
+  line-height: 1.7;
+}
+
+/* ========================================
+   CTA SECTION
+   ======================================== */
+
+.cta-section {
+  padding: var(--nyse-spacing-xxl) 5%;
+  background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
+  text-align: center;
+  color: white;
+  position: relative;
+  overflow: hidden;
+}
+
+.cta-section::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: 
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 30px,
+      rgba(255, 255, 255, 0.03) 30px,
+      rgba(255, 255, 255, 0.03) 31px
+    );
+  pointer-events: none;
+}
+
+.cta-section h2 {
+  color: white;
+  margin-bottom: var(--nyse-spacing-md);
+  position: relative;
+  z-index: 1;
+}
+
+.cta-section p {
+  font-size: 1.1rem;
+  margin-bottom: var(--nyse-spacing-xl);
+  opacity: 0.95;
+  position: relative;
+  z-index: 1;
+}
+
+.cta-section .btn-primary {
+  background: white;
+  color: var(--nyse-color-primary);
+  position: relative;
+  z-index: 1;
+}
+
+.cta-section .btn-primary:hover {
+  background: var(--nyse-color-background-alt);
+  transform: translateY(-2px) scale(1.05);
+}
+
+/* ========================================
+   FOOTER
+   ======================================== */
+
+footer {
+  background: var(--nyse-color-dark);
+  color: white;
+  padding: var(--nyse-spacing-xl) 5%;
+  text-align: center;
+}
+
+.footer-content p {
+  margin-bottom: var(--nyse-spacing-md);
+  opacity: 0.9;
+}
+
+.footer-links {
+  display: flex;
+  gap: var(--nyse-spacing-lg);
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.footer-links a {
+  color: white;
+  opacity: 0.9;
+  transition: opacity 0.3s ease;
+  text-decoration: none;
+}
+
+.footer-links a:hover {
+  opacity: 1;
+  text-decoration: underline;
+}
+
+/* ========================================
+   RESPONSIVE DESIGN
+   ======================================== */
+
+@media (max-width: 768px) {
+  nav {
+    flex-direction: column;
+    gap: var(--nyse-spacing-md);
+    padding: var(--nyse-spacing-md) 5%;
+  }
+
+  .nav-links {
+    flex-direction: column;
+    width: 100%;
+    gap: var(--nyse-spacing-md);
+  }
+
+  .nav-links a {
+    width: 100%;
+    text-align: center;
+  }
+
+  .hero-content {
+    padding: var(--nyse-spacing-xl) 5%;
+  }
+
+  .hero-subtitle {
+    font-size: 1rem;
+  }
+
+  .cta-buttons {
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .btn {
+    width: 100%;
+    max-width: 300px;
+  }
+
+  .features-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stats-grid {
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--nyse-spacing-md);
+  }
+
+  .testimonials {
+    grid-template-columns: 1fr;
+  }
+
+  .steps {
+    grid-template-columns: 1fr;
+  }
+
+  .wooden-inner {
+    padding: var(--nyse-spacing-lg);
+  }
+
+  .footer-links {
+    flex-direction: column;
+    gap: var(--nyse-spacing-md);
+  }
+}
+
+@media (max-width: 480px) {
+  .stats-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .stat-number {
+    font-size: 2rem;
+  }
+}
+
 /* 11. NYSE Component and Utility Classes */
 /*
  * NYSE Component and Utility Classes
@@ -413,18 +951,6 @@ img {
   text-align: center;
 }
 
-.stat-number {
-  font-family: var(--nyse-font-serif);
-  font-size: 2rem;
-  font-weight: 700;
-  margin-bottom: var(--nyse-spacing-xs);
-}
-
-.stat-label {
-  font-size: 0.85rem;
-  opacity: 0.9;
-}
-
 .signup-form-panel {
   padding: var(--nyse-spacing-xxl);
   display: flex;
@@ -621,33 +1147,9 @@ img {
   gap: var(--nyse-spacing-md);
 }
 
-.stat-card {
-  background: var(--nyse-color-background-alt);
-  padding: var(--nyse-spacing-lg);
-  border-radius: 8px;
-  text-align: center;
-  min-width: 80px;
-  border: 1px solid var(--nyse-color-border);
-}
-
 .stat-icon {
   font-size: 1.5rem;
   margin-bottom: var(--nyse-spacing-sm);
-}
-
-.stat-number {
-  font-family: var(--nyse-font-serif);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--nyse-color-primary);
-  margin-bottom: var(--nyse-spacing-xs);
-}
-
-.stat-label {
-  font-size: 0.8rem;
-  color: var(--nyse-color-text-light);
-  text-transform: uppercase;
-  letter-spacing: 0.5px;
 }
 
 .dashboard-nav {
@@ -1019,24 +1521,6 @@ img {
   gap: var(--nyse-spacing-md);
 }
 
-.brand-logo {
-  display: flex;
-  align-items: center;
-  gap: var(--nyse-spacing-sm);
-}
-
-.logo-icon {
-  font-size: 2rem;
-}
-
-.brand-name {
-  font-family: var(--nyse-font-serif);
-  font-size: 1.5rem;
-  font-weight: 700;
-  color: var(--nyse-color-primary);
-  letter-spacing: 2px;
-}
-
 .header-subtitle {
   font-size: 1rem;
   color: var(--nyse-color-text);
@@ -1354,7 +1838,10 @@ img {
   }
 }
 
-/* Market Ticker Styles */
+/* ========================================
+   MARKET TICKER STYLES
+   ======================================== */
+
 .market-ticker {
   background: linear-gradient(135deg, var(--nyse-color-primary) 0%, var(--nyse-color-secondary) 100%);
   color: white;
@@ -1366,7 +1853,7 @@ img {
 }
 
 .ticker-content {
-  display: flex;
+  display: inline-flex;
   gap: var(--nyse-spacing-xxl);
   animation: ticker-scroll 30s linear infinite;
   font-family: var(--nyse-font-sans);
@@ -1376,10 +1863,10 @@ img {
 
 @keyframes ticker-scroll {
   0% {
-    transform: translateX(100%);
+    transform: translateX(0);
   }
   100% {
-    transform: translateX(-100%);
+    transform: translateX(-50%);
   }
 }
 
@@ -1401,7 +1888,15 @@ img {
   color: #f44336;
 }
 
-/* Gear Animation Styles */
+.ticker-separator {
+  margin: 0 var(--nyse-spacing-md);
+  opacity: 0.5;
+}
+
+/* ========================================
+   GEAR ANIMATION STYLES
+   ======================================== */
+
 .gear-container {
   position: absolute;
   top: 0;
@@ -1418,6 +1913,27 @@ img {
   border-radius: 50%;
   border: 8px solid rgba(0, 61, 122, 0.1);
   animation: rotate 20s linear infinite;
+}
+
+.gear::before,
+.gear::after {
+  content: '';
+  position: absolute;
+  background: rgba(0, 61, 122, 0.1);
+}
+
+.gear::before {
+  width: 30%;
+  height: 100%;
+  left: 35%;
+  top: 0;
+}
+
+.gear::after {
+  width: 100%;
+  height: 30%;
+  left: 0;
+  top: 35%;
 }
 
 .gear:nth-child(1) {
@@ -1463,7 +1979,10 @@ img {
   }
 }
 
-/* Background Pattern */
+/* ========================================
+   BACKGROUND PATTERN
+   ======================================== */
+
 body {
   background-color: var(--nyse-color-background);
   position: relative;
@@ -1482,12 +2001,4 @@ body::before {
     linear-gradient(135deg, rgba(0, 61, 122, 0.02) 0%, transparent 100%);
   pointer-events: none;
   z-index: -1;
-}
-
-/* Test if CSS is loading */
-.test-style {
-  background-color: red !important;
-  color: white !important;
-  font-size: 20px !important;
-  padding: 10px !important;
 }
