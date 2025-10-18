@@ -45,7 +45,7 @@ services:
   backend-api:
     build:
       context: ./services/backend-api
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.nodejs
     container_name: beginner-investor-backend
     restart: unless-stopped
     ports:
@@ -73,7 +73,7 @@ services:
   marketdata-ingestion:
     build:
       context: ./services/marketdata-ingestion
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.nodejs
     container_name: beginner-investor-marketdata
     restart: unless-stopped
     ports:
@@ -99,7 +99,7 @@ services:
   ai-microservice-engine:
     build:
       context: ./services/ai-microservice-engine
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.python
     container_name: beginner-investor-ai
     restart: unless-stopped
     ports:
@@ -127,7 +127,7 @@ services:
   python-risk-engine:
     build:
       context: ./services/python-risk-engine
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.python
     container_name: beginner-investor-risk
     restart: unless-stopped
     ports:
@@ -151,7 +151,7 @@ services:
   portfolio-simulation:
     build:
       context: ./services/portfolio-simulation
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile.nodejs
     container_name: beginner-investor-portfolio
     restart: unless-stopped
     ports:
@@ -163,6 +163,7 @@ services:
       RISK_ENGINE_URL: http://python-risk-engine:3001
       MARKET_DATA_URL: http://marketdata-ingestion:3002
       AI_SERVICE_URL: http://ai-microservice-engine:3003
+      NUDGE_SERVICE_URL: http://behavioral-nudge-engine:8005
     depends_on:
       postgres:
         condition: service_healthy
@@ -174,8 +175,37 @@ services:
         condition: service_started
       ai-microservice-engine:
         condition: service_started
+      behavioral-nudge-engine:
+        condition: service_started
     volumes:
       - ./services/portfolio-simulation:/app
+    networks:
+      - app-network
+
+  # Behavioral Nudge Engine
+  behavioral-nudge-engine:
+    build:
+      context: ./services/behavioral-nudge-engine
+      dockerfile: Dockerfile.python
+    container_name: beginner-investor-nudge
+    restart: unless-stopped
+    ports:
+      - "8005:8005"
+    environment:
+      PORT: 8005
+      HOST: 0.0.0.0
+      DEBUG: "false"
+      DATABASE_URL: postgresql://investment_hub_user:${DATABASE_PASSWORD:-investment_hub_password}@postgres:5432/investment_hub
+      REDIS_URL: redis://redis:6379
+      JWT_SECRET: ${JWT_SECRET:-your-jwt-secret-key}
+      NODE_ENV: development
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    volumes:
+      - ./services/behavioral-nudge-engine:/app
     networks:
       - app-network
 
