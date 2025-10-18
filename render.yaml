@@ -3,7 +3,7 @@ services:
   - type: web
     name: backend-api
     runtime: docker
-    dockerfilePath: services/backend-api/Dockerfile
+    dockerfilePath: ./services/backend-api/Dockerfile.nodejs
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -42,7 +42,7 @@ services:
   - type: web
     name: marketdata-ingestion
     runtime: docker
-    dockerfilePath: services/marketdata-ingestion/Dockerfile
+    dockerfilePath: ./services/marketdata-ingestion/Dockerfile.nodejs
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -59,7 +59,7 @@ services:
   - type: web
     name: ai-microservice-engine
     runtime: docker
-    dockerfilePath: services/ai-microservice-engine/Dockerfile
+    dockerfilePath: ./services/ai-microservice-engine/Dockerfile.python
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -86,7 +86,7 @@ services:
   - type: web
     name: python-risk-engine
     runtime: docker
-    dockerfilePath: services/python-risk-engine/Dockerfile
+    dockerfilePath: ./services/python-risk-engine/Dockerfile.python
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -107,7 +107,7 @@ services:
   - type: web
     name: portfolio-simulation
     runtime: docker
-    dockerfilePath: services/portfolio-simulation/Dockerfile
+    dockerfilePath: ./services/portfolio-simulation/Dockerfile.nodejs
     plan: starter
     healthCheckPath: /health
     envVars:
@@ -130,7 +130,7 @@ services:
   - type: web
     name: behavioral-nudge-engine
     runtime: docker
-    dockerfilePath: services/behavioral-nudge-engine/Dockerfile
+    dockerfilePath: ./services/behavioral-nudge-engine/Dockerfile.python
     plan: starter
     healthCheckPath: /health
     envVars:
